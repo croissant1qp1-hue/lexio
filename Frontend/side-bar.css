@@ -1,5 +1,91 @@
 .side-bar {
-    height:100vh;
-    width:400px;
+    height:99.4vh;
+    width:18vw;
     background-color: var(--paper-text-soft);
+    border: 2px solid var(--paper-text-soft-border);
+    display: flex;
+    flex-direction: column;
+}
+
+
+.infos{
+    font-size: clamp(0.4rem, 0.6vw + 0.3rem, 0.6rem);
+    color:gray;
+
+}
+
+.logo-title{
+    margin-top: 5vh;
+    display: flex;
+    height:8vh;
+    flex-direction: row;
+    align-items: center;
+
+}
+
+
+.logo{
+    margin-left: 1.8vw;
+    height: 6vh;
+}
+
+.title{
+    font-size: clamp(1.4rem, 2.4vw + 0.9rem, 2.4rem);
+    display: inline-block;
+    margin: 0;
+    margin-left: 1.2vw;
+    color:rgb(59, 33, 18);
+}
+
+.side-bar-menu{
+    font-family: Arial, Helvetica, sans-serif;
+    display:flex;
+    flex-direction:column;
+    margin-top:3.7vh;
+
+}
+
+.button{
+    text-align:left;
+    padding-left:1vw;
+    background-color: var(--paper-text-soft);
+    font-size: clamp(0.9rem, 1.4vw + 0.7rem, 1.4rem);
+    border:none;    
+    height:7vh;
+    width:15vw;
+    margin-left:1.5vw;
+    color: rgb(131, 107, 95);
+    border-radius:10px;
+}
+
+.button:hover{
+    background-color: var(--paper-text-soft-light);
+    color:rgb(59,33,18);
+}
+
+.streak{
+    display:flex;
+    flex-direction:column;
+    height:13vh;
+    width:12vw;
+    background-color: var(--paper-text-soft-light);
+    border:2px solid var(--paper-text-soft-border);
+    margin-left:2vw;
+    border-radius:10px;
+    margin-top:3vh;
+
+}
+
+.streak-count{
+    padding-left:2vw;
+    padding-top:2vh;
+    color:rgb(216, 68, 0);
+    font-size: clamp(2rem, 2.3vw + 1.6rem, 2.3rem);
+}
+
+.streak-label{
+    padding-left:2vw;
+    padding-top:0.5vh;
+    color:rgb(124, 104, 96);
+    font-size: clamp(0.9rem, 1.4vw + 0.7rem, 1.4rem);
 }
