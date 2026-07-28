@@ -1,0 +1,5 @@
+.side-bar {
+    height:100vh;
+    width:400px;
+    background-color: var(--paper-text-soft);
+}

@@ -1,26 +1,2 @@
 /* probier das zu skellet.css umzubennen*/
 
-.container{
-    background-color: yellow;
-    width: 600px;
-  
-
-}
-
-.side-bar{
-    background-color: red;
-    width: 200px;
-
-
-}
-
-.main-body{
-    background-color: greenyellow;
-    width: 400px;
-}
-
-.container,
-.side-bar,
-.main-body{
-    height: 600px;
-}

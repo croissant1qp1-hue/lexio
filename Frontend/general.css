@@ -1,7 +1,32 @@
-div{
+ :root{
+    --ink:#1B2333;
+    --ink-2:#242E42;
+    --paper:#F2EAD6;
+    --paper-dim:#E7DCC2;
+    --paper-text:#241F16;
+    --paper-text-soft:#5B5344;
+    --off-white:#EFE9DC;
+    --muted:#A6AEC4;
+    --gold:#E7AE3D;
+    --gold-dark:#8A6620;
+    --terracotta:#C25B3F;
+    --sage:#7E9C77;
+    --sage-dark:#3E4F3B;
+    --serif: 'Fraunces', serif;
+    --sans: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+body{
     display: flex;
     min-width: 100vw;
     padding: 0;
     margin: 0;
     font-size: clamp(1rem, 2vw + 0.5rem, 2rem);
+}
+.container {
+    display: flex;
+    flex-direction: row;
+    min-width: 100vw;
+    padding: 0;
+    margin: 0;
 }
