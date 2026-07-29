@@ -21,6 +21,13 @@
     --sans: 'Inter', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
   }
+.root{
+    /**ich habe jetzt neue farben von Realtime colors ich schreib sie in hex hier drunter*/
+    --primary:#7544d2;
+    --secondary:#a781f0;
+    --acent:#7e3dfb;
+    --background:#f4f0f9;
+}
 body{
     display: flex;
     min-width: 100vw;

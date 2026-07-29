@@ -1,5 +1,5 @@
 .main-body {
-    background-color: var(--paper);
+    background-color: var(--background);
     height: 100vh;
     flex: 1;
     overflow: hidden;
@@ -34,7 +34,7 @@
     margin-left:auto;
     margin-right: 5vw;
     margin-top: 5vh;
-    background-color: var(--gold);
+    background-color: var(--primary);
     padding:1%;
     font-family: var(--mono);
 }
