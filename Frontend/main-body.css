@@ -1,8 +1,11 @@
 .main-body {
     background-color: var(--background);
-    height: 100vh;
     flex: 1;
     overflow: hidden;
+    display:flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
 }
 .heading-und-xp {
     display:flex;
@@ -21,7 +24,7 @@
     margin-left: clamp(0.5rem,1vh,1rem);
 }
 .vokabel-sets div{
-    height: 200px;
+    height: 300px;
     aspect-ratio: 1 / 1;
     border-radius: 10px;
     background-color: var(--vokabel-set-color);
@@ -37,4 +40,51 @@
     background-color: var(--primary);
     padding:1%;
     font-family: var(--mono);
+}
+.stats {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    margin: 5%;
+}
+.progress{
+    height: 400px;
+    width: 500px;
+    border: 0.5px solid rgba(0,0,0,1);
+    border-radius: 30px;
+    box-shadow: 0.1px 0.1px 1px rgba(0,0,0,1);
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+.ring {
+    height: 200px;
+    width: 200px;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold) 234deg, #eee 234deg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 2%;
+}
+.inner {
+    height: 170px;
+    width: 170px;
+    border-radius: 50%;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.inner span {
+    font-size: 24px;
+    font-weight: 500;
+}
+.text-prog {
+    color:var(--title-color);
+}
+.ring-rest {
+    display: flex;
+    gap: 5%;
 }
