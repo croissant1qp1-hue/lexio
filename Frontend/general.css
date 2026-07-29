@@ -1,4 +1,5 @@
  :root{
+    /*Farben*/
     --ink:#1B2333;
     --ink-2:#242E42;
     --paper:#F2EAD6;
@@ -14,6 +15,8 @@
     --terracotta:#C25B3F;
     --sage:#7E9C77;
     --sage-dark:#3E4F3B;
+
+    /*Fonts*/
     --serif: 'Fraunces', serif;
     --sans: 'Inter', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
