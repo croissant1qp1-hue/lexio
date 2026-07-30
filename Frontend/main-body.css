@@ -10,9 +10,9 @@
 .heading-und-xp {
     display:flex;
     flex-direction: row;
-    gap: 5vh;
-    margin-left: 5vh;
-    width:100%;
+    gap: clamp(1rem, 5vh, 3rem);
+    margin-left: clamp(1rem, 5vh, 3rem);
+    width: calc(100% - clamp(1rem, 5vh, 3rem));
 }
 .heading-kartenhaus {
     font-style: var(--mono);
@@ -20,7 +20,7 @@
 .vokabel-sets {
     display: flex;
     flex-direction: row;
-    gap: 5vh;
+    gap: clamp(1rem, 5vh, 4rem);
     margin-left: clamp(0.5rem,1vh,1rem);
 }
 .vokabel-sets div{
@@ -32,19 +32,19 @@
     transition: 0.4s;
 }
 .vokabel-sets div:hover { 
-    transform: scale(1.20); ; 
+    transform:scale(1.15);
     filter: brightness(0.8); 
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); 
 }
 .xp-anzeige {
-    width: 100px;
+    width: clamp(80px,8vw,120px);
     height: fit-content;
     border-radius: 20px;
     margin-left:auto;
-    margin-right: 5vw;
-    margin-top: 5vh;
+    margin-right:clamp(1rem,5vw,5rem);
+    margin-top:clamp(1rem,5vh,3rem);
     background-color: var(--paper-text-soft-light);
-    padding:1%;
+    padding:clamp(0.4rem,1vw,1rem);
     font-family: var(--mono);
     border:2px solid var(--paper-text-soft-border);
 }
@@ -52,11 +52,11 @@
     display: flex;
     flex-direction: row;
     gap: 5px;
-    margin: 5%;
+    margin:clamp(1rem,5%,4rem);
 }
 .progress{
-    height: 400px;
-    width: 500px;
+    width:clamp(280px,35vw,500px);
+    height:clamp(300px,35vw,400px);
     border: 0.5px solid rgba(0,0,0,1);
     border-radius: 30px;
     box-shadow: 0.1px 0.1px 1px rgba(0,0,0,1);
@@ -75,7 +75,8 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left: 2%;
+    margin-left:2%;
+    margin-top:clamp(1rem,3vw,2rem);
 }
 .inner {
     height: 85%;          
@@ -87,7 +88,7 @@
     justify-content: center;
 }
 .inner span {
-    font-size: 24px;
+    font-size:clamp(1rem,2vw,1.5rem);
     font-weight: 500;
 }
 .text-prog {
@@ -132,5 +133,5 @@
     justify-content: center;
     border-radius: 10px;
     background-color: #a09393;
-    padding: 5px;
+    padding:clamp(4px,0.5vw,8px);
 }
