@@ -89,3 +89,60 @@
     color:rgb(124, 104, 96);
     font-size: clamp(0.9rem, 1.4vw + 0.7rem, 1.4rem);
 }
+
+.Profile{
+    width:15vw;
+    display:flex;
+    flex-direction:column;
+    background-color: var(--paper-text-soft-light);
+    margin-top:3vh;
+    margin-left:1.5vw;
+}
+
+.profile-data{
+    display:flex;
+    flex-direction:row;
+}
+
+.profile-pic{
+    height:7vh;
+    border-radius:50%;
+    margin-left:0.5vw;
+    margin-top:1vh;
+}
+
+.profile-info{
+    display:flex;
+    flex-direction:column;
+}
+
+.profile-name{
+    display:inline-block;
+    font-size:clamp(1.2rem,1.8vw + 0.9rem, 1.8rem);
+    margin-left:1vw;
+    font-family: var(--sans);
+    margin-top:1.1vh;
+}
+
+.profile-level{
+    display:inline-block;
+    font-size:clamp(0.8rem,1.2rem + 0.6rem,1.2rem);
+    margin-left:1vw;
+}
+
+.profile-progression-bar{
+    display:flex;
+    background-color:blue;
+}
+
+.progression-bar{
+    height:1.8vh;
+    width:15vw;
+    background-color:gray;
+}
+
+.progression-fill{
+    height:1.8vh;
+    width:65%;
+    background-color:green;
+}
