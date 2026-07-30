@@ -98,3 +98,13 @@
     display: flex;
     gap: 5%;
 }
+.add-button-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.add-button {
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+}
