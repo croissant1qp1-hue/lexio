@@ -116,6 +116,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    margin-right: clamp(0.5rem, 2vw, 2rem);
 }
 .num-gelernt {
     align-items: center;
