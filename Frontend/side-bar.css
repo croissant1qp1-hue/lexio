@@ -13,7 +13,7 @@
     color:gray;
 
 }
-
+/*ich habe jetzt in deiner datei einheitliche variablen hinzugefügt damit es einheitlich aussieht wenn es dir nicht gefäällt kannst du einfach in der commit history nach hinten gehen :) */
 .logo-title{
     margin-top: 5vh;
     display: flex;
@@ -55,7 +55,7 @@
     width:15vw;
     margin-left:1.5vw;
     color: rgb(131, 107, 95);
-    border-radius:10px;
+    border-radius: var(--radius);
 }
 
 .button:hover{
@@ -71,7 +71,7 @@
     background-color: var(--paper-text-soft-light);
     border:2px solid var(--paper-text-soft-border);
     margin-left:2vw;
-    border-radius:10px;
+    border-radius: var(--radius);
     margin-top:3vh;
 
 }
@@ -79,7 +79,7 @@
 .streak-count{
     padding-left:2vw;
     padding-top:2vh;
-    color:rgb(216, 68, 0);
+    color: var(--terracotta);
     font-size: clamp(2rem, 2.3vw + 1.6rem, 2.3rem);
 }
 
@@ -98,8 +98,8 @@
     background-color: var(--paper-text-soft-light);
     margin-top:3vh;
     margin-left:1.5vw;
-    border-radius:0.5vw;
-    box-shadow: 0 0 0.5vw 0.1vw rgba(0,0,0,0.2);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
 }
 
 .profile-data{
@@ -147,7 +147,7 @@
 .progression-bar{
     height:1.8vh;
     width:11vw;
-    background-color:rgb(186, 255, 179);
+    background-color: var(--paper-dim);
     border-radius:10px;
     
 }
@@ -155,13 +155,13 @@
 .progression-fill{
     height:1.8vh;
     width:65%;
-    background-color:rgb(36, 177, 36);
+    background-color: var(--sage-dark);
     border-radius:10px;
 }
 
 .progression-procentage{
     font-size:clamp(0.8rem,1.2vw + 0.6rem,1.2rem);
-    color:rgb(53, 185, 0);
+    color: var(--sage-dark);
     margin-left:0.5vw;
     
 }

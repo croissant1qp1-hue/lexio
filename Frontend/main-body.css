@@ -173,7 +173,7 @@
     align-items: center;
     justify-content: center;
     display: inline-flex;
-    border-radius: 10px;
+    border-radius: var(--radius);
     background-color: var(--gold);
 }
 .num-gelernt h4 {
