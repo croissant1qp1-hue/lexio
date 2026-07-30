@@ -24,7 +24,7 @@
     margin-left: clamp(0.5rem,1vh,1rem);
 }
 .vokabel-sets div{
-    height: 300px;
+    height: clamp(200px, 25vw, 300px);
     aspect-ratio: 1 / 1;
     border-radius: 10px;
     background-color: var(--vokabel-set-color);
@@ -32,8 +32,7 @@
     transition: 0.4s;
 }
 .vokabel-sets div:hover { 
-    transform: scale(1.20); 
-    transform: translateY(-5); 
+    transform: scale(1.20); ; 
     filter: brightness(0.8); 
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); 
 }
@@ -104,7 +103,34 @@
     justify-content: center;
 }
 .add-button {
-    height: 100%;
-    width: 100%;
-    object-fit: contain;
+    height: clamp(200px,25vw,300px);
+    aspect-ratio:1/1;
+    transition: 0.4s;
+}
+.add-button:hover {
+    transform: scale(1.20); 
+    filter: brightness(0.8); 
+}
+.vokabs-gelernt {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.num-gelernt {
+    align-items: center;
+    justify-content: center;
+    display: inline-flex;
+    border-radius: 10px;
+    background-color: var(--gold);
+}
+.num-gelernt h4 {
+    margin: 0;
+}
+.vokabeln-gelernt-div-inner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background-color: #a09393;
+    padding: 5px;
 }
