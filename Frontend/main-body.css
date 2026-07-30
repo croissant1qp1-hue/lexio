@@ -26,7 +26,7 @@
 .vokabel-sets div{
     height: clamp(200px, 25vw, 300px);
     aspect-ratio: 1 / 1;
-    border-radius: 10px;
+    border-radius: var(--radius);
     background-color: var(--vokabel-set-color);
     border: 2px solid rgb(150, 148, 124);
     transition: 0.4s;
@@ -36,17 +36,67 @@
     filter: brightness(0.8); 
     box-shadow: 0 16px 40px rgba(0, 0, 0, 0.15); 
 }
-.xp-anzeige {
-    width: clamp(80px,8vw,120px);
-    height: fit-content;
-    border-radius: 20px;
-    margin-left:auto;
-    margin-right:clamp(1rem,5vw,5rem);
-    margin-top:clamp(1rem,5vh,3rem);
-    background-color: var(--paper-text-soft-light);
-    padding:clamp(0.4rem,1vw,1rem);
+.start {
+    width: clamp(220px, 30vw, 400px);
+    height: clamp(50px, 7vh, 70px);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, #E8B33A, #D4A017);
     font-family: var(--mono);
-    border:2px solid var(--paper-text-soft-border);
+    font-size: clamp(1rem, 2vw, 1.3rem);
+    font-weight: 600;
+    color: #3a2a0a;
+    border: 2px solid rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-soft);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
+    transition: 0.2s ease;
+    align-self: center;
+    margin: clamp(1rem, 3vh, 2rem) auto;
+}
+
+.start:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: var(--shadow-card);
+    filter: brightness(1.05);
+}
+
+.start:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 2px 6px rgba(212, 160, 23, 0.4);
+}
+
+.start {
+    animation: start-animation 5s ease-in-out infinite;
+}
+@keyframes start-animation {
+
+    0% {
+        transform: scale(1);
+    }
+
+    3% {
+        transform: scale(1.08);
+    }
+
+    6% {
+        transform: scale(0.97);
+    }
+
+    9% {
+        transform: scale(1.04);
+    }
+
+    12% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+
 }
 .stats {
     display: flex;
@@ -58,12 +108,13 @@
     width:clamp(280px,35vw,500px);
     height:clamp(300px,35vw,400px);
     border: 0.5px solid rgba(0,0,0,1);
-    border-radius: 30px;
-    box-shadow: 0.1px 0.1px 1px rgba(0,0,0,1);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
     display: flex;
     justify-content: flex-start;
     align-items: center;
     flex-direction: column;
+    background: var(--bg-elevated);
 }
 .ring {
     height: clamp(140px, 15vw, 200px);
@@ -82,7 +133,7 @@
     height: 85%;          
     width: 85%;
     border-radius: 50%;
-    background: white;
+    background: var(--bg-elevated-2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -132,7 +183,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 10px;
-    background-color: #a09393;
+    border-radius: var(--radius);
+    background-color: var(--bg-elevated-2);
     padding:clamp(4px,0.5vw,8px);
 }

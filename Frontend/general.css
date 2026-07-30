@@ -1,34 +1,40 @@
- :root{
-    /*Farben*/
-    --ink:#1B2333;
-    --ink-2:#242E42;
-    --paper:#F2EAD6;
-    --paper-dim:#E7DCC2;
-    --paper-text:#241F16;
-    --paper-text-soft:#E7DCC2;
-    --paper-text-soft-light:#F2EAD6;
-    --paper-text-soft-border:#DDD2B9;
-    --off-white:#EFE9DC;
-    --muted:#A6AEC4;
-    --gold:#E7AE3D;
-    --gold-dark:#8A6620;
-    --terracotta:#C25B3F;
-    --sage:#7E9C77;
-    --sage-dark:#3E4F3B;
-    --dark-brown-text:rgb(59, 33, 18);
+:root {
 
-    /*Fonts*/
+    --ink: #1B2333;
+    --paper: #F2EAD6;
+    --paper-dim: #E7DCC2;
+    --paper-text: #241F16;
+    --paper-text-soft: #E7DCC2;
+    --paper-text-soft-light: #F2EAD6;
+    --paper-text-soft-border: #DDD2B9;
+    --off-white: #EFE9DC;
+    --muted: #A6AEC4;
+
+
+    --gold: #E7AE3D;
+    --gold-dark: #8A6620;
+    --terracotta: #C25B3F;
+    --sage: #7E9C77;
+    --sage-dark: #3E4F3B;
+
+
+    --title-color: rgb(59, 33, 18);
+    --dark-brown-text: rgb(59, 33, 18);
+
+
+    --background: #FAF9F6;
+    --bg-elevated: #FFFFFF;
+    --bg-elevated-2: #F2EAD6;
+
+
     --serif: 'Fraunces', serif;
     --sans: 'Inter', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
-  }
-:root{
-    /**ich habe jetzt neue farben von Realtime colors ich schreib sie in hex hier drunter*/
-    --primary:#7544d2;
-    --secondary:#a781f0;
-    --acent:#7e3dfb;
-    --background:#FAF9F6;
-    --title-color:rgb(59, 33, 18);
+
+
+    --radius: 16px;
+    --shadow-soft: 0 4px 16px rgba(0,0,0,0.08);
+    --shadow-card: 0 8px 24px rgba(0,0,0,0.12);
 }
 body{
     display: flex;
