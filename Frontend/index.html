@@ -4,105 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vokabeln Trainer</title>
-    <!--Anfang Style Datein:-->
+
+    <!-- Anfang Style Dateien -->
     <link rel="stylesheet" href="styles/general.css">
     <link rel="stylesheet" href="styles/side-bar.css">
     <link rel="stylesheet" href="styles/skellet.css">
     <link rel="stylesheet" href="styles/main-body.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
-    <!--Ende Style Datein-->
-    <!--Anfang Script links-->
+    <!-- Ende Style Dateien -->
+
+    <!-- Anfang Script Links -->
     <script src="navbar/navbar.js" defer></script>
     <script src="script/add-von-karteikarten.js" defer></script>
-    <!--Ende Style Datein-->
+    <!-- Ende Script Links -->
+
 </head>
+
 <body>
+
     <div class="container">
-        <div class="side-bar">
-            <div class="infos">Version 1.0, Lexio™</div>
-            <div class="logo-title">
-                <img class="logo" src="images/logo.png">
-                <h4 class="title">Lexio</h4>
 
-            </div>
-            <div id="navbar">
-            </div>
-            <div class="streak">
-                <div class="streak-count">🔥18</div>
-                <div class="streak-label">Tage Streak</div>
-            </div>
-
-            <div class="Profile">
-                <div class="profile-data">
-                    <div class="profile-pic-container">
-                        <img class="profile-pic" src="images/profile_pic.png">
-                    </div>
-                    <div class="profile-info">
-                        <h4 class="profile-name">Mustermann</h4>
-                        <p class="profile-level">Level 5 • 6777 XP</p>
-                    </div>
-                </div>
-                <div class="profile-progression-bar">
-                    <div class="progression-bar">
-                        <div class="progression-fill">
-                            XP
-                        </div>
-                    </div>
-                    <div class="progression-procentage">
-                        65%
-                    </div>
+        <!-- Navbar/Sidebar wird hier geladen -->
+        <div id="navbar"></div>
 
 
-                </div>
-                    
-
-            </div>
-
-        </div>
         <div class="main-body">
+
             <div class="heading-und-xp">
                 <h4 class="heading-kartenhaus">Kartenhaus</h4>
-                
-
             </div>
-            
+
 
             <div class="vokabel-sets">
-                <img id="add-button-id" class="add-button" src="images/tile-border-outer.svg" title="Vokabeln Hinzufügen">
+
+                <img 
+                    id="add-button-id" 
+                    class="add-button" 
+                    src="images/tile-border-outer.svg" 
+                    title="Vokabeln Hinzufügen"
+                >
+
                 <div style="--vokabel-set-color: var(--gold);"></div>
                 <div style="--vokabel-set-color: var(--terracotta);"></div>
                 <div style="--vokabel-set-color: var(--sage);"></div>
                 <div style="--vokabel-set-color: var(--ink);"></div>
                 <div style="--vokabel-set-color: var(--paper-dim);"></div>
+
             </div>
-            <div class="stats"> 
+
+
+            <div class="stats">
+
                 <div class="progress">
+
                     <h4 class="text-prog">Fortschritt</h4>
+
                     <div class="ring-rest">
+
                         <div class="ring" style="--progress: 65;">
+
                             <div class="inner">
                                 <span>65%</span>
                             </div>
+
                         </div>
+
+
                         <div class="gelernte-karten-rest-stats">
+
                             <div class="vokabs-gelernt">
+
                                 <div class="vokabeln-gelernt-div-inner">
                                     <p>Vokabeln gelernt:</p>
                                 </div>
+
                                 <div class="num-gelernt">
                                     <h6>350</h6>
                                 </div>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 </div>
+
+
                 <div class="Erfolge">
 
                 </div>
 
+
             </div>
+
+
         </div>
-       
+
+
     </div>
+
+
 </body>
 </html>
