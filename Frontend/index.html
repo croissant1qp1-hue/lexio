@@ -4,11 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vokabeln Trainer</title>
-    <link rel="stylesheet" href="general.css">
-    <link rel="stylesheet" href="side-bar.css">
-    <link rel="stylesheet" href="skellet.css">
-    <link rel="stylesheet" href="main-body.css">
+    <!--Anfang Style Datein:-->
+    <link rel="stylesheet" href="styles/general.css">
+    <link rel="stylesheet" href="styles/side-bar.css">
+    <link rel="stylesheet" href="styles/skellet.css">
+    <link rel="stylesheet" href="styles/main-body.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <!--Ende Style Datein-->
+    <!--Anfang Script links-->
+    
+    <!--Ende Style Datein-->
 </head>
 <body>
     <div class="container">
@@ -62,14 +67,13 @@
             
 
             <div class="vokabel-sets">
-                <img class="add-button" src="images/tile-border-outer.svg" title="Vokabeln Hinzufügen">
+                <img id="add-button-id" class="add-button" src="images/tile-border-outer.svg" title="Vokabeln Hinzufügen">
                 <div style="--vokabel-set-color: var(--gold);"></div>
                 <div style="--vokabel-set-color: var(--terracotta);"></div>
                 <div style="--vokabel-set-color: var(--sage);"></div>
                 <div style="--vokabel-set-color: var(--ink);"></div>
                 <div style="--vokabel-set-color: var(--paper-dim);"></div>
             </div>
-            <button class="start">Los gehts ▶</button>
             <div class="stats"> 
                 <div class="progress">
                     <h4 class="text-prog">Fortschritt</h4>
@@ -90,6 +94,9 @@
                             </div>
                         </div>
                     </div>
+                </div>
+                <div class="Erfolge">
+
                 </div>
 
             </div>

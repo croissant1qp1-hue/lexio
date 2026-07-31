@@ -89,10 +89,10 @@
 .stats {
     display: flex;
     flex-direction: row;
-    gap: 5px;
+    gap: clamp(1rem,5%,4rem);
     margin:clamp(1rem,5%,4rem);
 }
-.progress{
+.stats > div{
     width:clamp(280px,35vw,500px);
     height:clamp(300px,35vw,400px);
     border: 0.5px solid rgba(0,0,0,1);

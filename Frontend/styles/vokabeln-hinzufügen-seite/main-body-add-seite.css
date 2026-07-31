@@ -1,0 +1,9 @@
+.main-body {
+    background-color: var(--background);
+    flex: 1;
+    overflow: hidden;
+    display:flex;
+    flex-direction: column;
+    overflow-y: auto;
+    min-height: 0;
+}
