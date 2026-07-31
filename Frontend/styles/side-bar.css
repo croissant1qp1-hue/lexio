@@ -66,6 +66,10 @@
     background-color: var(--paper-text-soft-light);
     color:var(--dark-brown-text);
 }
+.button.active {
+    background-color: var(--paper-text-soft-light);
+    color: var(--dark-brown-text);
+}
 
 .streak{
     display:flex;
