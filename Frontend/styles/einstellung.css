@@ -1,0 +1,138 @@
+.main-body{
+
+}
+
+.kopfzeile{
+    background-color:red;
+    display:block;
+    margin-top:7vh;
+    margin-left:4vw;
+
+}
+
+.überschrift{
+    color: white;
+    font-size: 2rem;
+    margin: 0;
+}
+
+.unterüberschrift{
+    color: white;
+    font-size: 1.25rem;
+    margin: 0;
+}
+
+
+
+.main-content{
+    display:flex;
+    flex-direction:columm;
+    background-color:blue;
+    height:65vh;
+    width:75vw;
+    margin-left:4vw;
+    margin-top:2vh;
+
+}
+
+.allgemein{
+    background-color:yellow;
+
+}
+
+.text-prog{
+
+}
+
+.überschrift-sprache{
+
+}
+
+.überschrift-land{
+
+}
+
+.überschrift-design{
+
+}
+
+.überschrift-töne{
+
+}
+
+.überschrift-tonstärke{
+
+}
+
+
+.restliche-einstellungen{
+
+    background-color: orange;
+
+}
+.benarichtigung{
+    background-color: purple;
+
+}
+.dayly-reminders{
+
+}
+
+.überschrift-reminder{
+
+}
+
+.unterüberschrift-reminder{
+    
+}
+
+input[name = "dayly-reminder"] {
+
+}
+
+
+
+.daten{
+    background-color:pink;
+
+}
+
+.daten-weiteres{
+
+}
+
+.email{
+
+}
+
+.überschrift-email{
+
+}
+
+.email-input{
+    
+}
+
+.email-variante{
+
+}
+
+.sonstiges{
+    background-color:cyan;
+
+
+}
+
+.footer{
+    display:flex;
+    background-color:green;
+    margin-left:4vw;
+    margin-top:2vh;
+}
+
+.delete-button{
+    margin:0;
+}
+.save-button{
+   margin-left:auto;
+}

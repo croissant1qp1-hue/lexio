@@ -7,6 +7,7 @@
     <!--Anfang Links für styles-->
     <link rel="stylesheet" href="/Frontend/styles/side-bar.css">
     <link rel="stylesheet" href="/Frontend/styles/general.css">
+    <link rel="stylesheet" href="/Frontend/styles/einstellung.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <!--Ende Links für styles-->
 
@@ -16,9 +17,130 @@
     <!--Ende scripts-->
 </head>
 <body>
+
     <div id="navbar"></div>
     <div class="main-body">
-        einstellungen
+        <div class="kopfzeile">
+            <h4 class="überschrift">
+                Einstellungen
+            </h4>
+
+            <p class="unterüberschrift">
+                Passe Lexio an deine Bedürfnisse an
+            </p>
+        </div>
+
+        <div class="main-content">
+            <div class="allgemein">
+                <h4 class="text-prog">Allgemein</h4>
+
+                <p class="überschrift-sprache">Sprache</p>
+                <select class="input-field" name="sprache">
+                    <option value="deutsch">Deutsch</option>
+                    <option value="englisch">Englisch</option>
+                </select>
+                <p class="überschrift-land">Land</p>
+                <select class="input-field" name="Land">
+                    <option value="deutschland">Deutschland</option>
+                    <option value="österreich">Österreich</option>
+                    <option value="schweiz">Schweiz</option>
+                </select>
+                <p class="überschrift-design">Design</p>
+                <select class="input-field" name="design">
+                    <option value="Hell">Hell</option>
+                    <option value="Dunkel">Dunkel</option>
+                </select>
+                <p class="überschrift-töne">Töne</p>
+                <select class="input-field" name="töne">
+                    <option value="an">An</option>
+                    <option value="aus">Aus</option>
+                </select>
+                <p class="überschrift-tonstärke">Tonstärke</p>
+                <select class="input-field" name="tonstärke">
+                    <option value="leise">Leise</option>
+                    <option value="normal">Normal</option>
+                    <option value="laut">Laut</option>
+                </select>
+
+
+
+            </div>
+
+            <div class="restliche-einstellungen">
+
+                <div class="benarichtigung">
+                    <h4 class="text-prog">Benarichtigung</h4>
+                    <div class="dayly-reminders">
+                        <div>
+                            <p class="überschrift-reminder">Tägliche Erinnerung</p>
+                            <p class="unterüberschrift-reminder">Erhalte eine tägliche Lernerinnerung</p>
+                        </div>
+                        
+                        <input type="checkbox" name="dayly-reminder">
+                    </div>
+
+                </div>
+
+                <div class="daten">
+                    <h4 class="text-prog">Daten</h4>
+                    <div class="daten-weiteres">
+                        <div class="email">
+                            <p class="überschrift-email">Email</p>
+                            <input type="email" class="email-input" placeholder="Email" name="email">
+                            <select class="email-variante">
+                                <option value="@gmail.com">@gmail.com</option>
+                                <option value="@yahoo.com">@yahoo.com</option>
+                                <option value="@hotmail.com">@hotmail.com</option>
+                                <option value="@outlook.com">@outlook.com</option>
+                            </select>
+                        
+
+                        </div>
+                        <div class="passwort">
+                            <p class="überschrift-passwort">Passwort</p>
+                            <input type="password" class="passwort-input" placeholder="Passwort">
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="sonstiges">
+                    <h4 class="überschrift-sonstiges">Sonstiges</h4>
+                    <div class="feedback">
+                        <div>
+                            <p class="überschrift-feedback">
+                                Feedback
+                            </p>
+                            <p class="unterüberschrift-feedback">
+                                Hilf uns, Lexio besser zu machen
+                            </p>
+                        </div>
+                        <button class="feedback">
+                            Feedback
+                        </button>
+
+                    </div>
+
+                    <div class="Über Lexio">
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+        <div class="footer">
+            <button class="delete-button">
+                Konto löschen
+            </button>
+
+            <button class="save-button">
+                Einstellungen speichern
+            </button>
+            
+        </div>
     </div>
 </body>
 </html>
