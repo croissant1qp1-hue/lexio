@@ -1,13 +1,15 @@
 .main-body {
     background-color: var(--background);
-    flex: 1;
-    overflow: hidden;
+    flex:1;
+    overflow-y:auto;
+    min-height:0;
     display:flex;
-    flex-direction: column;
-    overflow-y: auto;
-    min-height: 0;
+    flex-direction:column;
     align-items:center;
+    gap:25px;
+    padding-top:5vh;
 }
+
 .überschrift-div {
     display: inline-flex;
     align-items: center;
@@ -16,12 +18,16 @@
     background-color: var(--bg-elevated-2);
     padding-left:clamp(4px,0.5vw,8px);
     padding-right:clamp(4px,0.5vw,8px);
+    padding-top:clamp(1px,0.25vh,4px);
+    padding-bottom:clamp(1px,0.25vh,4px);
 }
 .überschrift {
     font-family: var(--mono);
     font-weight: 100;
     color: var(--title-color);
+    margin: 0;
 }
-.main-body {
-    gap: 10px;
+.sprachen-auswahl {
+    display:flex;
+    flex-direction: column;
 }

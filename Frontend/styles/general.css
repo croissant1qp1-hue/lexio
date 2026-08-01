@@ -35,6 +35,17 @@
     --radius: 16px;
     --shadow-soft: 0 4px 16px rgba(0,0,0,0.08);
     --shadow-card: 0 8px 24px rgba(0,0,0,0.12);
+    /*hier hab ich noch darkmode farben */
+    --card-dark: #1f2937;
+    --input-dark: #374151;
+
+    --text-light: #f8fafc;
+    --text-muted: #cbd5e1;
+    --placeholder-color: #94a3b8;
+
+    --accent-purple: #6366f1;
+
+    --shadow-dark: rgba(0,0,0,0.3);
 }
 body{
     display: flex;
