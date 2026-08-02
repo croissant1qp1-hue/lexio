@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const tonstärke = tonstärkeInput.value;
         const dailyReminder = dailyReminderInput.checked;
         const passwort = passwortInput.value;
-
     })
     
 
