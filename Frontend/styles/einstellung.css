@@ -212,16 +212,6 @@ input:checked + .slider::before {
     margin-top: 2vh;
 }
 
-.daten-weiteres{
-
-}
-
-.email{
-
-
-}
-
-
 
 .email-input{
     width: 70%;
@@ -245,6 +235,15 @@ input:checked + .slider::before {
     font-weight: 500;
 }
 
+.passwort-input{
+    width:25%;
+    height: 3.7vh;
+    font-family: var(--normal);
+    font-size: 0.875rem;
+    border-radius:0.5vh;
+    border: 1.3px solid var(--light-gray);
+}
+
 .sonstiges{
     display:flex;
     flex-direction:column;
@@ -256,6 +255,24 @@ input:checked + .slider::before {
     margin-top: 2vh;
 
 
+}
+
+.feedback{
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.feedback-button{
+    height: 3.7vh;
+    margin-top: 4%;
+    margin-left: auto;
+    margin-right:2%;
+    padding: 5px 10px;
+    font-weight: 500;
+    background-color: white;
+    border: 1.3px solid var(--light-gray);
+    border-radius: 0.5vh;
 }
 
 .footer{
