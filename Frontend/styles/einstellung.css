@@ -192,7 +192,7 @@ select[name="tonstärke"] {
 }
 
 input:checked + .slider {
-    background-color: #13d333;
+    background-color: #0fa127;
 }
 
 input:checked + .slider::before {
@@ -235,6 +235,8 @@ input:checked + .slider::before {
 
 .email-variante{
     height: 4.1vh;
+    margin-left: 2%;
+    width: 20%;
     border-radius: 0.5vh;
     border: 1.3px solid var(--light-gray);
     font-family: var(--normal);
