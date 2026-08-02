@@ -1,9 +1,28 @@
+@import 
+url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+
+:root{
+
+    /*Farben*/
+    --ink: rgb(7, 6, 6);
+    --gray:rgb(100, 100, 100);
+    --light-gray: rgb(200, 200, 200);
+    --gray-shadow: rgba(100, 100, 100, 0.5);
+    --light-brown:white;
+
+    /*Fonts*/
+    --normal: "Inter", sans-serif;
+}
+
+
+
 .main-body{
+    background-color: var(--light-brown);
 
 }
 
 .kopfzeile{
-    background-color:red;
     display:block;
     margin-top:7vh;
     margin-left:4vw;
@@ -11,24 +30,25 @@
 }
 
 .überschrift{
-    color: white;
+    font-family:var(--normal);
+    color: var(--ink);
     font-size: 2rem;
     margin: 0;
 }
 
 .unterüberschrift{
-    color: white;
+    font-family:var(--normal);
+    color: var(--gray);
     font-size: 1.25rem;
     margin: 0;
+    margin-top:0.5vh;
 }
 
 
 
 .main-content{
     display:flex;
-    flex-direction:columm;
-    background-color:blue;
-    height:65vh;
+    flex-direction:row;
     width:75vw;
     margin-left:4vw;
     margin-top:2vh;
@@ -36,65 +56,160 @@
 }
 
 .allgemein{
-    background-color:yellow;
+    display:flex;
+    flex-direction:column;
+    margin-right:2vw;
+    box-shadow: 1px 1px 1vh 0.2vh var(--gray-shadow);
+    border-radius: 0.5vh;
+    padding:1vw;
+    width: auto;
 
 }
 
 .text-prog{
+    margin-top: 0.5vh;
+    font-size: 1.25rem;
+    color: var(--ink);
+    font-family: var(--normal);
 
 }
 
-.überschrift-sprache{
-
-}
-
-.überschrift-land{
-
-}
-
-.überschrift-design{
-
-}
-
-.überschrift-töne{
-
-}
-
+.überschrift-sprache,
+.überschrift-land,
+.überschrift-design,
+.überschrift-töne,
 .überschrift-tonstärke{
+    color: var(--ink);
+    font-family: var(--normal);
+    font-size: 1rem;
+    margin-top: 2.4vh;
+    margin-bottom:0.8vh;
+    font-weight: 600;
 
 }
+
+select[name="sprache"],
+select[name="land"],
+select[name="design"],
+select[name="töne"],
+select[name="tonstärke"] {
+    width: 25vw;
+    height: 3.7vh;
+    border-radius: 0.5vh;
+    border: 1.3px solid var(--light-gray);
+    font-family: var(--normal);
+    color: var(--ink);
+    padding-left: 0.5vw;
+    font-weight: 500;
+}
+
 
 
 .restliche-einstellungen{
-
-    background-color: orange;
-
+    height :auto;
+    display:flex;
+    flex-direction:column;
+    width: 100%;
+    margin-right: 2vw;
 }
+
+
 .benarichtigung{
-    background-color: purple;
+    display:flex;
+    flex-direction:column;
+    margin-right:2vw;
+    box-shadow: 1px 1px 1vh 0.2vh var(--gray-shadow);
+    border-radius: 0.5vh;
+    padding:1vw;
+    width:auto;
+    
 
 }
 .dayly-reminders{
+    display:flex;
+    flex-direction:row;
 
 }
 
-.überschrift-reminder{
+.überschrift-reminder,
+.überschrift-email,
+.überschrift-passwort,
+.überschrift-about,
+.überschrift-feedback{
+    color: var(--ink);
+    font-family: var(--normal);
+    font-size: 1rem;
+    margin-top: 2.4vh;
+    margin-bottom: 0.8vh;
+    font-weight: 600;
+
 
 }
 
-.unterüberschrift-reminder{
+.unterüberschrift-reminder,
+.unterüberschrift-feedback,
+.unterüberschrift-about{
+    font-family: var(--normal);
+    color: var(--gray);
+    font-size: 0.8rem;
     
 }
 
-input[name = "dayly-reminder"] {
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 26px;
+    margin-top:2.8vh;
+    margin-left: auto;
+}
 
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    inset: 0;
+    background-color: #ccc;
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked + .slider {
+    background-color: #13d333;
+}
+
+input:checked + .slider::before {
+    transform: translateX(24px);
 }
 
 
 
 .daten{
-    background-color:pink;
-
+    display:flex;
+    flex-direction:column;
+    margin-right:2vw;
+    box-shadow: 1px 1px 1vh 0.2vh var(--gray-shadow);
+    border-radius: 0.5vh;
+    padding:1vw;
+    width:auto;
+    margin-top: 2vh;
 }
 
 .daten-weiteres{
@@ -103,22 +218,40 @@ input[name = "dayly-reminder"] {
 
 .email{
 
-}
-
-.überschrift-email{
 
 }
+
+
 
 .email-input{
+    width: 70%;
+    height: 3.7vh;
+    border-radius: 0.5vh;
+    border: 1.3px solid var(--light-gray);
+    padding-left: 0.5vw;
+    font-weight: 500;
     
 }
 
 .email-variante{
-
+    height: 4.1vh;
+    border-radius: 0.5vh;
+    border: 1.3px solid var(--light-gray);
+    font-family: var(--normal);
+    color: var(--ink);
+    padding-left: 0.5vw;
+    font-weight: 500;
 }
 
 .sonstiges{
-    background-color:cyan;
+    display:flex;
+    flex-direction:column;
+    margin-right:2vw;
+    box-shadow: 1px 1px 1vh 0.2vh var(--gray-shadow);
+    border-radius: 0.5vh;
+    padding:1vw;
+    width:auto;
+    margin-top: 2vh;
 
 
 }
