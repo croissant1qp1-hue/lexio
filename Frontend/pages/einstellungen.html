@@ -70,15 +70,22 @@
                         Dark Mode
                     </option>
                 </select>
-                <p class="überschrift-töne">Töne aktivieren</p>
-                <select class="input-field" name="töne">
-                    <option value="an">
-                        An
-                    </option>
-                    <option value="aus">
-                        Aus
-                    </option>
-                </select>
+                <div class="töne">
+                    <div>
+                        <p class="überschrift-töne">
+                            Töne aktivieren
+                        </p>
+                        <p class="unterüberschrift-töne">
+                            Aktiviere Töne für besseres Lernen
+                        </p>
+                    </div>
+
+                    <label class="switch2">
+                        <input type="checkbox">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                    
                 <p class="überschrift-tonstärke">Ton Lautstärke</p>
                 <select class="input-field" name="tonstärke">
                     <option value="leise">
@@ -142,6 +149,9 @@
                                 </option>
                                 <option value="@outlook.com">
                                     @outlook.com
+                                </option>
+                                <option value="@icloud.com">
+                                    @icloud.com
                                 </option>
                             </select>
                         

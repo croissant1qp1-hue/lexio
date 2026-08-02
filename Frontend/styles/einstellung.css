@@ -9,7 +9,10 @@ url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display
     --gray:rgb(100, 100, 100);
     --light-gray: rgb(200, 200, 200);
     --gray-shadow: rgba(100, 100, 100, 0.5);
-    --light-brown:white;
+    --light-brown: rgb(252,252,252);
+    --red: rgb(194, 0, 0);
+    --light-red: rgb(255, 131, 131);
+    --blue: rgb(5, 100, 209);
 
     /*Fonts*/
     --normal: "Inter", sans-serif;
@@ -32,7 +35,7 @@ url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display
 .überschrift{
     font-family:var(--normal);
     color: var(--ink);
-    font-size: 2rem;
+    font-size: 1.6rem;
     margin: 0;
 }
 
@@ -63,6 +66,7 @@ url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display
     border-radius: 0.5vh;
     padding:1vw;
     width: auto;
+    background-color: white;
 
 }
 
@@ -72,6 +76,11 @@ url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display
     color: var(--ink);
     font-family: var(--normal);
 
+}
+
+.töne{
+    display:flex;
+    flex-direction:row;
 }
 
 .überschrift-sprache,
@@ -122,6 +131,7 @@ select[name="tonstärke"] {
     border-radius: 0.5vh;
     padding:1vw;
     width:auto;
+    background-color: white;
     
 
 }
@@ -145,7 +155,7 @@ select[name="tonstärke"] {
 
 
 }
-
+.unterüberschrift-töne,
 .unterüberschrift-reminder,
 .unterüberschrift-feedback,
 .unterüberschrift-about{
@@ -155,16 +165,25 @@ select[name="tonstärke"] {
     
 }
 
-.switch {
+.switch,
+.switch2{
     position: relative;
     display: inline-block;
     width: 50px;
     height: 26px;
-    margin-top:2.8vh;
     margin-left: auto;
 }
 
-.switch input {
+.switch{
+    margin-top:2.8vh;
+}
+
+.switch2{
+    margin-top:4vh;
+}
+
+.switch input,
+.switch2 input{
     opacity: 0;
     width: 0;
     height: 0;
@@ -176,7 +195,7 @@ select[name="tonstärke"] {
     inset: 0;
     background-color: #ccc;
     border-radius: 26px;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 .slider::before {
@@ -188,7 +207,7 @@ select[name="tonstärke"] {
     bottom: 3px;
     background-color: white;
     border-radius: 50%;
-    transition: 0.3s;
+    transition: 0.2s;
 }
 
 input:checked + .slider {
@@ -209,6 +228,7 @@ input:checked + .slider::before {
     border-radius: 0.5vh;
     padding:1vw;
     width:auto;
+    background-color: white;
     margin-top: 2vh;
 }
 
@@ -242,6 +262,7 @@ input:checked + .slider::before {
     font-size: 0.875rem;
     border-radius:0.5vh;
     border: 1.3px solid var(--light-gray);
+    padding-left: 0.5vw;
 }
 
 .sonstiges{
@@ -253,38 +274,81 @@ input:checked + .slider::before {
     padding:1vw;
     width:auto;
     margin-top: 2vh;
+    background-color: white;
 
 
 }
 
-.feedback{
+.feedback,
+.about{
     display:flex;
     flex-direction: row;
     align-items: center;
 }
 
-.feedback-button{
+.feedback-button,
+.about-button{
     height: 3.7vh;
     margin-top: 4%;
     margin-left: auto;
     margin-right:2%;
-    padding: 5px 10px;
-    font-weight: 500;
+    padding: 5px 13px;
+    font-weight: 600;
     background-color: white;
-    border: 1.3px solid var(--light-gray);
+    border: 1.5px solid var(--light-gray);
     border-radius: 0.5vh;
+    transition:all 0.2s ease-in-out;
 }
+
+.about-button{
+    margin-top:1.5%;
+}
+
+.feedback-button:hover,
+.about-button:hover {
+    transform: translateY(-2px);
+    border-color: #565875;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
 
 .footer{
     display:flex;
-    background-color:green;
     margin-left:4vw;
-    margin-top:2vh;
+    margin-top:4vh;
+    margin-right:4.2vw;
 }
 
 .delete-button{
     margin:0;
+    background-color: white;
+    border: 1.6px solid var(--red);
+    color: var(--red);
+    padding: 5px 15px;
+    border-radius: 0.5vh;
+    transition: all 0.15s ease-in-out;
+
+
+}
+
+.delete-button:hover {
+    background-color: var(--red);
+    color: white;
+    opacity: 0.9;
+
 }
 .save-button{
    margin-left:auto;
+    background-color: white;
+    border: 1.6px solid var(--blue);
+    color: var(--blue);
+    padding: 5px 15px;
+    border-radius: 0.5vh;
+    transition: all 0.2s ease-in-out;
+}
+
+.save-button:hover {
+    background-color: var(--blue);
+    color: white;
+
 }
