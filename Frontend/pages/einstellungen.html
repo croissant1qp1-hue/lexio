@@ -14,6 +14,7 @@
     <!--Anfang Scripts-->
     <script src="/Frontend/navbar/navbar.js" defer></script>
     <script src="/Frontend/script/vokabeln-hinzufügen/main-script-hinzufügen-seite.js" defer></script>
+    <script src="/Frontend/script/einstellungen.js"></script>
     <!--Ende scripts-->
 </head>
 <body>
@@ -37,7 +38,7 @@
                 <p class="überschrift-sprache">
                     Sprache
                 </p>
-                <select class="input-field" name="sprache">
+                <select id="sprache" class="input-field" name="sprache">
                     <option value="deutsch">
                         🇩🇪 Deutsch
                     </option>
@@ -48,7 +49,7 @@
                 <p class="überschrift-land">
                     Land
                 </p>
-                <select class="input-field" name="land">
+                <select id="land" class="input-field" name="land">
                     <option value="deutschland">
                         🇩🇪 Deutschland
                     </option>
@@ -62,7 +63,7 @@
                 <p class="überschrift-design">
                     Design
                 </p>
-                <select class="input-field" name="design">
+                <select id="design" class="input-field" name="design">
                     <option value="Hell">
                         Hell Mode
                     </option>
@@ -81,13 +82,13 @@
                     </div>
 
                     <label class="switch2">
-                        <input type="checkbox">
+                        <input id="tonAn" type="checkbox">
                         <span class="slider"></span>
                     </label>
                 </div>
                     
                 <p class="überschrift-tonstärke">Ton Lautstärke</p>
-                <select class="input-field" name="tonstärke">
+                <select id="tonstärke" class="input-field" name="tonstärke">
                     <option value="leise">
                         Leise
                     </option>
@@ -120,7 +121,7 @@
                         </div>
                         
                         <label class="switch">
-                            <input type="checkbox">
+                            <input id="dailyReminder" type="checkbox">
                             <span class="slider"></span>
                         </label>
                     </div>
@@ -224,11 +225,11 @@
 
         </div>
         <div class="footer">
-            <button class="delete-button">
-                Konto löschen
+            <button id="reset-button" class="reset-button">
+                Einstellungen zurücksetzen
             </button>
 
-            <button class="save-button">
+            <button id="saveButton" class="save-button">
                 Einstellungen speichern
             </button>
             

@@ -319,7 +319,7 @@ input:checked + .slider::before {
     margin-right:4.2vw;
 }
 
-.delete-button{
+.reset-button{
     margin:0;
     background-color: white;
     border: 1.6px solid var(--red);
@@ -329,7 +329,7 @@ input:checked + .slider::before {
     transition: all 0.15s ease-in-out;
 }
 
-.delete-button:hover {
+.reset-button:hover {
     background-color: var(--red);
     color: white;
     opacity: 0.9;
@@ -349,6 +349,11 @@ input:checked + .slider::before {
     background-color: var(--blue);
     color: white;
 
+}
+
+.reset-button:active,
+.save-button:active{
+    opacity: 0.8;
 }
 
 .feedback-wrapper {
@@ -397,4 +402,6 @@ input:checked + .slider::before {
 .feedback-dropdown a:hover {
     background-color: #f5f0eb;
 }
+
+
 
