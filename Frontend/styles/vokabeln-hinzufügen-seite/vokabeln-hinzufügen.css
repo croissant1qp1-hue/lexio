@@ -1,3 +1,9 @@
+:root {
+    --französisch-farbe: #801e2e;
+    --englisch-farbe: #df9b35;
+    --spanisch-farbe: #c85d43;
+    --italienisch-farbe: #5c7d64;
+}
 .main-body {
     background-color: var(--background);
     flex:1;
