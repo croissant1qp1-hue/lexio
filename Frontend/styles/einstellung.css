@@ -327,8 +327,6 @@ input:checked + .slider::before {
     padding: 5px 15px;
     border-radius: 0.5vh;
     transition: all 0.15s ease-in-out;
-
-
 }
 
 .delete-button:hover {
@@ -352,3 +350,51 @@ input:checked + .slider::before {
     color: white;
 
 }
+
+.feedback-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-left: auto;
+    margin-right: 2%;
+}
+
+.feedback-dropdown {
+    position: absolute;
+    top: 110%;
+    right: 0;
+    background-color: white;
+    border: 1.5px solid var(--light-gray);
+    border-radius: 0.8vh;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    padding: 0.5vh 0;
+    min-width: 160px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.feedback-wrapper:hover .feedback-dropdown,
+.feedback-wrapper:focus-within .feedback-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.feedback-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 0.6vw;
+    padding: 1vh 1vw;
+    text-decoration: none;
+    color: var(--dark-brown-text, #3b2112);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease;
+}
+
+.feedback-dropdown a:hover {
+    background-color: #f5f0eb;
+}
+
