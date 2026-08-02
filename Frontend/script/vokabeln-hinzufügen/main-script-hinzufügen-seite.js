@@ -58,9 +58,10 @@ function dateiHinzufügen(sprache,link,konstante) {
 //das ist sozusagen der zweite schritt weil das passt die farben und auch so sachen wie placeholder an anhand der ausgewählten sprache
 function htmlAnpass(sprache) {
     hintergrundFarbe = sprachenFarben[sprache];
-    dateiHinzufügen("stylesheet","/Frontend/styles/vokabeln-hinzufügen-seite/vokabeln-input-seite.css",linkZuStyleNeuFürInput);
+    dateiHinzufügen("stylesheet","/Frontend/styles/vokabeln-hinzufügen-seite/vokabeln-hinzufügen-input-seite.css",linkZuStyleNeuFürInput);
     vokabelnHinzufügenSeite.style.display = "block";
     spracheAuswählenSeite.style.display = "none";
+    vokabelnHinzufügenSeite.style.display = "flex";
     mainBody.style.background = hintergrundFarbe;
     inputDeutsch.placeholder = placeholderTexte[sprache].deutsch;
     inputFremd.placeholder = placeholderTexte[sprache].fremd;
