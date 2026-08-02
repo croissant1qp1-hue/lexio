@@ -19,18 +19,26 @@
 <body data-active="karteikarten" >
     <div id="navbar"></div>
     <div class="main-body" id="main-body">
-        <div class="überschrift-div">
-            <h3 class="überschrift">Welche Sprache möchtest du lernen</h3>
+        <div class="seite-sprache-auswahl" id="seite-sprache-auswahl">
+            <div class="überschrift-div">
+                <h3 class="überschrift">Welche Sprache möchtest du lernen</h3>
+            </div>
+            <div class="sprachen-auswahl">
+                <div class="row1">
+                    <img  src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/englisch.svg" class="sprache-auswählen-img" alt="englisch-card" id="englisch-button">
+                    <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/französisch.svg" class="sprache-auswählen-img" alt="franz-card" id="französisch-button">
+                </div>
+                <div class="row2">
+                    <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/italienisch.svg" class="sprache-auswählen-img" alt="italienisch-card" id="italienisch-button">
+                    <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/spanisch.svg" class="sprache-auswählen-img" alt="spanisch-card"id="spanisch-button">
+                </div>
+            </div>
         </div>
-        <div class="sprachen-auswahl">
-            <div class="row1">
-                <img  src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/englisch.svg" class="sprache-auswählen-img" alt="englisch-card" id="englisch-button">
-                <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/französisch.svg" class="sprache-auswählen-img" alt="franz-card" id="französisch-button">
-            </div>
-            <div class="row2">
-                <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/italienisch.svg" class="sprache-auswählen-img" alt="italienisch-card" id="italienisch-button">
-                <img src="/Frontend/images/vokabel-karten-hinzufügen/sprache-auswählen/spanisch.svg" class="sprache-auswählen-img" alt="spanisch-card"id="spanisch-button">
-            </div>
+        <div class="vokabeln-hinzufügen-seite" id="vokabeln-hinzufügen-seite">
+            <input type="text" class="deutsch-input" id="deutsch-input-id">
+            <input type="text" class="fremd-input" id="fremd-input-id">
+            <button class="hinzufügen-button">Vokabel Hinzufügen</button>
+            <button>Fertig</button>
         </div>
 
     </div>
