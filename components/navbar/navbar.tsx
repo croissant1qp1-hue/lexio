@@ -1,4 +1,7 @@
-import styles from
+import "./side-bar.css";
+import "@/app/global.css";
+import Image from "next/image";
+import ButtonElementNavbar from "./button-element-navbar";
 const navbarElemente = {
     //dieses Dictonary enthält informationen übner die navbar
     übersicht: {
@@ -30,18 +33,33 @@ const navbarElemente = {
         link: "/einstellungen"
     }
 }
+
+
 export default function Navbar() {
+
     return (
 <nav className="side-bar">
     <div className="infos">Version 1.0, Lexio™</div>
 
     <div className="logo-title">
-        <img className="logo" src="/Frontend/images/logo.png" />
+        <Image 
+        alt="Logo" 
+        className="logo" 
+        src="/images/logo.png"
+        height={8} />
+        
         <h4 className="title">Lexio</h4>
     </div>
 
     <div className="side-bar-menu">
-        {}
+        {Object.values(navbarElemente).map((element) => (
+            <ButtonElementNavbar
+                key={element.name}
+                name={element.name}
+                icon={element.icon}
+                link={element.link}
+            />
+        ))}
     </div>
 
     <div className="streak">
@@ -52,7 +70,12 @@ export default function Navbar() {
     <div className="Profile">
         <div className="profile-data">
             <div className="profile-pic-container">
-                <img className="profile-pic" src="/Frontend/images/profile_pic.png" />
+                <Image 
+                alt="Profilbild" 
+                className="profile-pic" 
+                src="/images/profile_pic.png"
+                height={7}
+                />
             </div>
             <div className="profile-info">
                 <h4 className="profile-name">Mustermann</h4>
@@ -68,5 +91,4 @@ export default function Navbar() {
         </div>
     </div>
 </nav>
-    );
-}
+)};
