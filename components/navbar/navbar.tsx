@@ -46,7 +46,8 @@ export default function Navbar() {
         alt="Logo" 
         className="logo" 
         src="/images/logo.png"
-        height={8} />
+        width={1254}
+        height={1254} />
         
         <h4 className="title">Lexio</h4>
     </div>
@@ -74,7 +75,8 @@ export default function Navbar() {
                 alt="Profilbild" 
                 className="profile-pic" 
                 src="/images/profile_pic.png"
-                height={7}
+                width={170}
+                height={170}
                 />
             </div>
             <div className="profile-info">

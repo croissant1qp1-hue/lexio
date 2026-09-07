@@ -15,7 +15,7 @@
 }
 
 .logo-title{
-    margin-top: 5vh;
+    margin-top: 5vh;                            
     display: flex;
     height:8vh;
     flex-direction: row;
@@ -27,6 +27,9 @@
 .logo{
     margin-left: 1.8vw;
     height: 6vh;
+    width: 6vh;
+    flex: 0 0 6vh;
+    object-fit: contain;
 }
 
 .title{
@@ -119,9 +122,12 @@
 
 .profile-pic{
     height:7vh;
+    width:7vh;
+    flex: 0 0 7vh;
     border-radius:50%;
     margin-left:0.5vw;
     margin-top:1vh;
+    object-fit: cover;
 }
 
 .profile-info{
