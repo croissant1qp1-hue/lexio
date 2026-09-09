@@ -5,6 +5,17 @@
     --italienisch-farbe: #5c7d64;
 }
 
+.mainBody {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    padding-top: 5vh;
+}
+
 .vokabelnHinzufügenSeite {
     display: flex;
     flex-direction: column;
@@ -54,6 +65,11 @@
 .sprachenAuswahl {
     display: flex;
     flex-direction: column;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
 }
 
 .spracheAuswählenImg {
