@@ -1,0 +1,70 @@
+:root {
+    --französisch-farbe: #801e2e;
+    --englisch-farbe: #df9b35;
+    --spanisch-farbe: #c85d43;
+    --italienisch-farbe: #5c7d64;
+}
+
+.vokabelnHinzufügenSeite {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(20px, 4vh, 40px);
+    width: 100%;
+    height: 100%;
+}
+
+.fertigButtonDiv {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    margin-top: auto;
+    padding-right: clamp(30px, 5vw, 80px);
+    padding-bottom: clamp(30px, 5vh, 80px);
+}
+
+.fertigButton {
+    border: none;
+    border-radius: var(--radius);
+    padding: clamp(30px, 5vh, 80px);
+}
+
+.seiteSpracheAuswahl {
+    width: 100%;
+}
+
+.überschriftDiv {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    background-color: var(--bg-elevated-2);
+    padding: clamp(1px, 0.25vh, 4px) clamp(4px, 0.5vw, 8px);
+}
+
+.überschrift {
+    font-family: var(--mono);
+    font-weight: 100;
+    color: var(--title-color);
+    margin: 0;
+}
+
+.sprachenAuswahl {
+    display: flex;
+    flex-direction: column;
+}
+
+.spracheAuswählenImg {
+    height: clamp(200px, 25vw, 300px);
+    width: auto;
+    aspect-ratio: 1 / 1;
+    transition: 0.4s;
+    margin: clamp(8px, 3vw, 14px);
+}
+
+.spracheAuswählenImg:hover {
+    transform: scale(1.2);
+    filter: brightness(0.8);
+}

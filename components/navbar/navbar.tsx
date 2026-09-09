@@ -2,8 +2,9 @@ import "./side-bar.css";
 import "@/app/global.css";
 import Image from "next/image";
 import ButtonElementNavbar from "./button-element-navbar";
+
 const navbarElemente = {
-    //dieses Dictonary enthält informationen übner die navbar
+    /* Dieses Dictionary enthält Informationen über die Navbar. */
     übersicht: {
         name: "Übersicht",
         icon: "fa-solid fa-house",

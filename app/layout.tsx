@@ -2,6 +2,7 @@ import React from "react";
 import "@/app/global.css";
 import "@/components/navbar/side-bar.css";
 import Navbar from "@/components/navbar/navbar";
+import "./main-body.css";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -12,7 +13,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <div className="container">
           <Navbar />
-          <main>{children}</main>
+          <main className="main-body">{children}</main>
         </div>
       </body>
     </html>
