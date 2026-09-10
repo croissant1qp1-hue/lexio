@@ -24,7 +24,7 @@
         grid-template-columns: repeat(2, minmax(0, 1fr));
         grid-template-rows: repeat(4, minmax(140px, auto));
         grid-template-areas:
-            "box1 box2"
+            "box2 box2"
             "box1 box3"
             "box4 box4"
             "box4 box4";

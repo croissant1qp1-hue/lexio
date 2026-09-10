@@ -6,3 +6,12 @@ export type KarteikartenSet = {
   anzahlKarten: number;
   fortschritt: number;
 };
+export type WochenXpTyp = {
+  mo: number;
+  di: number;
+  mi: number;
+  do: number;
+  fr: number;
+  sa: number;
+  so: number;
+}
