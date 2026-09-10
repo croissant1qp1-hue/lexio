@@ -1,6 +1,6 @@
-import KarteikartenUebersicht from '@/components/karteikarten-übersicht';
-import Stats from "@/components/stats"
-import "./main-body.css";
+import KarteikartenUebersicht from '@/components/cards/karteikarten-übersicht';
+import Stats from "@/components/stats/stats"
+import "@/app/styles/main-body.css";
 
 export default function Home() {
   return (

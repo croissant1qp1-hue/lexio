@@ -19,7 +19,7 @@ export default function ButtonElementNavbar({ name, icon, link }: NavButtonProps
             className={isActive ? "button active" : "button"}
         >
             <i className={icon} aria-hidden="true"></i>
-            {name}
+            <span className="button-text">{name}</span>
         </button>
     );
 }

@@ -1,5 +1,4 @@
 import "./side-bar.css";
-import "@/app/global.css";
 import Image from "next/image";
 import ButtonElementNavbar from "./button-element-navbar";
 

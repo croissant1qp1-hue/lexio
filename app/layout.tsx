@@ -1,8 +1,8 @@
 import React from "react";
-import "@/app/global.css";
+import "@/app/styles/global.css";
 import "@/components/navbar/side-bar.css";
 import Navbar from "@/components/navbar/navbar";
-import "./main-body.css";
+import "@/app/styles/main-body.css";
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

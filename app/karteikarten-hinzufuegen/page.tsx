@@ -1,5 +1,5 @@
 import Image from "next/image"
-import styles from "@/app/styles/modules/vokabeln-hinzufügen/vokabeln-hinzufügen.module.css"
+import styles from "./page.module.css"
 
 export default function SeiteSpracheAuswahl() {
     return (
