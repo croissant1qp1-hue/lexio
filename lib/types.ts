@@ -15,3 +15,7 @@ export type WochenXpTyp = {
   sa: number;
   so: number;
 }
+export type TagesXpTyp = {
+  erreicht: number;
+  ziel: number;
+}

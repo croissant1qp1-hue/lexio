@@ -2,7 +2,7 @@
 import {AreaChart,Area,ResponsiveContainer,XAxis,YAxis,CartesianGrid,Tooltip,Legend} from "recharts";
 import { useEffect, useState } from "react";
 import { WochenXpTyp } from "@/lib/types";
-import { WochenXp } from "@/lib/mock-xp-pro-tag";
+import LoadingStateDiv from "@/components/loading-state-div/loading-state-div";
 export default function XpChart() {
     const [wochenXp, setWochenXp] = useState<WochenXpTyp | null>(null);
     const [loading,setLoading] = useState(true);
@@ -28,31 +28,24 @@ export default function XpChart() {
 ];
     return(
         loading? (
-            <div style={{
-                            width: "100%",
-                            height: "100%",
-                            minHeight: "220px",
-                            borderRadius: 12,
-                            background: "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)",
-                            backgroundSize: "200% 100%",
-                            animation: "pulse 1.2s ease-in-out infinite",
-                            margin: "8px 0",
-                            border:"none",
-                        }}></div> ):
+            <LoadingStateDiv />
+         ):
         (
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart width={500} height={400} data={chartData}>
-                <XAxis dataKey="name"/>
-                <YAxis />
+                <XAxis dataKey="name" tick={{ fill: "#3B2112" }} axisLine={{ stroke: "#DDD2B9" }} tickLine={false}/>
+                <YAxis tick={{ fill: "#3B2112" }} axisLine={{ stroke: "#DDD2B9" }} tickLine={false}/>
                 <Tooltip contentStyle={{
-      borderRadius: "12px",
-      backgroundColor: "#fff",
-      border: "1px solid #e5e7eb",
-    }}/>
-                <Legend />
-                <CartesianGrid strokeDasharray="5 5"/>
+                    borderRadius: "10px",
+                    backgroundColor: "#241F16",
+                    color: "#F2EAD6",
+                    border: "1px solid #C25B3F",
+                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
+                }} itemStyle={{ color: "#F2EAD6" }} labelStyle={{ color: "#F2EAD6" }}/>
+                <Legend wrapperStyle={{ color: "#3B2112" }}/>
+                <CartesianGrid stroke="#DDD2B9" strokeDasharray="4 6" opacity={0.65}/>
                 <Area type="monotone" dataKey="xp"
-                stroke="#110e0e63" fill="#801e2e"></Area>
+                stroke="#C25B3F" strokeWidth={3} fill="#C25B3F" fillOpacity={0.22}></Area>
             </AreaChart>
         </ResponsiveContainer>
         )

@@ -66,7 +66,7 @@
 }
 
 .button:hover{
-    background-color: var(--paper-text-soft-light);
+    background-color: var(--paper-text-soft-light-hover);
     color:var(--dark-brown-text);
 }
 .button.active {

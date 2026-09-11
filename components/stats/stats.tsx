@@ -1,5 +1,6 @@
 import styles from "./stats.module.css"
 import XpChart from "./stats-types/xp-chart";
+import TagesXpPieChart from "./stats-types/xp-pro-tag-pie-chart";
 export default function Stats() {
     return(
         <div className={styles.stats}>
@@ -12,6 +13,7 @@ export default function Stats() {
 
             </div>
             <div className={styles.box4} style={{ gridArea: "box4" }}>
+                <TagesXpPieChart />
             </div>
         </div>
     );
