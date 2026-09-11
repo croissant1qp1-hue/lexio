@@ -52,7 +52,7 @@ export default function XpChart() {
                 <Legend />
                 <CartesianGrid strokeDasharray="5 5"/>
                 <Area type="monotone" dataKey="xp"
-                stroke="#110e0e63" fill="#E7AE3D"></Area>
+                stroke="#110e0e63" fill="#801e2e"></Area>
             </AreaChart>
         </ResponsiveContainer>
         )

@@ -61,8 +61,10 @@ export default function KarteikartenUebersicht() {
                             getFarbeforSprache(set.sprache)
                                 ? { backgroundColor: getFarbeforSprache(set.sprache) }
                                 : {}
-                        }
-                    />
+                        }>
+                            <h1 className="set-name">{set.name}</h1>   
+                            <h2 className="set-anzahl-woerter">{set.anzahlKarten} Karten</h2>
+                    </div>
                 ))}
         </div>
     );
