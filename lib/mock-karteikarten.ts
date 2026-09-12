@@ -6,20 +6,20 @@ export const mockKarteikarten: KarteikartenSet[] = [
     name: "Englisch Grundlagen",
     sprache: "Englisch",
     anzahlKarten: 120,
-    fortschritt: 65,
+    fortschrittProzent: 65,
   },
   {
     id: "italienisch-urlaub",
     name: "Italienisch Urlaub",
     sprache: "Italienisch",
     anzahlKarten: 80,
-    fortschritt: 32,
+    fortschrittProzent: 32,
   },
   {
     id: "spanisch-alltag",
     name: "Spanisch Alltag",
     sprache: "Spanisch",
     anzahlKarten: 95,
-    fortschritt: 48,
+    fortschrittProzent: 48,
   },
 ];
