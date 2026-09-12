@@ -2,8 +2,8 @@ import type { SprachStat } from "./types";
 //fake databse
 export const mockStatProSprache: SprachStat[] = [
   {
-    id: 'deutsch',
-    sprache: 'Deutsch',
+    id: 'italienisch',
+    sprache: 'Italienisch',
     gelernt: 12,
     total: 20,
     xp: 150,
