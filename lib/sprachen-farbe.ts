@@ -1,9 +1,9 @@
 //das ist eine liste mit den farben für die verschiedenen sprachen
 export const sprachenFarben = {
-    englisch: "#df9b35",
-    französisch: "#801e2e",
-    spanisch: "#c85d43",
-    italienisch: "#5c7d64"
+    englisch: "#FFC857",
+    französisch: "#FF3D67",
+    spanisch: "#FF6B5B",
+    italienisch: "#42D6A4"
 } as const;
 export function getFarbeforSprache(sprache:string): string {
     return(

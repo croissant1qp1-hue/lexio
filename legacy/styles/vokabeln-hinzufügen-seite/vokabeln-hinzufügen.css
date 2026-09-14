@@ -1,8 +1,8 @@
 :root {
-    --französisch-farbe: #801e2e;
-    --englisch-farbe: #df9b35;
-    --spanisch-farbe: #c85d43;
-    --italienisch-farbe: #5c7d64;
+    --französisch-farbe: #FF3D67;
+    --englisch-farbe: #FFC857;
+    --spanisch-farbe: #FF6B5B;
+    --italienisch-farbe: #42D6A4;
 }
 .main-body {
     background-color: var(--background);
