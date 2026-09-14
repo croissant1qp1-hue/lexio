@@ -11,11 +11,19 @@
 
 .stats > div {
     min-height: 140px;
-    border: solid 1px #080707;
+    border: solid 1px #33444C;
     border-radius:10px;
     background-color: var(--bg-elevated);
     box-shadow: var(--shadow-soft);
     border-radius: var(--radius);
+    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.stats > div:hover {
+    background-color: var(--bg-elevated-2);
+    border-color: var(--sage);
+    box-shadow: var(--shadow-card);
+    transform: translateY(-2px);
 }
 
 

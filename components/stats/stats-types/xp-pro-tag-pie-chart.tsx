@@ -50,15 +50,15 @@ export default function TagesXpPieChart() {
                         cornerRadius={8}
                         stroke="none"
                     >
-                        <Cell fill="#C25B3F" />
-                        <Cell fill="#E7DCC2" />
+                        <Cell fill="var(--terracotta)" />
+                        <Cell fill="var(--bg-elevated-2)" />
                     </Pie>
                         <text
                         x="50%"
                         y="47%"
                         textAnchor="middle"
                         dominantBaseline="middle"
-                        style={{ fontSize: "1.8rem", fontWeight: 700, fill: "#333" }}
+                        style={{ fontSize: "1.8rem", fontWeight: 700, fill: "var(--text-primary)" }}
                     >
                             {erreicht}
                         </text>
@@ -67,20 +67,20 @@ export default function TagesXpPieChart() {
                             y="60%"
                             textAnchor="middle"
                             dominantBaseline="middle"
-                            style={{ fontSize: "0.85rem", fill: "#888" }}
+                            style={{ fontSize: "0.85rem", fill: "var(--text-secondary)" }}
                         >
                         von {proTagXp.ziel} XP
                     </text>
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "#241F16",
-                            border: "1px solid #C25B3F",
+                            backgroundColor: "var(--card-dark)",
+                            border: "1px solid var(--terracotta)",
                             borderRadius: "10px",
-                            color: "#F2EAD6",
-                            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
+                            color: "var(--text-primary)",
+                            boxShadow: "var(--shadow-card)",
                         }}
-                        labelStyle={{ color: "#F2EAD6" }}
-                        itemStyle={{ color: "#F2EAD6" }}
+                        labelStyle={{ color: "var(--text-secondary)" }}
+                        itemStyle={{ color: "var(--text-primary)" }}
                         formatter={(value) => `${value} XP`}
                     />
                 </PieChart>

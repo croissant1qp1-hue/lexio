@@ -1,52 +1,45 @@
 :root {
 
-    --ink: #1B2333;
-    --paper: #F2EAD6;
-    --paper-dim: #E7DCC2;
-    --paper-text: #241F16;
-    --paper-text-soft: #E7DCC2;
-    --paper-text-soft-light-hover:#f2ead667;
-    --paper-text-soft-light: #F2EAD6;
-    --paper-text-soft-border: #DDD2B9;
-    --off-white: #EFE9DC;
-    --muted: #A6AEC4;
+    --ink: #0D171D;
+    --paper: #F0E8D5;
+    --paper-dim: #E4DAC2;
+    --paper-text: #20252A;
+    --paper-text-soft: #F0E8D5;
+    --paper-text-soft-light-hover: #E8DEC8;
+    --paper-text-soft-light: #F7F1E4;
+    --paper-text-soft-border: #D7CBB2;
+    --off-white: #F7F1E4;
+    --muted: #718083;
 
+    --gold: #E7B14A;
+    --gold-dark: #9A6D20;
+    --terracotta: #B84254;
+    --sage: #65A88D;
+    --sage-dark: #39725F;
 
-    --gold: #E7AE3D;
-    --gold-dark: #8A6620;
-    --terracotta: #C25B3F;
-    --sage: #7E9C77;
-    --sage-dark: #3E4F3B;
+    --title-color: #F3F0E7;
+    --dark-brown-text: #20252A;
+    --card-dark: #17232B;
+    --text-primary: #F3F0E7;
+    --text-secondary: #A7B0AE;
+    --text-muted: #738084;
 
-
-    --title-color: rgb(59, 33, 18);
-    --dark-brown-text: rgb(59, 33, 18);
-
-
-    --background: #F7F1E7;;
-    --bg-elevated: #FFFFFF;
-    --bg-elevated-2: #F2EAD6;
-
+    --background: #0D171D;
+    --background-dunkel-blau: #0D171D;
+    --bg-elevated: #17232B;
+    --bg-elevated-2: #202E37;
+    --input-dark: #202E37;
+    --text-light: #F3F0E7;
+    --placeholder-color: #7C898C;
+    --accent-purple: #B84254;
 
     --serif: 'Fraunces', serif;
     --sans: 'Inter', sans-serif;
     --mono: 'IBM Plex Mono', monospace;
-
-
     --radius: 16px;
-    --shadow-soft: 0 4px 16px rgba(0,0,0,0.08);
-    --shadow-card: 0 8px 24px rgba(0,0,0,0.12);
-    /*hier hab ich noch darkmode farben */
-    --card-dark: #1f2937;
-    --input-dark: #374151;
-
-    --text-light: #f8fafc;
-    --text-muted: #cbd5e1;
-    --placeholder-color: #94a3b8;
-
-    --accent-purple: #6366f1;
-
-    --shadow-dark: rgba(0,0,0,0.3);
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
+    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.28);
+    --shadow-dark: rgba(0, 0, 0, 0.34);
 }
 body{
     display: flex;
@@ -78,16 +71,16 @@ p {
     place-items: center;
     padding: 2rem;
     background:
-        radial-gradient(circle at top, rgba(231, 174, 61, 0.18), transparent 35%),
-        linear-gradient(135deg, #f8f5f0 0%, #f2ead6 100%);
+        radial-gradient(circle at top, rgba(231, 177, 74, 0.16), transparent 35%),
+        linear-gradient(135deg, #17232B 0%, #0D171D 100%);
 }
 
 .not-found-card {
     width: min(560px, 100%);
-    background: rgba(255, 255, 255, 0.72);
-    border: 1px solid rgba(59, 33, 18, 0.08);
+    background: rgba(23, 35, 43, 0.92);
+    border: 1px solid rgba(167, 176, 174, 0.18);
     border-radius: 28px;
-    box-shadow: 0 24px 60px rgba(59, 33, 18, 0.12);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
     backdrop-filter: blur(10px);
     padding: clamp(2rem, 5vw, 3.5rem);
     text-align: center;
@@ -95,9 +88,9 @@ p {
 
 .not-found-badge {
     display: inline-block;
-    background: rgba(231, 174, 61, 0.12);
-    color: var(--gold-dark);
-    border: 1px solid rgba(231, 174, 61, 0.35);
+    background: rgba(231, 177, 74, 0.14);
+    color: var(--gold);
+    border: 1px solid rgba(231, 177, 74, 0.35);
     border-radius: 999px;
     padding: 0.5rem 0.9rem;
     font-size: 0.8rem;
@@ -117,7 +110,7 @@ p {
 .not-found-card p {
     margin: 1rem auto 0;
     max-width: 420px;
-    color: rgba(27, 35, 51, 0.75);
+    color: var(--text-secondary);
     font-size: 1.05rem;
     line-height: 1.6;
 }
@@ -144,9 +137,9 @@ p {
 }
 
 .not-found-button.primary {
-    background: linear-gradient(135deg, var(--gold) 0%, #d89c2f 100%);
-    color: #fff;
-    box-shadow: 0 12px 24px rgba(231, 174, 61, 0.32);
+    background: linear-gradient(135deg, var(--terracotta) 0%, #943344 100%);
+    color: var(--text-primary);
+    box-shadow: 0 12px 24px rgba(184, 66, 84, 0.32);
 }
 
 @keyframes pulse {

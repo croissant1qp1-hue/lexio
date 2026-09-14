@@ -33,19 +33,19 @@ export default function XpChart() {
         (
         <ResponsiveContainer width="100%" height="100%">
             <AreaChart width={500} height={400} data={chartData}>
-                <XAxis dataKey="name" tick={{ fill: "#3B2112" }} axisLine={{ stroke: "#DDD2B9" }} tickLine={false}/>
-                <YAxis tick={{ fill: "#3B2112" }} axisLine={{ stroke: "#DDD2B9" }} tickLine={false}/>
+                <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)" }} axisLine={{ stroke: "var(--muted)" }} tickLine={false}/>
+                <YAxis tick={{ fill: "var(--text-secondary)" }} axisLine={{ stroke: "var(--muted)" }} tickLine={false}/>
                 <Tooltip contentStyle={{
                     borderRadius: "10px",
-                    backgroundColor: "#241F16",
-                    color: "#F2EAD6",
-                    border: "1px solid #C25B3F",
-                    boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
-                }} itemStyle={{ color: "#F2EAD6" }} labelStyle={{ color: "#F2EAD6" }}/>
-                <Legend wrapperStyle={{ color: "#3B2112" }}/>
-                <CartesianGrid stroke="#DDD2B9" strokeDasharray="4 6" opacity={0.65}/>
+                    backgroundColor: "var(--card-dark)",
+                    color: "var(--text-primary)",
+                    border: "1px solid var(--terracotta)",
+                    boxShadow: "var(--shadow-card)",
+                }} itemStyle={{ color: "var(--text-primary)" }} labelStyle={{ color: "var(--text-secondary)" }}/>
+                <Legend wrapperStyle={{ color: "var(--text-secondary)" }}/>
+                <CartesianGrid stroke="var(--muted)" strokeDasharray="4 6" opacity={0.35}/>
                 <Area type="monotone" dataKey="xp"
-                stroke="#C25B3F" strokeWidth={3} fill="#C25B3F" fillOpacity={0.22}></Area>
+                stroke="var(--gold)" strokeWidth={3} fill="var(--gold)" fillOpacity={0.2}></Area>
             </AreaChart>
         </ResponsiveContainer>
         )

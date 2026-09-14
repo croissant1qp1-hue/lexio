@@ -49,34 +49,34 @@ export default function StatsProSprache() {
     <div style={{ width: "100%", height: 250 }}>
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={chartData} margin={{ left: 10, right: 10 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#DDD2B9" opacity={0.7} />
+          <CartesianGrid strokeDasharray="3 3" stroke="var(--muted)" opacity={0.35} />
           <XAxis
             dataKey="name"
-            tick={{ fill: "#3B2112", fontSize: 12 }}
-            axisLine={{ stroke: "#DDD2B9" }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
+            axisLine={{ stroke: "var(--muted)" }}
             tickLine={false}
             interval={0}
             height={40}
             tickMargin={8}
           />
           <YAxis
-            tick={{ fill: "#3B2112", fontSize: 12 }}
-            axisLine={{ stroke: "#DDD2B9" }}
+            tick={{ fill: "var(--text-secondary)", fontSize: 12 }}
+            axisLine={{ stroke: "var(--muted)" }}
             tickLine={false}
           />
           <Tooltip
             contentStyle={{
               borderRadius: "10px",
-              backgroundColor: "#241F16",
-              color: "#F2EAD6",
-              border: "1px solid #C25B3F",
-              boxShadow: "0 4px 16px rgba(0, 0, 0, 0.18)",
+              backgroundColor: "var(--card-dark)",
+              color: "var(--text-primary)",
+              border: "1px solid var(--terracotta)",
+              boxShadow: "var(--shadow-card)",
             }}
-            itemStyle={{ color: "#F2EAD6" }}
-            labelStyle={{ color: "#F2EAD6" }}
+            itemStyle={{ color: "var(--text-primary)" }}
+            labelStyle={{ color: "var(--text-secondary)" }}
             formatter={(value) => `${value} XP`}
           />
-          <Bar dataKey="xp" fill="#C25B3F" radius={[0, 6, 6, 0]} />
+          <Bar dataKey="xp" fill="var(--terracotta)" radius={[0, 6, 6, 0]} />
         </BarChart>
       </ResponsiveContainer>
     </div>

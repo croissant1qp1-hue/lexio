@@ -10,7 +10,7 @@
 
 .infos{
     font-size: clamp(0.4rem, 0.6vw + 0.3rem, 0.6rem);
-    color:gray;
+    color: var(--muted);
 
 }
 
@@ -37,7 +37,7 @@
     display: inline-block;
     margin: 0;
     margin-left: 1.2vw;
-    color:rgb(59, 33, 18);
+    color: var(--paper-text);
 }
 
 .side-bar-menu{
@@ -61,7 +61,7 @@
     height:7vh;
     width:15vw;
     margin-left:1.5vw;
-    color: rgb(131, 107, 95);
+    color: #766F62;
     border-radius:clamp(6px, 0.52vw, 10px);
 }
 
@@ -84,21 +84,21 @@
     margin-left:1.5vw;
     border-radius:clamp(6px, 0.52vw, 10px);
     margin-top:3vh;
-    box-shadow:0 0 0.5vw 0.1vw rgba(0,0,0,0.2);
+    box-shadow: 0 0 0.5vw 0.1vw rgba(32, 37, 42, 0.18);
 
 }
 
 .streak-count{
     padding-left:2vw;
     padding-top:2vh;
-    color:rgb(216, 68, 0);
+    color: var(--terracotta);
     font-size: clamp(2rem, 2.3vw + 1.6rem, 2.3rem);
 }
 
 .streak-label{
     padding-left:2vw;
     padding-top:0.5vh;
-    color:rgb(124, 104, 96);
+    color: #766F62;
     font-size: clamp(0.9rem, 1.4vw + 0.7rem, 1.4rem);
 }
 
@@ -111,7 +111,7 @@
     margin-top:3vh;
     margin-left:1.5vw;
     border-radius:0.5vw;
-    box-shadow: 0 0 0.5vw 0.1vw rgba(0,0,0,0.2);
+    box-shadow: 0 0 0.5vw 0.1vw rgba(32, 37, 42, 0.18);
 }
 
 .profile-data{
@@ -145,7 +145,7 @@
 }
 
 .profile-level{
-    color:rgb(145, 129, 113);
+    color: #8A8070;
     display:inline-block;
     font-size: clamp(0.8rem, 1vw, 1.2rem);
     margin-left:1vw;
@@ -162,7 +162,7 @@
 .progression-bar{
     height:1.8vh;
     width:11vw;
-    background-color:rgb(186, 255, 179);
+    background-color: #C7E5CA;
     border-radius:10px;
     
 }
@@ -170,7 +170,7 @@
 .progression-fill{
     height:1.8vh;
     width:65%;
-    background-color:rgb(36, 177, 36);
+    background-color: var(--sage);
     border-radius:10px;
     color:white;
     font-family:Arial, Helvetica, sans-serif;
@@ -180,7 +180,7 @@
 
 .progression-procentage{
     font-size:clamp(0.8rem,1.2vw + 0.6rem,1.2rem);
-    color:rgb(53, 185, 0);
+    color: var(--sage-dark);
     margin-left:0.5vw;
     
 }
