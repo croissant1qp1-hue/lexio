@@ -46,7 +46,7 @@ export default function KarteikartenUebersicht() {
                             aspectRatio: "1/1",
                             height: "clamp(200px, 25vw, 300px)",
                             borderRadius: 12,
-                            background: "linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%)",
+                            background: "linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%)",
                             backgroundSize: "200% 100%",
                             animation: "pulse 1.2s ease-in-out infinite",
                             margin: "8px 0",

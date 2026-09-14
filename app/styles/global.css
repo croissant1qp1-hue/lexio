@@ -32,6 +32,8 @@
     --text-light: #F3F0E7;
     --placeholder-color: #7C898C;
     --accent-purple: #B84254;
+    --skeleton-base: #17232B;
+    --skeleton-highlight: #2A3B44;
 
     --serif: 'Fraunces', serif;
     --sans: 'Inter', sans-serif;
