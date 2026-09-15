@@ -34,7 +34,7 @@ export default function KarteikartenUebersicht() {
                 width={250}
                 height={250}
                 onClick={() =>
-                    router.push("/karteikarten-hinzufuegen")
+                    router.push("/karteikarten-hinzufuegen/sprache-hinzufuegen")
                 }
             />
 
