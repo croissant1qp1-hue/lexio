@@ -1,0 +1,23 @@
+.topOfpage {
+    display:flex;
+    flex-direction: row;
+    height: clamp(52px, 4vw, 64px);
+    overflow: hidden;
+    align-items: center;
+    /**kleine horizontale lücke*/
+    column-gap: clamp(4px, 0.5vw, 8px);
+    border-bottom: 1px solid rgba(241, 235, 221, 0.08);
+}
+
+.pfeilVokabelnHinzufügenText {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.topOfpage h4 {
+    margin: 0;
+}
+/**
+    jetzt wird der Pfeil (svg) gestyled
+*/

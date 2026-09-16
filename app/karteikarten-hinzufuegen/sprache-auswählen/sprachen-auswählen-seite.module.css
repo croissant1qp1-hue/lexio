@@ -1,8 +1,12 @@
+.mainPartSeite {
+    background-color: coral;
+    display:flex;
+    flex-direction:column;
+    height:100%;
+    width:100%;
+}
 .sprache-auswählen-layout {
     background-color:aqua;
-}
-.überschrift-zurück-icon {
-    background-color: brown;
 }
 .text-unterüberschirft {
     background-color: blue;
