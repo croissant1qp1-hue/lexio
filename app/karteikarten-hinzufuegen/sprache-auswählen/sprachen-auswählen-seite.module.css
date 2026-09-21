@@ -1,16 +1,18 @@
-.mainPartSeite {
-    background-color: coral;
-    display:flex;
-    flex-direction:column;
-    height:100%;
-    width:100%;
-}
 .sprache-auswählen-layout {
-    background-color:aqua;
-}
-.text-unterüberschirft {
     background-color: blue;
+
+    display: flex;
+    flex-direction: column;
+
+    height: 100vh;
 }
-.cards-sprachen {
-    background-color: yellow;
+
+.mainPartSeite {
+    background-color: red;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    flex: 1;
 }
