@@ -1,0 +1,119 @@
+.seite {
+    /* Ohne border-box addiert width:100% das Padding obendrauf und die
+       Seite ragt aus dem Viewport (siehe .main-body: overflow-x: hidden). */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+    padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.titel {
+    margin: 0;
+    font-family: "Caveat", cursive;
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    line-height: 1.1;
+}
+
+.untertitel {
+    margin: -0.4rem 0 0.4rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.liste {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.zeile {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    width: 100%;
+    min-height: 64px;
+    padding: 0.7rem 0.9rem;
+    border-radius: var(--radius);
+    border: 1px solid #33444c;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.zeile:hover {
+    background: var(--bg-elevated-2);
+    border-color: var(--sage);
+    transform: translateX(2px);
+}
+
+.punkt {
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    border-radius: 50%;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.meta {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+}
+
+.prozent {
+    font-family: var(--mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.skelett {
+    height: 64px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+.neu {
+    margin-top: 0.6rem;
+    min-height: 52px;
+    border: 1px dashed var(--sage);
+    border-radius: var(--radius);
+    background: transparent;
+    color: var(--sage);
+    font-size: 0.98rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.neu:hover {
+    background: rgba(101, 168, 141, 0.12);
+}

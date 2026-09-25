@@ -1,22 +1,24 @@
 .stats {
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-template-rows: repeat(2, minmax(220px, 1fr));
-    gap: clamp(1rem, 3vw, 2rem);
-    width: min(100% - 2rem, 1200px);
-    margin: clamp(1rem, 5%, 4rem) auto;
-    grid-template-areas: "box1 box2 box2 box2"
-        "box1 box4 box3 box3";
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(200px, auto);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    margin: clamp(0.75rem, 2vw, 1.5rem);
+    grid-template-areas:
+        "box2 box2"
+        "box1 box1"
+        "box3 box4";
 }
 
 .stats > div {
-    min-height: 140px;
-    border: solid 1px #33444C;
-    border-radius:10px;
+    min-width: 0;
+    min-height: 200px;
+    border: 1px solid #33444c;
     background-color: var(--bg-elevated);
-    box-shadow: var(--shadow-soft);
     border-radius: var(--radius);
-    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+    box-shadow: var(--shadow-soft);
+    transition: background-color 180ms ease, border-color 180ms ease, box-shadow 180ms ease,
+        transform 180ms ease;
 }
 
 .stats > div:hover {
@@ -26,15 +28,32 @@
     transform: translateY(-2px);
 }
 
+@media (hover: none) {
+    .stats > div:hover {
+        transform: none;
+    }
+}
 
-@media (max-width: 800px) {
+@media (min-width: 700px) {
     .stats {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: repeat(4, minmax(140px, auto));
+        /* Vier Spalten muessen auch wirklich deklariert sein. Mit nur zwei
+           Spalten entstehen fuer "box2" und "box3" implizite auto-Tracks,
+           und deren Inhalt (Recharts mit width:100%) laeuft in einen
+           Zirkelschluss und kollabiert auf die Breite der Achsenlabels. */
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         grid-template-areas:
-            "box2 box2"
-            "box1 box3"
-            "box4 box4"
-            "box4 box4";
+            "box1 box2 box2 box2"
+            "box1 box4 box3 box3";
+    }
+}
+
+@media (max-width: 520px) {
+    .stats {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "box1"
+            "box2"
+            "box3"
+            "box4";
     }
 }

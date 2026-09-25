@@ -1,99 +1,180 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Oswald:wght@200..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+
 .main-body {
     background-color: var(--background-dunkel-blau);
     color: var(--text-primary);
     flex: 1;
-    overflow: hidden;
-    display:flex;
+    min-width: 0;
+    display: flex;
     flex-direction: column;
     overflow-y: auto;
-    min-height: 0;
-}
-.heading-und-xp {
-    display:flex;
-    flex-direction: row;
-    gap: clamp(1rem, 5vh, 3rem);
-    margin-left: clamp(1rem, 5vh, 3rem);
-    width: calc(100% - clamp(1rem, 5vh, 3rem));
-}
-.heading-kartenhaus {
-    font-style: var(--mono);
-}
-.vokabel-sets {
-    display: flex;
-    flex-direction: row;
-    gap: clamp(1rem, 5vh, 4rem);
-    margin-left: clamp(0.5rem,1vh,1rem);
-}
-.vokabel-sets div{
-    height: clamp(200px, 25vw, 300px);
-    aspect-ratio: 1 / 1;
-    box-sizing: border-box;
-    flex: 0 0 auto;
-    border-radius: var(--radius);
-    background-color: var(--vokabel-set-color);
-    border: 2px solid #33444C;
-    transition: 0.4s;
-    overflow: hidden;
-    display: grid;
-    grid-template-rows: 1fr auto;
-}
-.set-name {
-    margin:0;
-  font-family: "Caveat", cursive;
-  font-optical-sizing: auto;
-  font-weight: 700;
-  font-style: normal;
-  font-size: clamp(1.8rem, 3vw, 3.5rem);
-}
-.set-anzahl-woerter {
-    margin: 0;
-  font-family: "Oswald", sans-serif;
-  font-optical-sizing: auto;
-    font-weight: 400;
-    font-style: normal;
-    font-size: 20px;
-}
-.vokabel-sets div:hover { 
-    transform:scale(1.15);
-    filter: brightness(1.12); 
-    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36), 0 0 0 2px rgba(231, 177, 74, 0.2); 
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
 }
 
-.stats {
-    display: flex;
-    flex-direction: row;
-    gap: clamp(1rem,5%,4rem);
-    margin:clamp(1rem,5%,4rem);
+.main-body > * {
+    flex: 0 0 auto;
 }
-.stats > div{
-    width:clamp(280px,35vw,500px);
-    height:clamp(300px,35vw,400px);
-    border: 0.5px solid #33444C;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-soft);
+
+/* Platz fuer die untere Tableiste auf Mobilgeraeten */
+@media (max-width: 860px) {
+    .main-body {
+        padding-bottom: calc(60px + env(safe-area-inset-bottom));
+    }
+}
+
+.heading-und-xp {
     display: flex;
-    justify-content: flex-start;
+    flex-wrap: wrap;
     align-items: center;
-    flex-direction: column;
-    background: var(--bg-elevated);
+    gap: 1rem;
+    margin: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 0;
 }
+
+.heading-kartenhaus {
+    font-family: var(--mono);
+    font-size: clamp(1.1rem, 3vw, 1.6rem);
+    letter-spacing: 0.02em;
+    color: var(--text-primary);
+}
+
+.vokabel-sets {
+    display: grid;
+    /* Breite rechnet sich aus dem Container, nicht aus der Bildschirmbreite –
+       sonst ignores 25vw die Sidebar und erzeugt Overflow. */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    margin: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.set-relative {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    min-width: 0;
+}
+
+.set-tile {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.2rem;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: var(--radius);
+    overflow: hidden;
+    padding: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: transform 200ms ease, filter 200ms ease, box-shadow 200ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.add-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
+    padding: 0.9rem;
+    border-radius: var(--radius);
+    background: none;
+    border: 2px dashed #3d515a;
+    cursor: pointer;
+    transition: transform 200ms ease, box-shadow 200ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.add-button:hover,
+.set-tile:hover,
+.set-tile:focus-visible {
+    transform: scale(1.04);
+    filter: brightness(1.08);
+    box-shadow: 0 18px 42px rgba(0, 0, 0, 0.36), 0 0 0 2px rgba(231, 177, 74, 0.2);
+}
+
+@media (hover: none) {
+    /* Auf Touchgeraeten gibt es kein Hover. Scale 1.04 sprengt das Raster. */
+    .add-button:hover,
+    .set-tile:hover,
+    .set-tile:focus-visible {
+        transform: none;
+        filter: none;
+    }
+    .set-tile:active,
+    .add-button:active {
+        transform: scale(0.97);
+    }
+}
+
+.set-name {
+    margin: 0;
+    font-family: "Caveat", cursive;
+    font-optical-sizing: auto;
+    font-weight: 700;
+    font-size: clamp(1.4rem, 4.5vw, 2.4rem);
+    line-height: 1.05;
+    color: var(--ink);
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.set-anzahl-woerter {
+    margin: 0;
+    font-family: "Oswald", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-size: 0.85rem;
+    color: var(--ink);
+    opacity: 0.72;
+}
+
+.set-fortschritt {
+    margin-top: 0.35rem;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(13, 23, 29, 0.22);
+    overflow: hidden;
+}
+
+.set-fortschritt-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--ink);
+    transition: width 500ms ease;
+}
+
+.set-faellig {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: var(--ink);
+    color: var(--paper-text-soft);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 0.15rem 0.45rem;
+    border-radius: 999px;
+    letter-spacing: 0.03em;
+}
+
 .ring {
-    height: clamp(140px, 15vw, 200px);
-    aspect-ratio: 1 / 1;  
+    aspect-ratio: 1 / 1;
+    width: min(150px, 42vw);
     border-radius: 50%;
     background: conic-gradient(
-        var(--gold) calc(var(--progress) * 3.6deg),  
+        var(--gold) calc(var(--progress) * 3.6deg),
         #314149 calc(var(--progress) * 3.6deg));
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-left:2%;
-    margin-top:clamp(1rem,3vw,2rem);
 }
+
 .inner {
-    height: 85%;          
+    height: 85%;
     width: 85%;
     border-radius: 50%;
     background: var(--bg-elevated-2);
@@ -101,52 +182,13 @@
     align-items: center;
     justify-content: center;
 }
+
 .inner span {
-    font-size:clamp(1rem,2vw,1.5rem);
+    font-size: clamp(1rem, 3vw, 1.5rem);
     font-weight: 500;
 }
-.text-prog {
-    color:var(--title-color);
-}
+
 .ring-rest {
     display: flex;
     gap: 5%;
-}
-.add-button-div {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-.add-button {
-    height: clamp(200px,25vw,300px);
-    aspect-ratio:1/1;
-    transition: 0.4s;
-}
-.add-button:hover {
-    transform: scale(1.20); 
-    filter: brightness(0.8); 
-}
-.vokabs-gelernt {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    margin-right: clamp(0.5rem, 2vw, 2rem);
-}
-.num-gelernt {
-    align-items: center;
-    justify-content: center;
-    display: inline-flex;
-    border-radius: var(--radius);
-    background-color: var(--gold);
-}
-.num-gelernt h4 {
-    margin: 0;
-}
-.vokabeln-gelernt-div-inner {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: var(--radius);
-    background-color: var(--bg-elevated-2);
-    padding:clamp(4px,0.5vw,8px);
 }

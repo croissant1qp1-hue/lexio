@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {  Legend ,Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import LoadingStateDiv from "../../loading-state-div/loading-state-div";
 import type { TagesXpTyp } from "@/lib/types";
 
@@ -10,15 +10,21 @@ export default function TagesXpPieChart() {
     const [proTagXp, setProTagXp] = useState<TagesXpTyp | null>(null);
 
     useEffect(() => {
+        let abgebrochen = false;
         fetch("/api/tages-xp")
             .then((response) => response.json())
             .then((daten: TagesXpTyp) => {
+                if (abgebrochen) return;
                 setProTagXp(daten);
                 setLoading(false);
             })
             .catch(() => {
+                if (abgebrochen) return;
                 setLoading(false);
             });
+        return () => {
+            abgebrochen = true;
+        };
     }, []);
     //hier wird das loading state überprüft und generiert
     if (loading || !proTagXp) {

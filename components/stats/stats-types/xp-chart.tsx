@@ -7,16 +7,21 @@ export default function XpChart() {
     const [wochenXp, setWochenXp] = useState<WochenXpTyp | null>(null);
     const [loading,setLoading] = useState(true);
     useEffect(() => {
-        setLoading(true);
+        let abgebrochen = false;
         fetch("/api/wochen-xp").then((response) => {
             response.json().then((daten:WochenXpTyp) => {
+                if (abgebrochen) return;
                 setLoading(false);
                 setWochenXp(daten)
             })
         }).catch(() => {
+            if (abgebrochen) return;
             setLoading(false)
         })
-    },[]) 
+        return () => {
+            abgebrochen = true;
+        }
+    },[])
     const chartData = [
   { name: "Mo", xp: wochenXp?.mo ?? 0 },
   { name: "Di", xp: wochenXp?.di ?? 0 },
@@ -32,7 +37,14 @@ export default function XpChart() {
          ):
         (
         <ResponsiveContainer width="100%" height="100%">
-            <AreaChart width={500} height={400} data={chartData}>
+            <AreaChart
+                width={500}
+                height={400}
+                data={chartData}
+                /* Rechts Platz fuer das letzte X-Achsen-Label: es sitzt
+                   mittig auf dem letzten Punkt und ragt sonst aus dem SVG. */
+                margin={{ left: 4, right: 20, top: 4, bottom: 0 }}
+            >
                 <XAxis dataKey="name" tick={{ fill: "var(--text-secondary)" }} axisLine={{ stroke: "var(--muted)" }} tickLine={false}/>
                 <YAxis tick={{ fill: "var(--text-secondary)" }} axisLine={{ stroke: "var(--muted)" }} tickLine={false}/>
                 <Tooltip contentStyle={{

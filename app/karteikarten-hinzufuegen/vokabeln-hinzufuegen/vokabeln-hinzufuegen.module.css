@@ -1,0 +1,220 @@
+.seite {
+    /* Ohne border-box addiert width:100% das Padding obendrauf und die
+       Seite ragt aus dem Viewport (siehe .main-body: overflow-x: hidden). */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 720px;
+    margin-inline: auto;
+    padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.kopf {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+}
+
+.zurueck {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 12px;
+    border: 1px solid #33444c;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 160ms ease, border-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.zurueck:hover {
+    background: var(--bg-elevated-2);
+    border-color: var(--sage);
+}
+
+.titel {
+    margin: 0;
+    font-family: "Caveat", cursive;
+    font-size: clamp(1.7rem, 5vw, 2.4rem);
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0.15rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.sprachen {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 0.6rem;
+}
+
+.sprache {
+    min-height: 56px;
+    padding: 0.6rem 0.8rem;
+    border-radius: 12px;
+    border: 2px solid transparent;
+    color: var(--ink);
+    font-family: "Caveat", cursive;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: var(--shadow-soft);
+    transition: transform 160ms ease, border-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.sprache:hover {
+    transform: translateY(-2px);
+}
+
+.spracheAktiv {
+    border-color: var(--ink);
+    transform: translateY(-2px);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+    padding: clamp(1rem, 3vw, 1.5rem);
+    background: var(--bg-elevated);
+    border: 1px solid #33444c;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-soft);
+    animation: hoch 240ms ease;
+}
+
+@keyframes hoch {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.kopfzeile {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.punkt {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex: 0 0 12px;
+}
+
+.feld {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.label {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.input {
+    min-height: 50px;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid #33444c;
+    background: var(--input-dark);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.input::placeholder {
+    color: var(--placeholder-color);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(101, 168, 141, 0.22);
+}
+
+.input[aria-invalid="true"] {
+    border-color: var(--terracotta);
+}
+
+.fehler {
+    color: #ff8b9a;
+    font-size: 0.82rem;
+}
+
+.speichern {
+    min-height: 52px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, #943344 100%);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(184, 66, 84, 0.3);
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.speichern:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 28px rgba(184, 66, 84, 0.38);
+}
+
+.speichern:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+.speichern:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.weiter {
+    min-height: 50px;
+    border-radius: 12px;
+    border: 1px solid var(--sage);
+    background: transparent;
+    color: var(--sage);
+    font-size: 0.98rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.weiter:hover {
+    background: rgba(101, 168, 141, 0.12);
+}
+
+.hinweis {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 1.5rem 0;
+}

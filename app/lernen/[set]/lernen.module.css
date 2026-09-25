@@ -1,0 +1,546 @@
+.seite {
+    /* Ohne border-box addiert width:100% das Padding obendrauf und die
+       Seite ragt aus dem Viewport (siehe .main-body: overflow-x: hidden). */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2.5vw, 1.25rem);
+    min-height: 100%;
+}
+
+/* ---------------------------------------------------------------- Kopfzeile */
+
+.kopf {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.zurueck {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    flex: 0 0 44px;
+    border-radius: 12px;
+    border: 1px solid #33444c;
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.zurueck:hover {
+    background: var(--bg-elevated-2);
+}
+
+.fortschritt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.fortschrittBalken {
+    flex: 1;
+    height: 7px;
+    min-width: 0;
+    background: var(--bg-elevated-2);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fortschrittFuellung {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sage) 0%, var(--gold) 100%);
+    border-radius: 999px;
+    transition: width 320ms ease;
+}
+
+.fortschrittText {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.punkte {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.25;
+}
+
+.xp {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.streak {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- XP-Popup */
+
+.xpPop {
+    position: fixed;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--mono);
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 4px 22px rgba(231, 177, 74, 0.55);
+    pointer-events: none;
+    z-index: 60;
+    animation: pop 900ms ease forwards;
+}
+
+@keyframes pop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.6);
+    }
+    25% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.12);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-28px) scale(0.95);
+    }
+}
+
+/* ------------------------------------------------------------------- Karte */
+
+.buehne {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 0.5rem 0;
+}
+
+.karte {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 4 / 5;
+    /* Begrenzt die Karte so, dass Kopfzeile und Bewertungs-Buttons auf
+       kurzen Displays sichtbar bleiben, ohne gescrollt werden zu muessen. */
+    max-height: 58vh;
+    border: none;
+    border-radius: 22px;
+    padding: 0;
+    cursor: pointer;
+    font-family: inherit;
+    background: transparent;
+    perspective: 1200px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 160ms ease;
+}
+
+.karte:active {
+    transform: scale(0.985);
+}
+
+/* Der farbige Ruecken. Beim Umdrehen dreht die innere Ebene mit. */
+.karte::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    background: var(--kartenFarbe, var(--bg-elevated-2));
+    box-shadow: var(--shadow-card);
+}
+
+.karteInnen {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 460ms cubic-bezier(0.4, 0.14, 0.3, 1);
+    border-radius: 22px;
+}
+
+.karteAufgedeckt .karteInnen {
+    transform: rotateY(180deg);
+}
+
+.karteSeite {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 22px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 2.2rem 1.5rem 3.6rem;
+    text-align: center;
+    color: var(--ink);
+    overflow: hidden;
+}
+
+.karteLabel {
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.55;
+}
+
+.karteText {
+    font-family: "Caveat", cursive;
+    font-size: clamp(2.1rem, 9vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.karteTipp {
+    position: absolute;
+    bottom: 1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.74rem;
+    opacity: 0.5;
+    white-space: nowrap;
+}
+
+/* Sprachzeichen unten links – auf jeder Karte, sichtbar in beiden Richtungen */
+.karteZeichen {
+    position: absolute;
+    bottom: 0.85rem;
+    left: 0.85rem;
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+    border-radius: 999px;
+    background: rgba(13, 23, 29, 0.82);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.karteZeichenBild {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+}
+
+.karteZeichenText {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--paper-text-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.stufePunkte {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.9rem;
+    z-index: 3;
+    display: flex;
+    gap: 3px;
+    pointer-events: none;
+}
+
+.stufePunkt {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(13, 23, 29, 0.75);
+}
+
+/* --------------------------------------------------------------- Aktionen */
+
+.aktionen {
+    display: flex;
+    justify-content: center;
+    min-height: 96px;
+}
+
+.aufdecken {
+    width: 100%;
+    max-width: 460px;
+    min-height: 56px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold) 0%, #c99433 100%);
+    color: var(--ink);
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 12px 26px rgba(231, 177, 74, 0.3);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.aufdecken:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(231, 177, 74, 0.4);
+}
+
+.aufdecken:active {
+    transform: scale(0.98);
+}
+
+.bewertungen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+    width: 100%;
+    max-width: 520px;
+}
+
+.bewertung {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 76px;
+    padding: 0.5rem 0.3rem;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 140ms ease, filter 140ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bewertung:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.bewertung:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.bewertung:disabled {
+    opacity: 0.55;
+    cursor: progress;
+}
+
+.bewertungLabel {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.bewertungMeta {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    opacity: 0.72;
+    text-align: center;
+    line-height: 1.25;
+}
+
+.bewertung_nochmal {
+    background: rgba(184, 66, 84, 0.18);
+    border-color: rgba(184, 66, 84, 0.5);
+    color: #ff9aa8;
+}
+
+.bewertung_schwer {
+    background: rgba(231, 177, 74, 0.16);
+    border-color: rgba(231, 177, 74, 0.45);
+    color: var(--gold);
+}
+
+.bewertung_gut {
+    background: rgba(101, 168, 141, 0.18);
+    border-color: rgba(101, 168, 141, 0.5);
+    color: #8fd8bb;
+}
+
+.bewertung_einfach {
+    background: rgba(101, 168, 141, 0.3);
+    border-color: rgba(101, 168, 141, 0.75);
+    color: #b6e8d3;
+}
+
+.tastaturTipp {
+    margin: 0;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+@media (hover: none) {
+    .tastaturTipp {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------- Zustände */
+
+.skelett {
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 4 / 5;
+    border-radius: 22px;
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+    margin: 0 auto;
+}
+
+.ende {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.endeZeichen {
+    font-size: 3.4rem;
+    line-height: 1;
+}
+
+.endeTitel {
+    margin: 0;
+    font-family: "Caveat", cursive;
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+    color: var(--text-primary);
+}
+
+.endeText {
+    margin: 0;
+    max-width: 380px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    font-size: 0.95rem;
+}
+
+.endeStats {
+    display: flex;
+    gap: clamp(1.5rem, 8vw, 3rem);
+    margin: 0.8rem 0;
+}
+
+.endeStat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.endeZahl {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.endeLabel {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.knopf {
+    min-height: 52px;
+    width: 100%;
+    max-width: 300px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, #943344 100%);
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(184, 66, 84, 0.3);
+    transition: transform 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.knopf:hover {
+    transform: translateY(-1px);
+}
+
+.knopfLeise {
+    min-height: 46px;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid #33444c;
+    border-radius: 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+}
+
+.knopfLeise:hover {
+    background: var(--bg-elevated-2);
+}
+
+/* Kurze Displays (iPhone SE und aehnlich): Karte verkleinern, damit
+   Kopfzeile, Karte und Bewertungs-Buttons ohne Scrollen passen. */
+@media (max-height: 700px) {
+    .karte {
+        max-height: 54vh;
+    }
+}
+
+/* Sehr niedrige Bildschirme: Karte kleiner, damit die Buttons sichtbar bleiben */
+@media (max-height: 640px) {
+    .karte {
+        max-height: 46vh;
+    }
+    .aktionen {
+        min-height: 84px;
+    }
+    .bewertung {
+        min-height: 66px;
+    }
+}
+
+/* Sehr schmale Geraete: vier Bewertungen werden zweizeilig */
+@media (max-width: 360px) {
+    .bewertungen {
+        gap: 0.3rem;
+    }
+    .bewertungLabel {
+        font-size: 0.8rem;
+    }
+    .bewertungMeta {
+        font-size: 0.55rem;
+    }
+}

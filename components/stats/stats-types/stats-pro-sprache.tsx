@@ -18,16 +18,21 @@ export default function StatsProSprache() {
   const [datenFetch, setDatenFetch] = useState<SprachStat[] | null>(null);
 
   useEffect(() => {
-    setLoading(true);
+    let abgebrochen = false;
     fetch("/api/sprachen-stats")
       .then((res) => res.json())
       .then((dat: SprachStat[]) => {
+        if (abgebrochen) return;
         setDatenFetch(dat);
         setLoading(false);
       })
       .catch(() => {
+        if (abgebrochen) return;
         setLoading(false);
       });
+    return () => {
+      abgebrochen = true;
+    };
   }, []);
 
   if (loading || !datenFetch) {

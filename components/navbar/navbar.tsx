@@ -9,22 +9,16 @@ const navbarElemente = {
         icon: "fa-solid fa-house",
         link: "/"
     },
-    karteikarten: {
-        name: "Karteikarten",
-        icon: "fa-solid fa-book",
-        link: "/karteikarten"
+    hinzufuegen: {
+        name: "Hinzufügen",
+        icon: "fa-solid fa-plus",
+        link: "/karteikarten-hinzufuegen"
     },
 
     wortschatz: {
         name: "Wortschatz",
-        icon: "fa-solid fa-book-open",
+        icon: "fa-solid fa-layer-group",
         link: "/wortschatz"
-    },
-
-    statistiken: {
-        name: "Statistiken",
-        icon: "fa-solid fa-chart-bar",
-        link: "/statistiken"
     },
 
     einstellung: {

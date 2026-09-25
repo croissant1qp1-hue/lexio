@@ -20,8 +20,24 @@ create table if not exists public.karten (
   frage      text not null,
   antwort    text not null,
   gelernt    boolean not null default false,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+
+  -- Lernstand fuer die verteilte Wiederholung
+  stufe        integer     not null default 0,   -- 0 = neu, steigt mit jeder richtigen Antwort
+  faellig_am   date        not null default current_date,
+  letzte_wiederholung timestamptz,
+  treffer      integer     not null default 0,
+  fehler       integer     not null default 0
 );
+
+alter table public.karten add column if not exists stufe        integer not null default 0;
+alter table public.karten add column if not exists faellig_am   date not null default current_date;
+alter table public.karten add column if not exists letzte_wiederholung timestamptz;
+alter table public.karten add column if not exists treffer      integer not null default 0;
+alter table public.karten add column if not exists fehler       integer not null default 0;
+
+create index if not exists karten_set_id_idx     on public.karten (set_id);
+create index if not exists karten_faellig_am_idx on public.karten (faellig_am);
 
 create table if not exists public.xp_events (
   id         uuid primary key default gen_random_uuid(),
@@ -73,6 +89,30 @@ create policy "eigene xp schreiben"
   with check (auth.uid() = user_id);
 
 -- -----------------------------------------------------------------------------
+-- ACHTUNG: Schreib-Policies fuer den Entwicklungsbetrieb
+-- -----------------------------------------------------------------------------
+-- Solange Supabase Auth nicht verdrahtet ist, gibt es keine Session und
+-- auth.uid() ist null. Damit das Formular ueberhaupt speichern kann, erlauben
+-- die folgenden Policies dem anon-Rolle Schreibzugriff.
+--
+-- Das heisst: jeder mit dem anon Key kann Karten anlegen. Das ist fuer eine
+-- oeffentlich lesbare Lern-App vertretbar, aber KEIN Produktionszustand.
+-- Sobald Auth laeuft, werden diese beiden Policies durch die auth.uid()-Variante
+-- aus der naechsten Migration ersetzt. Siehe supabase/README.md.
+-- -----------------------------------------------------------------------------
+
+drop policy if exists "karten anlegen (nur entwicklung)" on public.karten;
+create policy "karten anlegen (nur entwicklung)"
+  on public.karten for insert
+  with check (true);
+
+drop policy if exists "karten aktualisieren (nur entwicklung)" on public.karten;
+create policy "karten aktualisieren (nur entwicklung)"
+  on public.karten for update
+  using (true)
+  with check (true);
+
+-- -----------------------------------------------------------------------------
 -- Startdaten
 -- -----------------------------------------------------------------------------
 insert into public.karteikarten_sets (slug, name, sprache, anzahl_karten)
@@ -111,6 +151,7 @@ select
   s.anzahl_karten,
   count(k.id)                                              as karten_gesamt,
   count(k.id) filter (where k.gelernt)                    as karten_gelernt,
+  count(k.id) filter (where k.faellig_am <= current_date) as karten_faellig,
   case
     when count(k.id) = 0 then 0
     else round(count(k.id) filter (where k.gelernt) * 100.0 / count(k.id))::int
