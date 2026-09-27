@@ -1,0 +1,688 @@
+/*
+ * Aufbau der Karte
+ * ----------------
+ *
+ * .buehne     perspective: 1200px
+ *   .karte    <button>, nur Ausloeser – keine 3D-Eigenschaften
+ *     .karteInnen    transform-style: preserve-3d, rotateY
+ *       .flaeche hinten   backface-visibility: hidden, rotateY(180deg)
+ *       .flaeche vorne    backface-visibility: hidden
+ *       .seite  vorne
+ *       .seite  hinten    backface-visibility: hidden, rotateY(180deg)
+ *
+ * Warum das so und nicht einfacher:
+ *
+ * 1. `perspective` liegt auf .buehne und nicht auf .karte. Ein <button>
+ *    erzeugt in mehreren Browsern eine eigene Formatierungs-Ueberschrift,
+ *    in der die 3D-Drehung der Kinder flachgedrueckt wird. Auf einem div
+ *    ist das Verhalten definiert. Der Button bleibt trotzdem ein Button –
+ *    er muss nur nichts mehr drehen.
+ *
+ * 2. Die farbige Flaeche ist ein Kind von .karteInnen und dreht sich mit.
+ *    Vorher lag sie als ::before auf .karte, also ausserhalb der
+ *    preserve-3d-Ebene. Sie blieb beim Umdrehen stehen, waehrend der Inhalt
+ *    sich drehte. Das Ergebnis war eine korrekt gedrehte Karte auf einem
+ *    Deckel, der sich nicht mitbewegt hat – je nach Browser ein Rahmen
+ *    sichtbar, der nie wegging, oder eine farbige Flaeche, die im Moment
+ *    des Drehens als Schatten mitrotierte.
+ *
+ * 3. Beide Seiten sind echte Ebenen mit backface-visibility: hidden. Damit
+ *    ist die Rueckseite unsichtbar, solange die Vorderseite vorne ist –
+ *    unabhaengig davon, wie der Browser mit Preserve-3D umgeht. Die
+ *    Vordrehung der Rueckseite ist nur noch die Haelfte davon: sie macht den
+ *    Text lesbar.
+ *
+ * 4. Sprachzeichen und Stufenpunkte liegen INNERHALB von .karteInnen auf
+ *    .seite, nicht daneben. Vorher waren sie Geschwister der beiden Seiten
+ *    und drehten sich gar nicht mit: beim Umdrehen stand das Zeichen der
+ *    falschen Sprache oben.
+ */
+
+.seite {
+    /* Ohne border-box addiert width:100% das Padding obendrauf und die
+       Seite ragt aus dem Viewport (siehe .main-body: overflow-x: hidden). */
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 640px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2.5vw, 1.25rem);
+    min-height: 100%;
+}
+
+/* ---------------------------------------------------------------- Kopfzeile */
+
+.kopf {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.zurueck {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch);
+    height: var(--touch);
+    flex: 0 0 var(--touch);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.zurueck:hover {
+    background: var(--bg-elevated-2);
+}
+
+.fortschritt {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+}
+
+.fortschrittBalken {
+    flex: 1;
+    height: 7px;
+    min-width: 0;
+    background: var(--bg-elevated-2);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.fortschrittFuellung {
+    height: 100%;
+    background: linear-gradient(90deg, var(--sage) 0%, var(--gold) 100%);
+    border-radius: 999px;
+    transition: width 320ms ease;
+}
+
+.fortschrittText {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.punkte {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.25;
+}
+
+.xp {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.streak {
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+/* ------------------------------------------------------------- XP-Popup */
+
+.xpPop {
+    position: fixed;
+    top: 22%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-mono);
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 4px 22px rgba(231, 177, 74, 0.55);
+    pointer-events: none;
+    z-index: 60;
+    animation: pop 900ms ease forwards;
+}
+
+@keyframes pop {
+    0% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.6);
+    }
+    25% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1.12);
+    }
+    70% {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-28px) scale(0.95);
+    }
+}
+
+/* ------------------------------------------------------------------- Karte */
+
+.buehne {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    padding: 0.5rem 0;
+
+    /* Die Perspektive gehoert auf die Buehne, nicht auf den Button. Siehe
+       Kopfkommentar, Punkt 1. */
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
+}
+
+.karte {
+    position: relative;
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 4 / 5;
+    /* Begrenzt die Karte so, dass Kopfzeile und Bewertungs-Buttons auf
+       kurzen Displays sichtbar bleiben, ohne gescrollt werden zu muessen. */
+    max-height: 58vh;
+    border: none;
+    padding: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    /* Kein transition auf transform: die Drehung gehoert .karteInnen. Eine
+       zweite Animation auf dem Button wuerde die Perspektive waehrend des
+       Drehens verschieben. */
+}
+
+.karteInnen {
+    position: absolute;
+    inset: 0;
+    transform-style: preserve-3d;
+    transition: transform 460ms cubic-bezier(0.4, 0.14, 0.3, 1);
+}
+
+.karteAufgedeckt .karteInnen {
+    transform: rotateY(180deg);
+}
+
+/*
+ * Farbige Flaeche. Sie liegt zwischen den beiden Inhaltsseiten und dreht
+ * sich mit. Ohne z-index liegt sie hinter dem Text – Reihenfolge im DOM
+ * entscheidet, und der Text steht danach.
+ */
+.flaeche {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    background: var(--kartenFarbe, var(--bg-elevated-2));
+    box-shadow: var(--shadow-card);
+}
+
+.flaecheHinten {
+    transform: rotateY(180deg);
+}
+
+/* Beide Inhaltsseiten teilen sich .kartenSeite: gleiche Flaeche, gleiche
+   Typografie, gleicher Rand. Nur die Ausrichtung unterscheidet sich.
+
+   Eigene Klasse, und nicht .seite wie vorher: Der Seitencontainer der
+   Lernansicht hiess .seite, und CSS-Module kennen keine Hierarchie. Der
+   zweite Block hat position:absolute, inset:0 und display:flex
+   dazugedeckt – der aeussere Container stand damit fest auf Null Pixeln
+   innerhalb seines Elternteils, und die Kopfzeile, der Fortschrittsbalken
+   und die Bewertungsknoepfe lagen uebereinander am oberen Rand. */
+.kartenSeite {
+    position: absolute;
+    inset: 0;
+    border-radius: 22px;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem;
+    padding: 2.4rem 1.5rem 3.8rem;
+    text-align: center;
+    color: var(--text-primary);
+    overflow: hidden;
+}
+
+/* Die Rueckseite ist um 180 Grad VORGEDREHT. Die Drehung des Containers und
+   diese heben sich auf, der Text steht richtig herum. */
+.kartenSeiteHinten {
+    transform: rotateY(180deg);
+}
+
+.karteLabel {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.karteText {
+    font-family: var(--font-caveat);
+    font-size: clamp(2.1rem, 9vw, 3.4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
+.karteTipp {
+    position: absolute;
+    bottom: 1.1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.74rem;
+    opacity: 0.55;
+    white-space: nowrap;
+}
+
+/* Sprachzeichen. Liegt in .seite, dreht sich also mit – und steht nach dem
+   Umdrehen auf der Rueckseite unten links, wie es hingehört. */
+.karteZeichen {
+    position: absolute;
+    bottom: 0.85rem;
+    left: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.25rem 0.6rem 0.25rem 0.25rem;
+    border-radius: 999px;
+    background: rgba(13, 23, 29, 0.82);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.karteZeichenBild {
+    width: 26px;
+    height: 26px;
+    flex: 0 0 26px;
+}
+
+.karteZeichenText {
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--paper-text-soft);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    max-width: 96px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Stufenpunkte nur auf der Vorderseite: auf der Rueckseite waeren sie
+   doppelt (die hintere Ebene ist dann die vordere). */
+.stufePunkte {
+    position: absolute;
+    top: 0.9rem;
+    right: 0.9rem;
+    display: flex;
+    gap: 3px;
+    pointer-events: none;
+}
+
+.stufePunkt {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(13, 23, 29, 0.75);
+}
+
+/* --------------------------------------------------------------- Aktionen */
+
+.aktionen {
+    display: flex;
+    justify-content: center;
+    min-height: 96px;
+}
+
+.aufdecken {
+    width: 100%;
+    max-width: 460px;
+    min-height: 56px;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, var(--gold) 0%, #c99433 100%);
+    /* Auf goldener Flaeche ist weisser Text Kontrast unter 4,5:1. Dunkel
+       ist hier die richtige Wahl, und in der Einstellung "Kontrast" gleich
+       mit. */
+    color: #241A05;
+    font-size: 1.05rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 12px 26px rgba(231, 177, 74, 0.3);
+    transition: transform 160ms ease, box-shadow 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.aufdecken:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 16px 32px rgba(231, 177, 74, 0.4);
+}
+
+.aufdecken:active {
+    transform: scale(0.98);
+}
+
+.bewertungen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.45rem;
+    width: 100%;
+    max-width: 520px;
+}
+
+.bewertung {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.15rem;
+    min-height: 76px;
+    padding: 0.5rem 0.3rem;
+    border-radius: 14px;
+    border: 1px solid transparent;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 140ms ease, filter 140ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bewertung:hover:not(:disabled) {
+    transform: translateY(-2px);
+    filter: brightness(1.1);
+}
+
+.bewertung:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.bewertung:disabled {
+    opacity: 0.55;
+    cursor: progress;
+}
+
+.bewertungLabel {
+    font-size: 0.92rem;
+    font-weight: 700;
+}
+
+.bewertungMeta {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    opacity: 0.78;
+    text-align: center;
+    line-height: 1.25;
+}
+
+/*
+ * Bewertungen als Text auf eingefaerbter Flaeche. Die Farben sind so
+ * gewaehlt, dass der Text mindestens 4,5:1 erreicht: eine zusaetzliche
+ * Klasse je Bewertung statt eines HSL-Werts im Code, damit die Werte
+ * nachvollziehbar bleiben und sich in der Hellmodus-Variante anpassen
+ * koennen, ohne den JavaScript zu aendern.
+ */
+.bewertung_nochmal {
+    background: rgba(184, 66, 84, 0.24);
+    border-color: var(--terracotta);
+    color: #ffd9de;
+}
+
+.bewertung_schwer {
+    background: rgba(231, 177, 74, 0.2);
+    border-color: var(--gold);
+    color: #ffeec4;
+}
+
+.bewertung_gut {
+    background: rgba(101, 168, 141, 0.26);
+    border-color: var(--sage);
+    color: #d3f0e4;
+}
+
+.bewertung_einfach {
+    background: rgba(101, 168, 141, 0.42);
+    border-color: var(--sage);
+    color: #f0fbf6;
+}
+
+[data-design="hell"] .bewertung_nochmal {
+    color: #6b0f1d;
+}
+
+[data-design="hell"] .bewertung_schwer {
+    color: #4a3208;
+}
+
+[data-design="hell"] .bewertung_gut {
+    color: #10392c;
+}
+
+[data-design="hell"] .bewertung_einfach {
+    color: #0d2f25;
+}
+
+.tastaturTipp {
+    margin: 0;
+    text-align: center;
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+/*
+ * Das Speichern ist fehlgeschlagen. Die Karte liegt noch da, die Bewertung
+ * kann erneut gesendet werden – die Meldung sagt das auch, sonst liest man
+ * sie als Endzustand. `role="alert"` faellt auf, die Meldung steht bewusst
+ * ueber dem Tastaturhinweis, weil sie wichtiger ist.
+ */
+.speicherFehler {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--terracotta);
+    background: rgba(184, 66, 84, 0.1);
+    border: 1px solid rgba(184, 66, 84, 0.35);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+}
+
+@media (hover: none) {
+    .tastaturTipp {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------- Zustände */
+
+.skelett {
+    width: 100%;
+    max-width: 460px;
+    aspect-ratio: 4 / 5;
+    border-radius: 22px;
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+    margin: 0 auto;
+}
+
+.ende {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+    text-align: center;
+    padding: 2rem 0;
+}
+
+.endeZeichen {
+    font-size: 3.4rem;
+    line-height: 1;
+}
+
+.endeTitel {
+    margin: 0;
+    font-family: var(--font-caveat);
+    font-size: clamp(1.8rem, 7vw, 2.6rem);
+    color: var(--text-primary);
+}
+
+.endeText {
+    margin: 0;
+    max-width: 380px;
+    color: var(--text-secondary);
+    line-height: 1.55;
+    font-size: 0.95rem;
+}
+
+.endeStats {
+    display: flex;
+    gap: clamp(1.5rem, 8vw, 3rem);
+    margin: 0.8rem 0;
+}
+
+.endeStat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.endeZahl {
+    font-family: var(--font-mono);
+    font-size: clamp(1.5rem, 6vw, 2rem);
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.endeLabel {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+.knopf {
+    min-height: 52px;
+    width: 100%;
+    max-width: 300px;
+    border: none;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--terracotta) 0%, #943344 100%);
+    color: var(--off-white);
+    font-size: 1rem;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(184, 66, 84, 0.3);
+    transition: transform 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.knopf:hover {
+    transform: translateY(-1px);
+}
+
+.knopfLeise {
+    min-height: 46px;
+    width: 100%;
+    max-width: 300px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background-color 160ms ease;
+}
+
+.knopfLeise:hover {
+    background: var(--bg-elevated-2);
+}
+
+/* Kurze Displays (iPhone SE und aehnlich): Karte verkleinern, damit
+   Kopfzeile, Karte und Bewertungs-Buttons ohne Scrollen passen. */
+@media (max-height: 700px) {
+    .karte {
+        max-height: 54vh;
+    }
+}
+
+/* Sehr niedrige Bildschirme: Karte kleiner, damit die Buttons sichtbar bleiben */
+@media (max-height: 640px) {
+    .karte {
+        max-height: 46vh;
+    }
+    .aktionen {
+        min-height: 84px;
+    }
+    .bewertung {
+        min-height: 66px;
+    }
+}
+
+/* Sehr schmale Geraete: vier Bewertungen bekommen mehr Abstand, die
+   Beschriftung wird kleiner. Zwei Zeilen bei 360px sind vermeidbar. */
+@media (max-width: 360px) {
+    .bewertungen {
+        gap: 0.3rem;
+    }
+    .bewertungLabel {
+        font-size: 0.8rem;
+    }
+    .bewertungMeta {
+        font-size: 0.55rem;
+    }
+}
+
+/* Querformat auf dem Telefon: die Karte ist links, die Bewertungen rechts.
+   Nebeneinander statt uebereinander, sonst muesste man auf einem Display,
+   das breiter als hoch ist, scrollen, um zu bewerten. */
+@media (orientation: landscape) and (max-height: 560px) {
+    .seite {
+        max-width: none;
+    }
+    .buehne {
+        align-items: stretch;
+    }
+    .karte {
+        max-height: 100%;
+        max-width: 340px;
+    }
+}
+
+/*
+ * Hinweis statt Fehler. Die Farbe ist bewusst nicht die des Speicherfehlers:
+ * hier passiert nichts, was man reparieren muss – es steht nur, dass ein
+ * Teil des Sets nicht mitspielt.
+ */
+.hinweis {
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--ink-2);
+    background: rgba(184, 66, 84, 0.06);
+    border: 1px dashed rgba(184, 66, 84, 0.3);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+}

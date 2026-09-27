@@ -1,0 +1,294 @@
+/* Karteikarten – Mockup-Screen #6: Tabelle aller Sets mit Suche. */
+
+.seite {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 1.1rem);
+}
+
+.kopf {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.neu {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.1rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--gold);
+    color: #17110a;
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 150ms ease, background-color 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.neu:hover {
+    transform: translateY(-2px);
+    background: #ffdb9f;
+}
+
+.neu:active {
+    transform: scale(0.98);
+}
+
+/* ----------------------------------------------------------------- Suche */
+
+.suchfeld {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.85rem;
+    min-height: 46px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+}
+
+.suchfeld input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.suchfeld input::placeholder {
+    color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------- Tabelle */
+
+.tabellenRahmen {
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.tabelle {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+}
+
+.tabelle thead th {
+    padding: 0.7rem 0.9rem;
+    background: var(--bg-elevated-2);
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.tabelle th.rechts,
+.tabelle td.rechts {
+    text-align: right;
+}
+
+.zeile {
+    border-top: 1px solid var(--line);
+    cursor: pointer;
+    transition: background-color 140ms ease;
+}
+
+.zeile:hover,
+.zeile:focus-visible {
+    background: var(--bg-elevated-2);
+    outline: none;
+}
+
+.zeile:first-child {
+    border-top: none;
+}
+
+.sprachZelle {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.8rem 0.9rem;
+    font-weight: 400;
+    text-align: left;
+}
+
+.punkt {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 50%;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.3;
+}
+
+/*
+ * Der Name ist jetzt ein <Link>, kein <span>. Damit das aussehen kann wie
+ * vorher – kein Unterstrich, keine Linkfarbe – wird die Unterstreichung hier
+ * abgenommen statt im Markup unterdrueckt.
+ */
+.name {
+    font-weight: 600;
+    color: var(--text-primary);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.name:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.meta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.zahl {
+    padding: 0.8rem 0.9rem;
+    font-family: var(--mono);
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.xp {
+    color: var(--gold);
+    font-weight: 700;
+}
+
+.datum {
+    padding: 0.8rem 0.9rem;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+/* -------------------------------------------------------------- Zustände */
+
+.leer,
+.fehler {
+    margin: 0;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.fehler {
+    color: var(--terracotta);
+}
+
+.skelett {
+    height: 220px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+/* ------------------------------------------------------------- Mobil */
+
+@media (max-width: 700px) {
+    .tabellenRahmen {
+        border: none;
+        background: transparent;
+        overflow: visible;
+    }
+
+    .tabelle thead {
+        /* Auf dem Telefon klaeren die Ueberschriften die Spalten nicht mehr.
+           Jede Zelle traegt stattdessen ihr eigenes Label unten. */
+        display: none;
+    }
+
+    .tabelle,
+    .tabelle tbody,
+    .tabelle tr,
+    .tabelle th,
+    .tabelle td {
+        display: block;
+        width: 100%;
+    }
+
+    .zeile {
+        background: var(--bg-elevated);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        margin-bottom: 0.5rem;
+        padding: 0.3rem 0.2rem;
+    }
+
+    .sprachZelle {
+        padding: 0.85rem 0.9rem 0.5rem;
+    }
+
+    .zahl,
+    .datum {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding: 0.35rem 0.9rem;
+    }
+
+    /* Das Label steht rechts, der Wert links – wie eine Zeile Preisschild. */
+    .zahl::before,
+    .datum::before {
+        font-family: var(--mono);
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
+
+    .zahl:nth-of-type(1)::before { content: "Gelernt"; }
+    .zahl:nth-of-type(2)::before { content: "Total"; }
+    .datum::before { content: "Zuletzt"; }
+}

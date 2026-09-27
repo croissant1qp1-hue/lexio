@@ -1,0 +1,302 @@
+/* Statistiken – Mockup-Screen #7. */
+
+.seite {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+.kopf {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------ Kennzahlen */
+
+.kacheln {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+}
+
+.kachel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1.1rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.kachel:nth-child(1) .kachelZahl { color: var(--gold); }
+.kachel:nth-child(2) .kachelZahl { color: var(--sage); }
+.kachel:nth-child(3) .kachelZahl { color: var(--text-primary); }
+.kachel:nth-child(4) .kachelZahl { color: var(--gold); }
+
+.kachelZahl {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 5vw, 2rem);
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.kachelLabel {
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* ---------------------------------------------------------------- Blöcke */
+
+.block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.blockTitel {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- Heute */
+
+.heute {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+    padding: 1rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.heuteKopf {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+}
+
+.heuteZahl {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--gold);
+}
+
+.heuteZiel {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.balken {
+    height: 10px;
+    background: var(--bg-elevated-2);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.balkenFuellung {
+    height: 100%;
+    background: var(--gold);
+    border-radius: 999px;
+    transition: width 600ms ease;
+}
+
+.heuteText {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+/* ----------------------------------------------------------- Wochenbalken */
+
+.woche {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.35rem;
+    padding: 1rem 0.75rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.tag {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+}
+
+/* Feste Hoehe, damit die Balken unabhaengig vom Inhalt gleich hoch sind. */
+.tagBalkenHuelle {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    max-width: 34px;
+    height: 96px;
+    background: var(--bg-elevated-2);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.tagBalken {
+    width: 100%;
+    background: var(--gold);
+    border-radius: 6px;
+    transition: height 600ms ease;
+}
+
+.tagLabel {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+.tagXp {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    color: var(--text-secondary);
+    min-height: 1em;
+}
+
+.fussnote {
+    margin: 0;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------- Pro Sprache */
+
+.sprachen {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.sprache {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.8rem 0.9rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.spracheKopf {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0;
+    border: none;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    cursor: pointer;
+    text-align: left;
+}
+
+.punkt {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 50%;
+}
+
+.spracheName {
+    flex: 1;
+    min-width: 0;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spracheXp {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--gold);
+    white-space: nowrap;
+}
+
+.spracheBalken {
+    height: 8px;
+    background: var(--bg-elevated-2);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.spracheFuellung {
+    height: 100%;
+    background: var(--sage);
+    border-radius: 999px;
+    transition: width 600ms ease;
+}
+
+.spracheMeta {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------- Zustände */
+
+.leer {
+    margin: 0;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.skelett {
+    height: 320px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+@media (max-width: 400px) {
+    .tagBalkenHuelle {
+        height: 76px;
+    }
+    .woche {
+        padding: 0.8rem 0.4rem 0.6rem;
+    }
+}

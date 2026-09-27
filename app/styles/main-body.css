@@ -1,5 +1,15 @@
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&display=swap');
+/*
+ * Keine @import-Zeilen fuer Google Fonts.
+ *
+ * Sie standen hier seit der ersten Fassung. Sie sind doppelt schlecht: Der
+ * Browser laedt die Dateien bei jedem Aufruf von Google – bei einer
+ * Lern-App, die sonst komplett lokal laeuft, ein Datenschutzproblem und ein
+ * zusaetzlicher Request – und sie widersprechen dem, was app/layout.tsx
+ * macht. next/font liefert Caveat und Co. bereits lokal aus und legt sie
+ * ueber CSS-Variablen bereit. Deshalb steht in diesem Modul
+ * `var(--font-caveat)`, und Oswald kommt gar nicht mehr vor, weil es nirgends
+ * geladen wurde.
+ */
 
 .main-body {
     background-color: var(--background-dunkel-blau);
@@ -112,23 +122,25 @@
 
 .set-name {
     margin: 0;
-    font-family: "Caveat", cursive;
+    font-family: var(--font-caveat);
     font-optical-sizing: auto;
     font-weight: 700;
     font-size: clamp(1.4rem, 4.5vw, 2.4rem);
     line-height: 1.05;
-    color: var(--ink);
+    color: var(--text-primary);
     overflow-wrap: break-word;
     hyphens: auto;
 }
 
 .set-anzahl-woerter {
     margin: 0;
-    font-family: "Oswald", sans-serif;
+    /* Oswald wird nirgends geladen. Es stand hier als Rest aus der
+       Zeit, als die Schriften ueber ein @import aus dem Netz kamen. */
+    font-family: var(--font-sans);
     font-optical-sizing: auto;
     font-weight: 400;
     font-size: 0.85rem;
-    color: var(--ink);
+    color: var(--text-primary);
     opacity: 0.72;
 }
 

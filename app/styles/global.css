@@ -1,48 +1,163 @@
+/*
+ * Design-Tokens.
+ *
+ * Ein einziges :root-Block. Alles, was eine Farbe oder eine Groesse
+ * bedeutet, wird hier benannt und nirgends sonst fest verdrahtet.
+ *
+ * Warum das wichtig war: --font-sans, --font-serif und --font-caveat waren
+ * als --sans, --serif und --font-caveat deklariert. Die Kurzformen wurden von
+ * sieben Modulen benutzt, aber nirgends definiert – die Anzeige fiel still
+ * auf Times New Roman zurueck. Ein Token, den niemand kennt, sieht in einer
+ * Oberflaeche nicht kaputt aus. Er ist nur nicht mehr die, die man
+ * entworfen hat.
+ */
+
 :root {
+    /* ------------------------------------------------------------------
+       Schrift
+       ------------------------------------------------------------------ */
 
-    --ink: #0D171D;
-    --paper: #F0E8D5;
-    --paper-dim: #E4DAC2;
-    --paper-text: #20252A;
-    --paper-text-soft: #F0E8D5;
-    --paper-text-soft-light-hover: #E8DEC8;
-    --paper-text-soft-light: #F7F1E4;
-    --paper-text-soft-border: #D7CBB2;
-    --off-white: #F7F1E4;
-    --muted: #718083;
+    /*
+     * next/font in app/layout.tsx. Die drei Familien werden dort als
+     * CSS-Variablen abgelegt, weil next/font die Dateien selbst waehlt,
+     * ueberaltet sie selbst ausliefert und – entscheidend – in subsets
+     * aufgeteilt. Deshalb steht hier kein @font-face und kein Google-Link:
+     * beides wuerde die Dateien ein zweites Mal laden.
+     */
+    --font-sans: var(--next-font-sans), "Inter", "Segoe UI", system-ui, sans-serif;
+    --font-serif: var(--next-font-serif), Georgia, "Times New Roman", serif;
+    --font-mono: var(--next-font-mono), "IBM Plex Mono", ui-monospace, monospace;
+    --font-caveat: var(--next-font-caveat), "Caveat", "Segoe Script", cursive;
 
-    --gold: #E7B14A;
-    --gold-dark: #9A6D20;
-    --terracotta: #B84254;
-    --sage: #65A88D;
-    --sage-dark: #39725F;
+    /* Kurzformen. Nur noch von den Modulen benutzt, die den Stil schon
+       nicht importieren. */
+    --sans: var(--font-sans);
+    --serif: var(--font-serif);
+    --mono: var(--font-mono);
 
-    --title-color: #F3F0E7;
-    --dark-brown-text: #20252A;
-    --card-dark: #17232B;
-    --text-primary: #F3F0E7;
-    --text-secondary: #A7B0AE;
+    /* ------------------------------------------------------------------
+       Papier und Tinte – die Sidebar
+       ------------------------------------------------------------------ */
+
+    --paper: #f0e8d5;
+    --paper-dim: #e4dac2;
+    --paper-text: #20252a;
+    --paper-text-soft: #f0e8d5;
+    --paper-text-soft-light: #f7f1e4;
+    --paper-text-soft-light-hover: #e8dec8;
+    --paper-text-soft-border: #d7cbb2;
+
+    /* ------------------------------------------------------------------
+       Akzente
+       ------------------------------------------------------------------ */
+
+    --gold: #e7b14a;
+    --gold-dark: #9a6d20;
+    --terracotta: #b84254;
+    --sage: #65a88d;
+    --sage-dark: #39725f;
+
+    /* ------------------------------------------------------------------
+       Dunkles Design (Vorgabe)
+       ------------------------------------------------------------------ */
+
+    --background: #0d171d;
+    --bg-elevated: #17232b;
+    --bg-elevated-2: #202e37;
+    /* Frueher --input-dark: "dark" stand im Namen, nicht im Wert. Der Wert
+       war in hellem Design ebenfalls ein dunkles Feld, nur eben helleres
+       Dunkel. */
+    --input-bg: #202e37;
+    --card-bg: #17232b;
+    --line: #33444c;
+    --ink: #0d171d;
+
+    --title-color: #f3f0e7;
+    --text-primary: #f3f0e7;
+    --text-light: #f3f0e7;
+    --text-secondary: #a7b0ae;
     --text-muted: #738084;
+    --placeholder-color: #7c898c;
 
-    --background: #0D171D;
-    --background-dunkel-blau: #0D171D;
-    --bg-elevated: #17232B;
-    --bg-elevated-2: #202E37;
-    --input-dark: #202E37;
-    --text-light: #F3F0E7;
-    --placeholder-color: #7C898C;
-    --accent-purple: #B84254;
-    --skeleton-base: #17232B;
-    --skeleton-highlight: #2A3B44;
+    --off-white: #f7f1e4;
+    --muted: #718083;
+    --dark-brown-text: #20252a;
 
-    --serif: 'Fraunces', serif;
-    --sans: 'Inter', sans-serif;
-    --mono: 'IBM Plex Mono', monospace;
-    --radius: 16px;
+    --skeleton-base: #17232b;
+    --skeleton-highlight: #2a3b44;
+
     --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
     --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.28);
     --shadow-dark: rgba(0, 0, 0, 0.34);
+
+    /* ------------------------------------------------------------------
+       Masse
+       ------------------------------------------------------------------ */
+
+    --radius: 16px;
+
+    /*
+     * 44px ist die Mindestgroesse, die Apple und WCAG fuer antippenbare
+     * Ziele empfehlen. Stand vorher in app/(app)/einstellungen/einstellung.css
+     * – also in einem Stylesheet, das nur auf der Einstellungsseite
+     * geladen wird. Jede andere Seite griff deshalb auf ein undefiniertes
+     * var(--touch) zu und die Eigenschaft fiel auf ihren Ausgangswert
+     * zurueck. Eine Variable, die nur auf einer Seite existiert, ist kein
+     * Designsystem, sondern ein Zufall.
+     */
+    --touch: 44px;
 }
+
+/* ==========================================================================
+   Helles Design
+   ==========================================================================
+
+   Umsetzung am <html>-Element statt mit .light an einem Container. Grund:
+   :root und .light sind beide Spezifitaet 0,1 – wer gewinnt, entscheidet die
+   Reihenfolge im Quelltext, nicht die Absicht. Die alte Loesung
+   (html.dark { filter: invert(1) }) hat ausserdem jeden Screenshot, jedes
+   PNG und jede farbige Illustration invertiert.
+
+   Die Werte hier sind nicht einfach die Dark-Werte invertiert, sondern eine
+   eigene Palette auf Basis des Papiers der Sidebar.
+*/
+[data-design="hell"] {
+    --background: #efe7d8;
+    --bg-elevated: #fbf7ee;
+    --bg-elevated-2: #f4eee1;
+    --input-bg: #fdfaf3;
+    --card-bg: #fbf7ee;
+    --line: #d7cbb2;
+    --ink: #fdfaf3;
+
+    --title-color: #20252a;
+    --text-primary: #20252a;
+    --text-light: #20252a;
+    --text-secondary: #5f5a4e;
+    --text-muted: #8a8070;
+    --placeholder-color: #a49a88;
+
+    --off-white: #fdfaf3;
+    --muted: #8a8070;
+    --dark-brown-text: #20252a;
+
+    --skeleton-base: #e6ddca;
+    --skeleton-highlight: #f4eee1;
+
+    --shadow-soft: 0 8px 24px rgba(80, 66, 40, 0.12);
+    --shadow-card: 0 12px 32px rgba(80, 66, 40, 0.16);
+    --shadow-dark: rgba(80, 66, 40, 0.18);
+
+    /* Der Kontrast muss im hellen Design besser sein, nicht schlechter:
+       Terrakotta auf Papier ist bei gleicher Farbe zu blass. */
+    --terracotta: #a53448;
+    --gold: #b57f1c;
+}
+
+/* ==========================================================================
+   Grundlagen
+   ========================================================================== */
+
 html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
@@ -52,13 +167,16 @@ body {
     margin: 0;
     padding: 0;
     font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
-    font-family: var(--sans);
+    font-family: var(--font-sans);
     min-height: 100dvh;
     /* min-width:100vw erzeugt horizontalen Scrollbar, sobald eine vertikale
        Scrollleiste den Platz frisst. 100% ist die korrekte Angabe. */
     width: 100%;
     background-color: var(--background);
+    color: var(--text-primary);
     overscroll-behavior-y: none;
+    /* Wechsel zwischen den Designs soll nicht blitzen. */
+    transition: background-color 200ms ease, color 200ms ease;
 }
 
 .container {
@@ -69,7 +187,7 @@ body {
 
 h4,
 p {
-    margin:0;
+    margin: 0;
 }
 
 /* Sichtbarer Fokus fuer Tastaturnutzung. Nicht entfernen, nur gestalten. */
@@ -79,22 +197,26 @@ p {
     border-radius: 6px;
 }
 
+/* ==========================================================================
+   404
+   ========================================================================== */
+
 .not-found-page {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     place-items: center;
     padding: 2rem;
     background:
         radial-gradient(circle at top, rgba(231, 177, 74, 0.16), transparent 35%),
-        linear-gradient(135deg, #17232B 0%, #0D171D 100%);
+        linear-gradient(135deg, var(--bg-elevated) 0%, var(--background) 100%);
 }
 
 .not-found-card {
     width: min(560px, 100%);
-    background: rgba(23, 35, 43, 0.92);
-    border: 1px solid rgba(167, 176, 174, 0.18);
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
     border-radius: 28px;
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    box-shadow: var(--shadow-card);
     backdrop-filter: blur(10px);
     padding: clamp(2rem, 5vw, 3.5rem);
     text-align: center;
@@ -152,7 +274,7 @@ p {
 
 .not-found-button.primary {
     background: linear-gradient(135deg, var(--terracotta) 0%, #943344 100%);
-    color: var(--text-primary);
+    color: var(--off-white);
     box-shadow: 0 12px 24px rgba(184, 66, 84, 0.32);
 }
 
@@ -162,5 +284,20 @@ p {
     }
     100% {
         background-position: -200% 0;
+    }
+}
+
+/* ==========================================================================
+   Restschaerfe
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
     }
 }

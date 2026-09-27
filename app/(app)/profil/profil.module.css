@@ -1,0 +1,300 @@
+/*
+ * Profilseite.
+ *
+ * Ein einziges Spaltenraster, das ueber `auto-fit` zwischen einer und vier
+ * Spalten umschaltet. Feste Spaltenzahlen wuerden auf 360px vier Kacheln
+ * ergeben, die jede 60px breit sind – und in 60px passt "Tage Serie" nicht.
+ * `minmax` ist hier deshalb keine Optimierung, sondern die Bedingung
+ * dafuer, dass die Zahlen auf dem Telefon lesbar bleiben.
+ *
+ * Alle Farben und Abstaende kommen aus den Tokens in app/styles/global.css.
+ * Fest verdrahtete Werte waeren hier besonders teuer: die Seite waere die
+ * einzige, die im hellen Design nicht mitwechselt.
+ */
+
+.seite {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.9rem, 2vw, 1.4rem);
+}
+
+/* ------------------------------------------------------------------ Kopf */
+
+.kopf {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------- Karten */
+
+.karte {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding: clamp(0.9rem, 3vw, 1.4rem);
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.abschnittTitel {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* ------------------------------------------------------------- Identitaet */
+
+.kopfzeile {
+    display: flex;
+    align-items: center;
+    /* Ohne min-width: 0 schiebt eine lange E-Mail die ganze Karte auf,
+       statt im Textbereich umzubrechen. */
+    min-width: 0;
+    gap: clamp(0.7rem, 2.5vw, 1.1rem);
+}
+
+.bildRahmen {
+    position: relative;
+    width: clamp(56px, 14vw, 72px);
+    height: clamp(56px, 14vw, 72px);
+    flex: 0 0 clamp(56px, 14vw, 72px);
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--sage-dark);
+    box-shadow: 0 0 0 3px var(--bg-elevated), 0 0 0 4px var(--line);
+}
+
+.bild {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.initialen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 700;
+    color: var(--paper-text-inverse, #fff);
+}
+
+.identitaet {
+    display: flex;
+    flex-direction: column;
+    /* Das ist der Teil, der umbrechen muss: lange Namen, noch laengere
+       E-Mail-Adressen. */
+    min-width: 0;
+    gap: 0.1rem;
+}
+
+.name {
+    font-size: clamp(1.05rem, 3.5vw, 1.3rem);
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.email,
+.mitgliedSeit {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    /* Die E-Mail bricht innerhalb ihres Containers um. `break-word` greift
+       auch mitten in einem Wort ("sehr.lange.adresse@beispiel.de"), was
+       `overflow-wrap: anywhere` nicht kaputt macht. */
+    overflow-wrap: break-word;
+}
+
+/* ---------------------------------------------------------------- Balken */
+
+.balken {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--bg-elevated-2);
+    overflow: hidden;
+}
+
+.fuellung {
+    height: 100%;
+    border-radius: inherit;
+    background: var(--terracotta);
+    transition: width 0.4s ease;
+}
+
+.fuss {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.2rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.levelText {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.rest {
+    color: var(--text-muted);
+}
+
+/* -------------------------------------------------------------- Kennzahlen */
+
+.kacheln {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.6rem;
+}
+
+.kachel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 1.1rem 0.75rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    text-align: center;
+}
+
+.kachelIcon {
+    font-size: 1rem;
+    color: var(--terracotta);
+}
+
+.kachelZahl {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+    /* `font-variant-numeric: tabular-nums`: ohne das springt die Kachel
+       beim Wechsel von 9 auf 10, weil Ziffern dann unterschiedlich breit
+       sind. Vier Kacheln nebeneinander zappeln dann im Takt. */
+    font-variant-numeric: tabular-nums;
+}
+
+.kachelLabel {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    /* Umbruch erlaubt: "Tage Serie" und "Sets gelernt" duerfen zwei Zeilen
+       brauchen, statt die Kachel zu sprengen. */
+    overflow-wrap: break-word;
+}
+
+/* ----------------------------------------------------------------- Konto */
+
+.liste {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.zeile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.1rem 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+}
+
+.zeile:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.begriff {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.wert {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: right;
+    overflow-wrap: break-word;
+}
+
+.aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.knopf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    /* min-width: 0 und die Flex-Wrap oben: zwei nebeneinander werden auf
+       dem Telefon zu zweizeiligen Knoepfen, statt ueber den Rand zu ragen. */
+    min-width: 0;
+    padding: 0.6rem 0.95rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--text-primary);
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    transition: background-color 0.15s ease;
+}
+
+.knopf:hover {
+    background: var(--paper-text-soft);
+}
+
+.knopf:active {
+    transform: translateY(1px);
+}
+
+/* ------------------------------------------------------------ Leerzustand */
+
+.leerKarte {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 2.5rem 1.25rem;
+    text-align: center;
+    color: var(--terracotta);
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+}
+
+.leerText {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}

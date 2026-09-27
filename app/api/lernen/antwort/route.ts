@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { mitUserOder401 } from "@/lib/supabase/user";
 import {
   faelligAb,
   istBewertung,
@@ -7,7 +7,22 @@ import {
   xpFuerBewertung,
 } from "@/lib/lernlogik";
 
+/**
+ * Verbucht eine Antwort: Fortschritt der Karte und XP des Tages.
+ *
+ * Beides passiert in einem Aufruf an public.antwort_verbuchen und damit in
+ * einer Transaktion. Vorher waren es zwei HTTP-Aufrufe: der Fortschritt
+ * wurde geschrieben, dann die XP. Klickte man schnell genug, war der
+ * Zaehler leer, obwohl die Karte weitergewandert war – oder umgekehrt.
+ *
+ * Die Stufenlogik bleibt hier in TypeScript, damit die Regeln an einer
+ * Stelle stehen. Die Funktion in der Datenbank schreibt nur, sie rechnet
+ * nicht.
+ */
 export async function POST(request: Request) {
+  const { supabase, antwort: nichtAngemeldet } = await mitUserOder401();
+  if (nichtAngemeldet) return nichtAngemeldet;
+
   let body: unknown;
   try {
     body = await request.json();
@@ -27,11 +42,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ungültige Bewertung" }, { status: 400 });
   }
 
-  const supabase = await createClient();
-
+  /*
+   * Die Karte lesen, um die aktuelle Stufe zu kennen. Das ist kein Schreib-
+   * Zugriff, sondern die Grundlage fuer die Berechnung: ohne den Wert ginge
+   * "gut" von einem falschen Ausgangspunkt aus.
+   *
+   * Die RLS-Policy auf public.karten filtert fremde Karten heraus. Ein
+   * fremdes Set liefert daher `null` – und die Karte ist fuer diese Person
+   * genauso nicht existent wie eine, die es nicht gibt.
+   */
   const { data: karte, error: leseFehler } = await supabase
     .from("karten")
-    .select("id, stufe, set_id, treffer, fehler")
+    .select("id, set_id")
     .eq("id", kartenId)
     .maybeSingle();
 
@@ -42,65 +64,95 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
   }
 
-  const neueStufe = stufeNachAntwort(karte.stufe, bewertung);
-  const richtig = bewertung !== "nochmal";
+  /*
+   * Den eigenen Fortschritt lesen, nicht den der Karte. public.karten.stufe
+   * ist seit 003 Altlast: sie beschreibt niemanden mehr, seit alle denselben
+   * Wert fuer alle sehen wuerden.
+   */
+  const { data: eigener, error: fortschrittFehler } = await supabase
+    .from("karten_fortschritt")
+    .select("stufe")
+    .eq("karte_id", kartenId)
+    .maybeSingle();
+
+  if (fortschrittFehler) {
+    return NextResponse.json({ error: fortschrittFehler.message }, { status: 500 });
+  }
+
+  const aktuelleStufe = eigener?.stufe ?? 0;
+  const neueStufe = stufeNachAntwort(aktuelleStufe, bewertung);
+  const gelernt = bewertung !== "nochmal";
   const xp = xpFuerBewertung(bewertung);
 
-  const { error: schreibFehler } = await supabase
-    .from("karten")
-    .update({
-      stufe: neueStufe,
-      gelernt: richtig,
-      faellig_am: faelligAb(neueStufe),
-      letzte_wiederholung: new Date().toISOString(),
-      treffer: karte.treffer + (richtig ? 1 : 0),
-      fehler: karte.fehler + (richtig ? 0 : 1),
-    })
-    .eq("id", kartenId);
+  const { data: ergebnis, error: rpcFehler } = await supabase.rpc("antwort_verbuchen", {
+    p_karte_id: kartenId,
+    p_set_id: karte.set_id,
+    p_bewertung: bewertung,
+    p_neue_stufe: neueStufe,
+    p_gelernt: gelernt,
+    p_faellig_am: faelligAb(neueStufe),
+    p_xp: xp,
+  });
 
-  if (schreibFehler) {
-    return NextResponse.json({ error: schreibFehler.message }, { status: 500 });
-  }
-
-  //XP brauchen eine angemeldete Person: xp_events verweist per Fremdschluessel
-  //auf auth.users. Ohne Session wird nichts geschrieben, der Client zeigt den
-  //Punktestand trotzdem sofort an. Sobald Auth laeuft, wandert er in die DB.
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  let xpGespeichert = false;
-  if (user) {
-    const heute = new Date().toISOString().slice(0, 10);
-    const { data: bestehend } = await supabase
-      .from("xp_events")
-      .select("id, xp")
-      .eq("user_id", user.id)
-      .eq("datum", heute)
-      .maybeSingle();
-
-    if (bestehend) {
-      const { error } = await supabase
-        .from("xp_events")
-        .update({ xp: bestehend.xp + xp })
-        .eq("id", bestehend.id);
-      xpGespeichert = !error;
-    } else {
-      const { error } = await supabase.from("xp_events").insert({
-        user_id: user.id,
-        set_id: karte.set_id,
-        datum: heute,
-        xp,
-        ziel: 20,
-      });
-      xpGespeichert = !error;
+  if (rpcFehler) {
+    /*
+     * 42501 = insufficient_privilege, P0002 = raise_exception aus der
+     * Funktion. Im zweiten Fall sagt die Meldung der Funktion mehr als
+     * "Internal Server Error" – die wird deshalb durchgereicht.
+     */
+    if (rpcFehler.code === "P0002") {
+      return NextResponse.json({ error: "Karte nicht gefunden" }, { status: 404 });
     }
+    if (rpcFehler.code === "42501") {
+      return NextResponse.json(
+        {
+          error:
+            "Antwort konnte nicht gespeichert werden. Bitte die Migration " +
+            "supabase/003-auth-und-user-daten.sql ausführen.",
+        },
+        { status: 403 },
+      );
+    }
+    if (rpcFehler.code === "42883" || rpcFehler.code === "42P01") {
+      // Funktion oder Tabelle fehlt: 003 nicht gelaufen.
+      return NextResponse.json(
+        { error: "Lernfortschritt ist nicht eingerichtet – Migration 003 fehlt." },
+        { status: 503 },
+      );
+    }
+    return NextResponse.json({ error: rpcFehler.message }, { status: 500 });
   }
+
+  const werte = (ergebnis ?? {}) as { xp?: number; neueStufe?: number; xpGesamt?: number };
+
+  /*
+   * Streak nachziehen.
+   *
+   * Der Streak haengt daran, ob es heute schon XP gab, und diese Zeile in
+   * public.xp_events entsteht erst durch den Aufruf von eben. Die Kopfzeile
+   * der Lernansicht zeigte deshalb nach der ersten Antwort des Tages noch
+   * eine Serie von 0 – bei 30 angezeigten XP. Die Navbar hatte die Zahl
+   * richtig, weil sie ihre Daten beim Rendern holt.
+   *
+   * Deshalb geht hier ein zweiter, winziger Select an die View. Fehlt sie
+   * (Migration 003 nicht gelaufen), ist `streak` null: der Client haelt dann
+   * seinen alten Wert, statt auf 0 zurueckzuspringen. Bewusst kein Fehler –
+   * die Antwort selbst ist ja gespeichert.
+   */
+  const { data: stand } = await supabase
+    .from("mein_fortschritt")
+    .select("streak")
+    .maybeSingle();
 
   return NextResponse.json({
-    xp,
-    neueStufe,
-    naechsteWiederholung: faelligAb(neueStufe),
-    xpGespeichert,
+    xp: werte.xp ?? xp,
+    neueStufe: werte.neueStufe ?? neueStufe,
+    xpGesamt: werte.xpGesamt ?? 0,
+    streak: typeof stand?.streak === "number" ? stand.streak : null,
+    naechsteWiederholung: faelligAb(werte.neueStufe ?? neueStufe),
+    // Erfolgreich gespeichert. Frueher stand hier ein `xpGespeichert`, das
+    // false sein konnte, ohne dass der Client etwas getan haette – der
+    // Punktestand war dann weg und niemand wusste warum.
+    xpGespeichert: true,
   });
 }

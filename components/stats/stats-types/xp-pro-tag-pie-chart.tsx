@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import LoadingStateDiv from "../../loading-state-div/loading-state-div";
+import { holeJson } from "@/lib/api-client";
 import type { TagesXpTyp } from "@/lib/types";
 
 export default function TagesXpPieChart() {
@@ -11,9 +12,8 @@ export default function TagesXpPieChart() {
 
     useEffect(() => {
         let abgebrochen = false;
-        fetch("/api/tages-xp")
-            .then((response) => response.json())
-            .then((daten: TagesXpTyp) => {
+        holeJson<TagesXpTyp | null>("/api/tages-xp", null)
+            .then((daten) => {
                 if (abgebrochen) return;
                 setProTagXp(daten);
                 setLoading(false);
@@ -26,11 +26,9 @@ export default function TagesXpPieChart() {
             abgebrochen = true;
         };
     }, []);
-    //hier wird das loading state überprüft und generiert
     if (loading || !proTagXp) {
         return <LoadingStateDiv />;
     }
-    //hier werden daten generiert für den chart
     const erreicht = Math.min(proTagXp.erreicht, proTagXp.ziel);
     const uebrig = Math.max(proTagXp.ziel - erreicht, 0);
     const chartData = [
@@ -79,7 +77,7 @@ export default function TagesXpPieChart() {
                     </text>
                     <Tooltip
                         contentStyle={{
-                            backgroundColor: "var(--card-dark)",
+                            backgroundColor: "var(--card-bg)",
                             border: "1px solid var(--terracotta)",
                             borderRadius: "10px",
                             color: "var(--text-primary)",

@@ -12,6 +12,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import LoadingStateDiv from "../../loading-state-div/loading-state-div";
+import { holeJson } from "@/lib/api-client";
 
 export default function StatsProSprache() {
   const [loading, setLoading] = useState(true);
@@ -19,11 +20,10 @@ export default function StatsProSprache() {
 
   useEffect(() => {
     let abgebrochen = false;
-    fetch("/api/sprachen-stats")
-      .then((res) => res.json())
-      .then((dat: SprachStat[]) => {
+    holeJson<SprachStat[] | null>("/api/sprachen-stats", null)
+      .then((dat) => {
         if (abgebrochen) return;
-        setDatenFetch(dat);
+        setDatenFetch(dat ?? []);
         setLoading(false);
       })
       .catch(() => {
@@ -39,11 +39,13 @@ export default function StatsProSprache() {
     return <LoadingStateDiv />;
   }
 
-  const formatLanguageLabel = (name: string) => {
-    const maxLength = 8;
-    if (name.length <= maxLength) return name;
-    return `${name.slice(0, maxLength)}...`;
-  };
+  /*
+   * "Italienisch" wurde auf 8 Zeichen gekuerzt und bekam "..." – im
+   * Diagramm stand dann mehr Text als irgendwo sonst auf der Seite. Die
+   * Achse hat Platz, und Hochformat laesst sich per CSS regeln. Deshalb: der
+   * volle Name, und die Achsenbeschriftung bricht selbst um.
+   */
+  const formatLanguageLabel = (name: string) => name;
 
   const chartData = datenFetch.map((item) => ({
     name: formatLanguageLabel(item.sprache),
@@ -61,7 +63,7 @@ export default function StatsProSprache() {
             axisLine={{ stroke: "var(--muted)" }}
             tickLine={false}
             interval={0}
-            height={40}
+            height={48}
             tickMargin={8}
           />
           <YAxis
@@ -72,7 +74,7 @@ export default function StatsProSprache() {
           <Tooltip
             contentStyle={{
               borderRadius: "10px",
-              backgroundColor: "var(--card-dark)",
+              backgroundColor: "var(--card-bg)",
               color: "var(--text-primary)",
               border: "1px solid var(--terracotta)",
               boxShadow: "var(--shadow-card)",

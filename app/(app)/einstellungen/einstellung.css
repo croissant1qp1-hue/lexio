@@ -1,0 +1,460 @@
+.einstellungen{
+    /*
+     * Frueher lag das hier in :root. Diese Datei wird als globale
+     * Stylesheet eingebunden, nicht als CSS-Modul – ein :root hier galt
+     * also fuer die ganze App. Wer die Einstellungen einmal besucht hatte,
+     * bekam danach auf jeder anderen Seite ein anderes --ink und damit
+     * anders gezeichnete Fortschrittsbalken. Jetzt gilt es nur fuer
+     * diese Seite, und die Namen sind zusaetzlich eindeutig.
+     */
+
+    /*Farben*/
+    --ink: var(--text-primary);
+    --gray: var(--text-secondary);
+    --light-gray: #3A4B54;
+    --gray-shadow: rgba(0, 0, 0, 0.24);
+    --light-brown: var(--bg-elevated);
+    --red: var(--terracotta);
+    --light-red: #D56E7A;
+    --blue: var(--sage);
+
+    /*Fonts*/
+    --normal: var(--sans);
+
+    /*Grenzen fuer Bedienelemente – auf kleinen Displays ist alles
+      kleiner als 44px kaum antippen.*/
+    --touch: 44px;
+}
+
+.einstellungen .kopfzeile{
+    margin: clamp(1rem, 4vh, 2.75rem) clamp(1rem, 3vw, 2rem) 0;
+}
+
+.einstellungen .überschrift{
+    font-family:var(--normal);
+    color: var(--text-primary);
+    font-size: clamp(1.3rem, 4vw, 1.6rem);
+    margin: 0;
+}
+
+.einstellungen .unterüberschrift{
+    font-family:var(--normal);
+    color: var(--gray);
+    font-size: clamp(0.95rem, 3vw, 1.25rem);
+    margin: 0.35rem 0 0;
+}
+
+/* Zwei Spalten auf grossen Displays, eine auf schmalen. minmax(0, …)
+   verhindert, dass lange Inhalte (E-Mail-Felder) die Spalte aufblasen. */
+.einstellungen .main-content{
+    display: grid;
+    grid-template-columns: minmax(0, 22rem) minmax(0, 1fr);
+    align-items: start;
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    width: 100%;
+    max-width: 1100px;
+    margin: clamp(0.75rem, 3vh, 1.5rem) auto 0;
+    padding: 0 clamp(1rem, 3vw, 2rem);
+    box-sizing: border-box;
+}
+
+@media (max-width: 860px){
+    .einstellungen .main-content{
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.einstellungen .allgemein,
+.einstellungen .benarichtigung,
+.einstellungen .daten,
+.einstellungen .sonstiges{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    padding: clamp(0.85rem, 2vw, 1.25rem);
+    box-sizing: border-box;
+    width: 100%;
+    border-radius: var(--radius);
+    background-color: var(--bg-elevated);
+    box-shadow: 0 6px 18px var(--gray-shadow);
+}
+
+.einstellungen .restliche-einstellungen{
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: clamp(0.75rem, 2vw, 1.5rem);
+    min-width: 0;
+}
+
+.einstellungen .text-prog{
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    font-family: var(--normal);
+}
+
+.einstellungen .töne,
+.einstellungen .dayly-reminders,
+.einstellungen .feedback,
+.einstellungen .about{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.einstellungen .töne > div,
+.einstellungen .dayly-reminders > div,
+.einstellungen .feedback > div,
+.einstellungen .about > div{
+    min-width: 0;
+    flex: 1;
+}
+
+.einstellungen .überschrift-sprache,
+.einstellungen .überschrift-land,
+.einstellungen .überschrift-design,
+.einstellungen .überschrift-töne,
+.einstellungen .überschrift-tonstärke,
+.einstellungen .überschrift-reminder,
+.einstellungen .überschrift-email,
+.einstellungen .überschrift-passwort,
+.einstellungen .überschrift-about,
+.einstellungen .überschrift-feedback{
+    color: var(--text-primary);
+    font-family: var(--normal);
+    font-size: 1rem;
+    margin: 1.4rem 0 0.4rem;
+    font-weight: 600;
+}
+
+.einstellungen .töne .überschrift-töne{
+    margin-top: 1.4rem;
+}
+
+.einstellungen .unterüberschrift-töne,
+.einstellungen .unterüberschrift-reminder,
+.einstellungen .unterüberschrift-feedback,
+.einstellungen .unterüberschrift-about{
+    font-family: var(--normal);
+    color: var(--gray);
+    font-size: 0.8rem;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.einstellungen input,
+.einstellungen select{
+    font-family: var(--normal);
+    box-sizing: border-box;
+    min-height: var(--touch);
+    border-radius: 0.6rem;
+    border: 1px solid var(--light-gray);
+    color: var(--text-primary);
+    font-weight: 500;
+    background-color: var(--bg-elevated-2);
+}
+
+.einstellungen select[name="sprache"],
+.einstellungen select[name="land"],
+.einstellungen select[name="design"],
+.einstellungen select[name="tonstärke"]{
+    width: 100%;
+    padding: 0 0.6rem;
+    font-size: 0.95rem;
+}
+
+.einstellungen select[name="töne"]{
+    width: 100%;
+    padding: 0 0.6rem;
+}
+
+/* E-Mail: Feld und Domain nebeneinander, brechen aber um, bevor
+   eines von beiden unbrauchbar schmal wird. */
+/*
+ * Die Regeln fuer .email, .email-input und .email-variante sind mit dem
+ * Email-Formular weggefallen – dort stand eine Liste fest verdrahteter
+ * Anbieter-Domaene, die an nichts angeschlossen war. Sie sind entfernt, nicht
+ * nur unbenutzt: jemand, der sich hier orientiert, soll keine Formulare
+ * finden, die es nicht mehr gibt.
+ */
+
+.einstellungen .passwort-input{
+    width: 100%;
+    padding: 0 0.6rem;
+}
+
+/* Das Passwort-Formular: Beschriftung, zwei Felder, Knopf untereinander. */
+.einstellungen .passwort-formular{
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
+}
+
+.einstellungen .passwort-formular .überschrift-passwort{
+    margin: 0 0 0.2rem;
+}
+
+.einstellungen .passwort-formular .save-button{
+    flex: 0 0 auto;
+    align-self: flex-start;
+    margin-top: 0.3rem;
+}
+
+.einstellungen .meldung-ok,
+.einstellungen .meldung-fehler{
+    margin: 0.7rem 0 0;
+    padding: 0.55rem 0.7rem;
+    border-radius: 0.5rem;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.einstellungen .meldung-ok{
+    background: rgba(101, 168, 141, 0.14);
+    border: 1px solid rgba(101, 168, 141, 0.4);
+    color: var(--text-primary);
+}
+
+.einstellungen .meldung-fehler{
+    background: rgba(184, 66, 84, 0.14);
+    border: 1px solid rgba(184, 66, 84, 0.4);
+    color: var(--text-primary);
+}
+
+.einstellungen .unterüberschrift-about a{
+    color: var(--blue);
+    text-underline-offset: 3px;
+}
+
+/* Die Geraetezeile steht unter dem Passwort und sieht sonst aus wie die
+   Benachrichtigungszeile darueber – eigener Abstand, damit der Abschnitt
+   als eigener lesbar bleibt. */
+.einstellungen .geraet-reihe{
+    margin-top: 1.3rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Der Schalter ist optisch 26px hoch, die Antipffläche ist 44px. */
+.einstellungen .switch,
+.einstellungen .switch2{
+    display: inline-flex;
+    align-items: center;
+    width: 50px;
+    min-height: var(--touch);
+    margin-left: auto;
+    flex: 0 0 auto;
+    cursor: pointer;
+}
+
+.einstellungen .switch input,
+.einstellungen .switch2 input{
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    min-height: 0;
+}
+
+.einstellungen .slider{
+    position: relative;
+    cursor: pointer;
+    width: 50px;
+    height: 26px;
+    background-color: #42525A;
+    border-radius: 26px;
+    transition: 0.2s;
+    flex: 0 0 auto;
+}
+
+.einstellungen .slider::before{
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    left: 3px;
+    bottom: 3px;
+    background-color: var(--text-primary);
+    border-radius: 50%;
+    transition: 0.2s;
+}
+
+.einstellungen input:checked + .slider {
+    background-color: var(--sage);
+}
+
+.einstellungen input:checked + .slider::before {
+    transform: translateX(24px);
+}
+
+.einstellungen .feedback-wrapper{
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+}
+
+.einstellungen .feedback-dropdown{
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    right: 0;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--light-gray);
+    border-radius: 0.8rem;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+    padding: 0.25rem 0;
+    min-width: 160px;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+}
+
+.einstellungen .feedback-wrapper:hover .feedback-dropdown,
+.einstellungen .feedback-wrapper:focus-within .feedback-dropdown{
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.einstellungen .feedback-dropdown a{
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: var(--touch);
+    padding: 0.5rem 1rem;
+    text-decoration: none;
+    color: var(--text-primary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.15s ease;
+}
+
+.einstellungen .feedback-dropdown a:hover{
+    background-color: var(--bg-elevated-2);
+}
+
+.einstellungen .feedback-button,
+.einstellungen .about-button{
+    min-height: var(--touch);
+    padding: 0.5rem 0.9rem;
+    font-weight: 600;
+    background-color: var(--bg-elevated-2);
+    border: 1px solid var(--light-gray);
+    border-radius: 0.6rem;
+    color: var(--text-primary);
+    font-family: var(--normal);
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.einstellungen .about{
+    margin-top: 1.4rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--light-gray);
+}
+
+.einstellungen .feedback-button:hover,
+.einstellungen .about-button:hover{
+    transform: translateY(-2px);
+    border-color: var(--sage);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.einstellungen .footer{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    width: 100%;
+    max-width: 1100px;
+    margin: 1.25rem auto 0;
+    padding: 0 clamp(1rem, 3vw, 2rem) clamp(1rem, 4vh, 2rem);
+    box-sizing: border-box;
+}
+
+.einstellungen .reset-button,
+.einstellungen .save-button{
+    flex: 1 1 12rem;
+    min-height: var(--touch);
+    padding: 0.5rem 1rem;
+    font-family: var(--normal);
+    font-weight: 600;
+    background-color: var(--bg-elevated);
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+.einstellungen .reset-button{
+    border: 1px solid var(--red);
+    color: var(--red);
+}
+
+.einstellungen .save-button{
+    border: 1px solid var(--blue);
+    color: var(--blue);
+}
+
+.einstellungen .reset-button:hover{
+    background-color: var(--red);
+    color: var(--text-primary);
+    opacity: 0.9;
+}
+
+.einstellungen .save-button:hover{
+    background-color: var(--blue);
+    color: var(--text-primary);
+}
+
+.einstellungen .reset-button:active,
+.einstellungen .save-button:active{
+    opacity: 0.8;
+}
+
+@media (max-width: 520px){
+    .einstellungen .footer{
+        flex-direction: column;
+    }
+    .einstellungen .email-input,
+    .einstellungen .email-variante{
+        flex: 1 1 100%;
+    }
+}
+
+/* =============================================================================
+   Attrappen-Gruppe
+
+   Alles, was noch keine Speicherung hat, steht in einem <fieldset disabled>.
+   Das macht zwei Dinge gleichzeitig: Die Regler lassen sich nicht verstellen,
+   und sie sehen auch danach aus, was sie sind. Eine active:disabled-Optik
+   fehlt, weil man sonst denkt, nur die Anzeige waere kaputt.
+   ========================================================================== */
+
+.einstellungen .todo-gruppe {
+    margin: 1.4rem 0 0;
+    padding: 0.9rem 1rem 1rem;
+    border: 1px dashed var(--light-gray);
+    border-radius: var(--radius);
+    opacity: 0.65;
+    min-width: 0;
+}
+
+.einstellungen .todo-gruppe .text-prog {
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.einstellungen .todo-hinweis {
+    margin: 0.4rem 0 0.2rem;
+    color: var(--gray);
+    font-size: 0.82rem;
+    line-height: 1.45;
+}
+
+.einstellungen .todo-gruppe .überschrift-sprache:first-of-type {
+    margin-top: 1.1rem;
+}

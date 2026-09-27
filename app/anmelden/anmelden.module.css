@@ -1,0 +1,600 @@
+/*
+ * Anmeldeseite.
+ *
+ * Zwei Spalten auf dem Desktop: links die Marke, rechts das Formular. Auf
+ * dem Telefon faellt die linke Spalte weg – sie ist Dekoration, und eine
+ * Werbeflaeche vor dem Formular ist auf 360px Breite nur Aerger.
+ */
+
+.seite {
+    /* Die Anmeldeseite steht ausserhalb des .container der App, damit die
+       Seitenleiste sie nicht einengt. Sie bringt ihre eigene Zentrierung
+       mit. */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: clamp(1rem, 4vw, 2.5rem);
+    background:
+        radial-gradient(ellipse 80% 60% at 15% 0%, rgba(231, 177, 74, 0.09), transparent 60%),
+        radial-gradient(ellipse 70% 50% at 90% 100%, rgba(101, 168, 141, 0.07), transparent 60%),
+        var(--background);
+}
+
+.gitter {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+    width: 100%;
+    max-width: 62rem;
+    border-radius: 24px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    box-shadow: var(--shadow-card);
+    background: var(--bg-elevated);
+}
+
+/* --------------------------------------------------------------- Markenseite */
+
+.marke {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(1.5rem, 4vh, 3rem);
+    padding: clamp(1.75rem, 4vw, 3rem);
+    background: linear-gradient(150deg, #3a2325 0%, #1a1418 55%, #131a1f 100%);
+}
+
+.markeKopf {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.logo {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    object-fit: contain;
+}
+
+.markeName {
+    /* Nicht "Caveat": next/font liefert die Familie unter einem
+       generierten Namen aus. Der Klarname trifft sie nicht mehr, und
+       die Ueberschrift fiel still auf die Standardschrift zurueck. */
+    font-family: var(--font-caveat);
+    font-size: 2.1rem;
+    line-height: 1;
+    color: var(--text-primary);
+}
+
+.markeText {
+    margin-top: auto;
+}
+
+.markeUeberschrift {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.8rem, 3.4vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1.12;
+    color: var(--text-primary);
+    text-wrap: balance;
+}
+
+.markeZeile {
+    margin: 0.9rem 0 0;
+    max-width: 34ch;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.markeListe {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.markeListe li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+}
+
+.markeListe i {
+    flex: 0 0 auto;
+    margin-top: 0.15rem;
+    color: var(--gold);
+    font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------------ Formular */
+
+.formular {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    background: var(--bg-elevated);
+}
+
+/*
+ * Zwei Klassen statt einer fuer beides.
+ *
+ * Beide Elemente – die tablist und die beiden Reiter darin – hiessen
+ * .reiter, und standen damit im selben Block. Da beide Regeln auf
+ * dieselbe Klasse wirkten, erbte die tablist von der Knopfregel
+ * (flex: 1, justify-content: center) und die Reiter von der
+ * Containerregel (margin-bottom: 1.5rem, Rahmen). Sichtbar war das als
+ * eine dunkle Leiste, in der die Beschriftungen mit Abstand nach unten
+ * hingen statt mittig zu sitzen.
+ */
+.reiterLeiste {
+    display: flex;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    margin-bottom: 1.5rem;
+    background: var(--background);
+    border-radius: 12px;
+    border: 1px solid var(--line);
+}
+
+.reiter {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 0.75rem;
+    margin: 0;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 160ms ease, color 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.reiter:focus-visible {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
+}
+
+.reiterAktiv {
+    background: var(--bg-elevated-2);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-soft);
+}
+
+.reiter:hover:not(.reiterAktiv) {
+    color: var(--text-primary);
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.55rem, 4vw, 1.95rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0.35rem 0 1.25rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Nur im "Fast geschafft"-Zustand, dort ohne die Reiter. */
+.titelFastFertig {
+    margin: 0.4rem 0 0;
+    font-family: var(--serif);
+    font-size: 1.8rem;
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--text-primary);
+}
+
+/*
+ * Karte fuer die schmalen Bildschirme und die Zwischenbildschirme
+ * ("Fast geschafft", Passwort zuruecksetzen, Passwort aendern). Sie stand
+ * im JSX schon, war aber nie im Stylesheet definiert – `styles.karte` war
+ * `undefined`, die Seite lief ohne jede Formatierung. Deshalb gehoert die
+ * Klasse hier her und nicht in eine eigene Datei: die Klassen sind
+ * ausdruecklich dieselben wie im Formular.
+ *
+ * Ohne die Markenspalte, die es nur im zweispaltigen Gitter gibt.
+ */
+.karte {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 30rem;
+    padding: clamp(1.5rem, 5vw, 2.5rem);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-card);
+}
+
+.karte .text,
+.karte .fussnote {
+    /* Der Text steht sonst am Rand des Inhalts, der zurueck-Zurueck-Knopf
+       darunter ist zentriert – beides sieht nach zwei verschiedenen
+       Bausteinen aus. */
+    margin-inline: 0;
+}
+
+.text {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+.text strong {
+    color: var(--text-primary);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.fussnote {
+    margin: 0.9rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--text-muted);
+}
+
+/* ------------------------------------------------------------------ Meldungen */
+
+.fehler,
+.hinweis {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+    margin: 0 0 1rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+}
+
+.fehler {
+    background: rgba(184, 66, 84, 0.14);
+    border: 1px solid rgba(184, 66, 84, 0.4);
+    color: #ff9aa8;
+}
+
+.fehler i {
+    flex: 0 0 auto;
+    margin-top: 0.1rem;
+}
+
+.hinweis {
+    background: rgba(101, 168, 141, 0.12);
+    border: 1px solid rgba(101, 168, 141, 0.35);
+    color: #8fd8bb;
+}
+
+/* ------------------------------------------------------------------ Anbieter */
+
+.anbieter {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.anbieterKnopf {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.65rem;
+    width: 100%;
+    min-height: 48px;
+    padding: 0.6rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--bg-elevated-2);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.anbieterKnopf > *:first-child {
+    flex: 0 0 18px;
+    display: inline-flex;
+}
+
+.anbieterKnopf:hover:not(:disabled) {
+    border-color: var(--sage);
+    background: var(--bg-elevated-2);
+    transform: translateY(-1px);
+}
+
+.anbieterKnopf:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.trenner {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin: 1.25rem 0;
+}
+
+.trennerLinie {
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+}
+
+.trennerText {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------- Form */
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+/* Zeile mit der Checkbox. Das Kästchen ist 20px, die Zeile 44px hoch: der
+   sichtbare Kasten darf klein sein, die Schaltfläche nicht. */
+.merkenZeile {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 44px;
+    margin: -0.2rem 0 0;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.35;
+}
+
+.merkenZeile input {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    accent-color: var(--sage);
+    cursor: pointer;
+}
+
+.merkenZeile:hover {
+    color: var(--text-primary);
+}
+
+.merkenZeile:focus-within {
+    color: var(--text-primary);
+}
+
+.feld {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+}
+
+.eingabe {
+    width: 100%;
+    min-height: 48px;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.eingabe::placeholder {
+    color: var(--placeholder-color);
+}
+
+.eingabe:focus {
+    outline: none;
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(101, 168, 141, 0.22);
+}
+
+/* Der Container traegt den Rahmen, das input selbst ist rahmenlos –
+   sonst haette man zwei Rahmen und einen Knick an der rechten Kante. */
+.passwortFeld {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.passwortFeld .eingabe {
+    padding-right: 3rem;
+}
+
+.auge {
+    position: absolute;
+    right: 0.35rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--touch, 44px);
+    height: var(--touch, 44px);
+    padding: 0;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: color 160ms ease;
+}
+
+.auge:hover {
+    color: var(--text-primary);
+}
+
+.absenden {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.55rem;
+    width: 100%;
+    min-height: 50px;
+    margin-top: 0.35rem;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--gold) 0%, #c99433 100%);
+    color: #17110a;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 12px 26px rgba(231, 177, 74, 0.28);
+    transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.absenden:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 16px 32px rgba(231, 177, 74, 0.36);
+}
+
+.absenden:active:not(:disabled) {
+    transform: scale(0.985);
+}
+
+.absenden:disabled {
+    opacity: 0.65;
+    cursor: progress;
+}
+
+.textKnopf {
+    align-self: center;
+    margin-top: 1.1rem;
+    padding: 0.3rem 0.5rem;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    transition: color 160ms ease;
+}
+
+.textKnopf:hover {
+    color: var(--gold);
+}
+
+.nebenKnopf {
+    align-self: center;
+    margin-top: 1.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 160ms ease, color 160ms ease;
+}
+
+.nebenKnopf:hover {
+    border-color: var(--gold);
+    color: var(--text-primary);
+}
+
+.zeichen {
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+/* ------------------------------------------------------------------ Telefon */
+
+@media (max-width: 900px) {
+    .gitter {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 30rem;
+    }
+
+    /* Die Marke verschwindet, aber das Wort Lexio bleibt. Sonst steht auf
+       dem Telefon eine Seite ohne erkennbaren Namen da. */
+    .marke {
+        padding: 1.25rem 1.5rem;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .markeText,
+    .markeListe {
+        display: none;
+    }
+
+    .markeKopf {
+        gap: 0.5rem;
+    }
+
+    .logo {
+        width: 30px;
+        height: 30px;
+        flex-basis: 30px;
+    }
+
+    .markeName {
+        font-size: 1.6rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .seite {
+        padding: 0;
+        align-items: stretch;
+    }
+
+    .gitter {
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        min-height: 100dvh;
+    }
+}
+
+/* Sehr niedrige Displays (Landscape-Handy): die Seite soll scrollen,
+   nicht die Formularflaeche abschneiden. */
+@media (max-height: 560px) and (min-width: 901px) {
+    .seite {
+        align-items: flex-start;
+    }
+
+    .markeListe {
+        display: none;
+    }
+}

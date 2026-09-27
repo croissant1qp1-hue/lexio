@@ -3,21 +3,22 @@ import {AreaChart,Area,ResponsiveContainer,XAxis,YAxis,CartesianGrid,Tooltip,Leg
 import { useEffect, useState } from "react";
 import { WochenXpTyp } from "@/lib/types";
 import LoadingStateDiv from "@/components/loading-state-div/loading-state-div";
+import { holeJson } from "@/lib/api-client";
 export default function XpChart() {
     const [wochenXp, setWochenXp] = useState<WochenXpTyp | null>(null);
     const [loading,setLoading] = useState(true);
     useEffect(() => {
         let abgebrochen = false;
-        fetch("/api/wochen-xp").then((response) => {
-            response.json().then((daten:WochenXpTyp) => {
+        holeJson<WochenXpTyp | null>("/api/wochen-xp", null)
+            .then((daten) => {
                 if (abgebrochen) return;
                 setLoading(false);
-                setWochenXp(daten)
+                setWochenXp(daten);
             })
-        }).catch(() => {
-            if (abgebrochen) return;
-            setLoading(false)
-        })
+            .catch(() => {
+                if (abgebrochen) return;
+                setLoading(false);
+            });
         return () => {
             abgebrochen = true;
         }
@@ -49,7 +50,7 @@ export default function XpChart() {
                 <YAxis tick={{ fill: "var(--text-secondary)" }} axisLine={{ stroke: "var(--muted)" }} tickLine={false}/>
                 <Tooltip contentStyle={{
                     borderRadius: "10px",
-                    backgroundColor: "var(--card-dark)",
+                    backgroundColor: "var(--card-bg)",
                     color: "var(--text-primary)",
                     border: "1px solid var(--terracotta)",
                     boxShadow: "var(--shadow-card)",
