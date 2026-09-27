@@ -284,6 +284,23 @@
     hyphens: auto;
 }
 
+/*
+ * Der Beispielsatz ist Nebensache, nicht Karte. Er sitzt darunter in
+ * Satzschrift und ueber der Tippmarke, damit "Tippen zum Aufdecken" unten
+ * bleibt. `clamp` mit vw, damit ein langer Satz auf dem Handy die Karte
+ * nicht ueber den Rand schiebt – die Karte hat eine feste Hoehe, ein
+ * umbrechender Text wuerde den Inhalt sonst abschneiden.
+ */
+.karteBeispiel {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: clamp(0.95rem, 3.6vw, 1.15rem);
+    line-height: 1.35;
+    color: var(--text-secondary);
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+
 .karteTipp {
     position: absolute;
     bottom: 1.1rem;

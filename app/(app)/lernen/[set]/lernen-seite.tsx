@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
-import { getFarbeforSprache } from "@/lib/sprachen-farbe";
+import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import styles from "./lernen.module.css";
@@ -13,11 +13,25 @@ type Karte = {
     id: string;
     frage: string;
     antwort: string;
+    /*
+     * Seit Migration 005 optional. Deshalb nullable: die Haelfte der Karten in
+     * einem gemischten Set stammt noch ohne Satz, und der Typ muss das sagen,
+     * statt die Anzeige auf "" zu pruefen.
+     */
+    beispielsatz: string | null;
+    beispielUebersetzung: string | null;
     stufe: number;
     gelernt: boolean;
 };
 
-type SetInfo = { slug: string; name: string; sprache: string };
+/**
+ * Das Set, wie /api/lernen es meldet.
+ *
+ * `sprache` ist seit 0.1 ein Objekt mit Code, Namen und Farben. Der Code wird
+ * gleich fuer speechSynthesis gebraucht (1.3) – vorher muesste die Seite aus
+ * einem deutschen Namen ("Englisch") erst erraten, welche Browserstimme passt.
+ */
+type SetInfo = { slug: string; name: string; sprache: SpracheInfo };
 
 /** Antwort von /api/lernen. */
 type LernAntwort = {
@@ -380,7 +394,8 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
     }
 
     const anteil = Math.round((index / karten.length) * 100);
-    const farbe = set ? getFarbeforSprache(set.sprache) : undefined;
+    const farbe = set ? farbeVonSprache(set.sprache).flaeche : undefined;
+    const sprachName = set ? nameVonSprache(set.sprache) : "";
 
     return (
         <div className={styles.seite}>
@@ -451,6 +466,15 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                         <span className={styles.kartenSeite}>
                             <span className={styles.karteLabel}>Begriff</span>
                             <span className={styles.karteText}>{karte.frage}</span>
+                            {/*
+                             * Der Beispielsatz steht auf der Vorderseite, nicht
+                             * erst auf der Rueckseite. Er ist kein Spoiler,
+                             * sondern der Gebrauch, in dem der Begriff
+                             * vorkommt – aufgedeckt waere er zu spaet.
+                             */}
+                            {karte.beispielsatz && (
+                                <span className={styles.karteBeispiel}>{karte.beispielsatz}</span>
+                            )}
                             <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
 
                             <span className={styles.karteZeichen}>
@@ -461,7 +485,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                                     height={26}
                                     className={styles.karteZeichenBild}
                                 />
-                                <span className={styles.karteZeichenText}>{set?.sprache}</span>
+                                <span className={styles.karteZeichenText}>{sprachName}</span>
                             </span>
 
                             {karte.stufe > 0 && (
@@ -481,6 +505,11 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                         <span className={`${styles.kartenSeite} ${styles.kartenSeiteHinten}`}>
                             <span className={styles.karteLabel}>Antwort</span>
                             <span className={styles.karteText}>{karte.antwort}</span>
+                            {karte.beispielUebersetzung && (
+                                <span className={styles.karteBeispiel}>
+                                    {karte.beispielUebersetzung}
+                                </span>
+                            )}
 
                             <span className={styles.karteZeichen}>
                                 <Image
@@ -490,7 +519,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                                     height={26}
                                     className={styles.karteZeichenBild}
                                 />
-                                <span className={styles.karteZeichenText}>{set?.sprache}</span>
+                                <span className={styles.karteZeichenText}>{sprachName}</span>
                             </span>
                         </span>
                     </span>

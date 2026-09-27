@@ -2,16 +2,18 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getFarbeforSprache } from "@/lib/sprachen-farbe";
+import { farbeVonSprache, type Sprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, sendeJson, ApiFehler } from "@/lib/api-client";
 import styles from "./vokabeln-hinzufuegen.module.css";
+import SprachAuswahl from "./sprach-auswahl";
 
 type Status = "idle" | "speichert" | "fehler";
 
 type SetZeile = {
     id: string;
     name: string;
-    sprache: string;
+    /** Seit 0.1 ein Objekt aus public.sprachen, kein Freitext. */
+    sprache: SpracheInfo;
     kartenGesamt: number;
     /**
      * true = gehoert dieser Person und darf befuellt werden.
@@ -26,15 +28,20 @@ type SetZeile = {
     eigen: boolean;
 };
 
-type Paar = { frage: string; antwort: string };
+/*
+ * `beispiel` und `beispielUebersetzung` heissen hier anders als in der API.
+ * Das Formular benutzt camelCase wie der Rest der Oberflaeche, die Spalten in
+ * Postgres sind snake_case. Die Umbenennung passiert genau an einer Stelle,
+ * beim Senden – sonst muesste man an beiden Enden daran denken.
+ */
+type Paar = { frage: string; antwort: string; beispiel: string; beispielUebersetzung: string };
 
-const LEER: Paar = { frage: "", antwort: "" };
+const LEER: Paar = { frage: "", antwort: "", beispiel: "", beispielUebersetzung: "" };
 
 /** Kennung fuer "neues Set" in der Auswahl. Kein Slug, also keine Kollision. */
 const NEUES_SET = "__neu__";
 
 const MAX_NAME = 60;
-const MAX_SPRACHE = 40;
 
 const SCHRITT_TITEL = {
     1: "Wort hinzufügen",
@@ -66,13 +73,17 @@ export default function VokabelnHinzufuegenSeite() {
 
     const [sets, setSets] = useState<SetZeile[]>([]);
     const [setsGeladen, setSetsGeladen] = useState(false);
+    /** Die feste Sprachliste. Ohne sie laesst sich kein neues Set anlegen. */
+    const [sprachListe, setSprachListe] = useState<Sprache[]>([]);
+    const [sprachFehler, setSprachFehler] = useState<string | null>(null);
     const [schritt, setSchritt] = useState<Schritt>(1);
 
     /** null = nichts gewaehlt, NEUES_SET = neues Set, sonst der Slug. */
     const [auswahl, setAuswahl] = useState<string | null>(null);
     const [paare, setPaare] = useState<Paar[]>([{ ...LEER }]);
     const [setName, setSetName] = useState("");
-    const [sprache, setSprache] = useState("");
+    /** Die Sprache als Code aus public.sprachen. null = noch keine gewaehlt. */
+    const [spracheCode, setSpracheCode] = useState<string | null>(null);
 
     const [status, setStatus] = useState<Status>("idle");
     const [fehler, setFehler] = useState<Fehler>({});
@@ -80,6 +91,38 @@ export default function VokabelnHinzufuegenSeite() {
     const [fertig, setFertig] = useState<{ name: string; slug: string; anzahl: number } | null>(null);
 
     const ersteFrageRef = useRef<HTMLInputElement>(null);
+
+    /*
+     * Die Sprachliste kommt getrennt von den Sets. Sie ist ein fester Katalog
+     * aus der Datenbank, kein Zustand dieser Person, und sie wird auch dann
+     * gebraucht, wenn es noch kein einziges eigenes Set gibt – das ist genau
+     * der Fall, in dem jemand sein erstes Set anlegt.
+     */
+    useEffect(() => {
+        let abgebrochen = false;
+        holeJson<Sprache[] | null>("/api/sprachen", null)
+            .then((daten) => {
+                if (abgebrochen) return;
+                setSprachListe(daten ?? []);
+            })
+            .catch((f) => {
+                if (abgebrochen) return;
+                /*
+                 * 503 wird auch mit Ersatzwert geworfen – hier ist das
+                 * richtig: Die Meldung nennt die fehlende Migration, und genau
+                 * die braucht der Nutzer. Eine leere Liste ohne Erklaerung
+                 * waere ein Auswahlfeld, das sich nicht bedienen laesst.
+                 */
+                setSprachFehler(
+                    f instanceof ApiFehler
+                        ? f.message
+                        : "Die Sprachliste konnte nicht geladen werden.",
+                );
+            });
+        return () => {
+            abgebrochen = true;
+        };
+    }, []);
 
     useEffect(() => {
         let abgebrochen = false;
@@ -136,7 +179,7 @@ export default function VokabelnHinzufuegenSeite() {
     );
 
     /** Fehler eines Feldes, egal ob lokal oder vom Server gesetzt. */
-    const feldFehler = (index: number, feld: "frage" | "antwort") =>
+    const feldFehler = (index: number, feld: keyof Paar) =>
         fehler[`${feld}.${index}`] ?? (index === 0 ? fehler[feld] : undefined);
 
     /**
@@ -150,7 +193,17 @@ export default function VokabelnHinzufuegenSeite() {
      */
     const ohneFeldfehler = (alt: Fehler): Fehler =>
         Object.fromEntries(
-            Object.entries(alt).filter(([schluessel]) => !/^(frage|antwort)(\.|$)/.test(schluessel)),
+            Object.entries(alt).filter(
+                /*
+                 * Beide Schreibweisen: die lokalen Felder heissen camelCase,
+                 * die API meldet snake_case. Sonst bliebe eine Laengenmarkierung
+                 * am Beispielsatz stehen, obwohl der Satz laengst gekuerzt wurde.
+                 */
+                ([schluessel]) =>
+                    !/^(frage|antwort|beispiel|beispielUebersetzung|beispielsatz|beispiel_uebersetzung)(\.|$)/.test(
+                        schluessel,
+                    ),
+            ),
         );
 
     function waehlen(wert: string | null) {
@@ -162,16 +215,16 @@ export default function VokabelnHinzufuegenSeite() {
         // neues Set bleibt der Wert des ersten eigenen Sets als Startwert –
         // sichtbar und aenderbar, nicht stillschweigend geraten.
         const ziel = eigeneSets.find((s) => s.id === wert);
-        if (ziel) setSprache(ziel.sprache);
+        if (ziel) setSpracheCode(ziel.sprache.code);
         else if (wert === NEUES_SET && eigeneSets.length > 0) {
-            setSprache(eigeneSets[0].sprache);
+            setSpracheCode(eigeneSets[0].sprache.code);
         }
     }
 
     function demoKopieren(set: SetZeile) {
         setAuswahl(NEUES_SET);
         setSetName(kopieName(set));
-        setSprache(set.sprache);
+        setSpracheCode(set.sprache.code);
         setFehler({});
         setStatus("idle");
         setSchritt(2);
@@ -264,7 +317,6 @@ export default function VokabelnHinzufuegenSeite() {
         if (status === "speichert" || gefuelltePaare.length === 0) return;
 
         const name = setName.trim();
-        const setSprache = sprache.trim();
 
         const neu: Fehler = {};
 
@@ -279,11 +331,8 @@ export default function VokabelnHinzufuegenSeite() {
          */
         const legtNeuesSetAn = !gewaehltesSet || name !== gewaehltesSet.name.trim();
 
-        if (legtNeuesSetAn) {
-            if (!setSprache) neu.sprache = "Welche Sprache?";
-            else if (setSprache.length > MAX_SPRACHE) {
-                neu.sprache = `Maximal ${MAX_SPRACHE} Zeichen`;
-            }
+        if (legtNeuesSetAn && !spracheCode) {
+            neu.sprache = "Welche Sprache?";
         }
 
         if (Object.keys(neu).length > 0) {
@@ -302,7 +351,7 @@ export default function VokabelnHinzufuegenSeite() {
             if (!slug) {
                 const daten = await sendeJson<{ set: { slug: string } }>("/api/sets", {
                     name,
-                    sprache: setSprache,
+                    spracheCode,
                 });
                 slug = daten.set.slug;
             }
@@ -312,6 +361,13 @@ export default function VokabelnHinzufuegenSeite() {
                 paare: gefuelltePaare.map((p) => ({
                     frage: p.frage.trim(),
                     antwort: p.antwort.trim(),
+                    /*
+                     * Leere Beispielsätze gehen als null raus, nicht als "". Sonst
+                     * stuende in der Datenbank spaeter ein leerer String, den die
+                     * Lernseite erst als "Satz vorhanden" erkennen muesste.
+                     */
+                    beispielsatz: p.beispiel.trim() || null,
+                    beispiel_uebersetzung: p.beispielUebersetzung.trim() || null,
                 })),
             });
 
@@ -477,7 +533,7 @@ export default function VokabelnHinzufuegenSeite() {
                                     className={`${styles.sprache} ${aktiv ? styles.spracheAktiv : ""}`}
                                     style={{
                                         backgroundColor:
-                                            getFarbeforSprache(set.sprache) ?? "var(--bg-elevated)",
+                                            farbeVonSprache(set.sprache).flaeche ?? "var(--bg-elevated)",
                                     }}
                                     onClick={() => waehlen(aktiv ? null : set.id)}
                                     aria-pressed={aktiv}
@@ -517,7 +573,7 @@ export default function VokabelnHinzufuegenSeite() {
                             >
                                 <span
                                     className={styles.punkt}
-                                    style={{ backgroundColor: getFarbeforSprache(set.sprache) }}
+                                    style={{ backgroundColor: farbeVonSprache(set.sprache).flaeche }}
                                     aria-hidden="true"
                                 />
                                 <span className={styles.demoName}>{set.name}</span>
@@ -584,6 +640,18 @@ export default function VokabelnHinzufuegenSeite() {
 
                         const frageFehler = feldFehler(gefIndex, "frage");
                         const antwortFehler = feldFehler(gefIndex, "antwort");
+                        /*
+                         * Die API meldet Laengenfehler je Stapel unter dem
+                         * Spaltennamen: "beispielsatz.3". Beide Nummern sind
+                         * derselbe gefIndex, den auch die anderen Felder
+                         * benutzen.
+                         */
+                        const serverBeispielFehler = fehler[`beispielsatz.${gefIndex}`];
+                        const serverBeispielUebFehler = fehler[`beispiel_uebersetzung.${gefIndex}`];
+                        const beispielFehler =
+                            fehler[`beispiel.${gefIndex}`] ?? serverBeispielFehler;
+                        const beispielUebFehler =
+                            fehler[`beispielUebersetzung.${gefIndex}`] ?? serverBeispielUebFehler;
                         return (
                             <div
                                 className={styles.paarZeile}
@@ -629,6 +697,71 @@ export default function VokabelnHinzufuegenSeite() {
                                     {antwortFehler && (
                                         <span className={styles.fehler} id={`fehler-${index}-antwort`}>
                                             {antwortFehler}
+                                        </span>
+                                    )}
+                                </label>
+
+                                {/*
+                                 * Beispielsatz, optional (Migration 005). Bewusst
+                                 * unter Begriff und Uebersetzung und nicht
+                                 * daneben: wer zehn Woerter auf einmal eintippt,
+                                 * soll dafuer keine vier Felder je Zeile
+                                 * bedienen muessen. Wer einen Satz will, hat
+                                 * Platz dafuer – ohne ihn ausfuellen zu muessen.
+                                 */}
+                                <label className={styles.feld}>
+                                    <span className={styles.label}>
+                                        Beispielsatz
+                                        <span className={styles.optional}>optional</span>
+                                    </span>
+                                    <input
+                                        className={styles.input}
+                                        value={paar.beispiel}
+                                        onChange={(e) => paarAendern(index, "beispiel", e.target.value)}
+                                        placeholder="z. B. Ci vediamo domani?"
+                                        autoComplete="off"
+                                        autoCapitalize="none"
+                                        spellCheck={false}
+                                        aria-invalid={Boolean(beispielFehler)}
+                                        aria-describedby={
+                                            beispielFehler ? `fehler-${index}-beispiel` : undefined
+                                        }
+                                    />
+                                    {beispielFehler && (
+                                        <span className={styles.fehler} id={`fehler-${index}-beispiel`}>
+                                            {beispielFehler}
+                                        </span>
+                                    )}
+                                </label>
+
+                                <label className={styles.feld}>
+                                    <span className={styles.label}>
+                                        Satz auf Deutsch
+                                        <span className={styles.optional}>optional</span>
+                                    </span>
+                                    <input
+                                        className={styles.input}
+                                        value={paar.beispielUebersetzung}
+                                        onChange={(e) =>
+                                            paarAendern(index, "beispielUebersetzung", e.target.value)
+                                        }
+                                        placeholder="z. B. Wir sehen uns morgen?"
+                                        autoComplete="off"
+                                        autoCapitalize="none"
+                                        spellCheck={false}
+                                        aria-invalid={Boolean(beispielUebFehler)}
+                                        aria-describedby={
+                                            beispielUebFehler
+                                                ? `fehler-${index}-beispielUebersetzung`
+                                                : undefined
+                                        }
+                                    />
+                                    {beispielUebFehler && (
+                                        <span
+                                            className={styles.fehler}
+                                            id={`fehler-${index}-beispielUebersetzung`}
+                                        >
+                                            {beispielUebFehler}
                                         </span>
                                     )}
                                 </label>
@@ -712,37 +845,34 @@ export default function VokabelnHinzufuegenSeite() {
                 </label>
 
                 {/*
-                 * Die Sprache ist eine echte Eingabe, kein still uebernommener
-                 * Wert. Vorher stand hier fest "Englisch", sobald kein Set
-                 * gewaehlt war – ein spanisches Set konnte man so anlegen,
-                 * ohne es zu bemerken, und es tauchte danach unter
-                 * "Italienisch" wieder auf.
+                 * Die Sprache ist ein Auswahlfeld mit fester Liste, kein
+                 * Freitext. Zwei Gruende, und beide sind der Grund fuer 0.1:
+                 *
+                 *   - "Englisch", "englisch", "Englisch Unterricht" waren drei
+                 *     verschiedene Sets und drei verschiedene Farben, von
+                 *     denen keine zuordenbar war. Die Liste ist jetzt public.
+                 *     sprachen, und der Code ist der Schluessel.
+                 *   - Der Code entscheidet auch mit, welche Browserstimme fuer
+                 *     die Aussprache passt (1.3). Ein getippter Name sagt das
+                 *     nicht.
+                 *
+                 * Bei einem bestehenden Set bleibt das Feld gesperrt: Dann
+                 * aendert sich am Set nichts, und eine zweite, widerspruechliche
+                 * Angabe waere nur eine neue Fehlerquelle.
                  */}
-                <label className={styles.feld}>
-                    <span className={styles.label}>Sprache</span>
-                    <input
-                        className={styles.input}
-                        value={sprache}
-                        onChange={(e) => setSprache(e.target.value)}
-                        placeholder="z. B. Italienisch"
-                        maxLength={MAX_SPRACHE}
-                        autoComplete="off"
-                        list="sprachen-vorschlaege"
-                        aria-invalid={Boolean(fehler.sprache)}
-                        disabled={!legtNeuesSetAn}
-                    />
-                    {/*
-                     * Die vorhandenen Sprachen als Vorschlaege. Sie kommen aus
-                     * den Sets, die diese Person sieht – also aus genau den
-                     * Werten, die /api/sets danach auch wiederfindet.
-                     */}
-                    <datalist id="sprachen-vorschlaege">
-                        {[...new Set(sets.map((s) => s.sprache).filter(Boolean))].map((s) => (
-                            <option key={s} value={s} />
-                        ))}
-                    </datalist>
-                    {fehler.sprache && <span className={styles.fehler}>{fehler.sprache}</span>}
-                </label>
+                <SprachAuswahl
+                    label="Sprache"
+                    wert={spracheCode}
+                    sprachen={sprachListe}
+                    onWahl={setSpracheCode}
+                    disabled={!legtNeuesSetAn || sprachListe.length === 0}
+                    invalid={Boolean(fehler.sprache)}
+                />
+                {sprachFehler && (
+                    <span className={styles.fehler} role="alert">
+                        {sprachFehler}
+                    </span>
+                )}
 
                 {gewaehltesSet && legtNeuesSetAn && (
                     <p className={styles.hinweis}>

@@ -1,0 +1,230 @@
+/*
+ * Das eigene Sprachmenü.
+ *
+ * Die Farben kommen aus dem Theme, nicht aus dem Modul: `flaeche` und `akzent`
+ * der Sprache stehen in `public.sprachen` und kommen als Inline-Style an, weil
+ * sie pro Sprache verschieden sind. Alles andere – Rahmen, Flaeche, Text –
+ * nimmt dieselben Variablen wie die anderen Eingabefelder, damit das Feld im
+ * hellen wie im dunklen Design nicht als fremdes Objekt dasteht.
+ */
+
+.feld {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    position: relative;
+}
+
+.beschriftung {
+    /*
+     * 14px, nicht 0.78rem. Die Beschriftung im selben Formular stand auf
+     * 0.78rem = 12.5px, und sie ist mit auf 14px gehoben: eine neue
+     * Beschriftung, die kleiner ist als die daneben, sieht nach Zufall aus.
+     * Phase 5 verlangt ohnehin keine Schrift unter 14px, also wird die
+     * Grenze jetzt in dem Formular gesetzt, in dem sie greift.
+     */
+    font-size: 0.875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+   Der Knopf
+   --------------------------------------------------------------------------- */
+
+.knopf {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: var(--touch);
+    padding: 0.65rem 1rem;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.knopf:hover:not(:disabled) {
+    border-color: var(--text-muted);
+}
+
+.knopf:focus-visible {
+    outline: 2px solid var(--sage);
+    outline-offset: 2px;
+}
+
+.knopf:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.knopf[aria-invalid="true"] {
+    border-color: var(--terracotta);
+}
+
+.text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/*
+ * Der Farbpunkt. 0.7rem ist gewaehlt, nicht gesetzt: kleiner gelesen, und
+ * `outline` haelt ihn auf hellen Flaechen sichtbar, wenn die Sprachfarbe
+ * einmal hell ist. Der Ring sitzt im Fokusabstand des Punktes, nicht am
+ * Punkt selbst, sonst wuerde er den Nachbartext anschneiden.
+ */
+.punkt {
+    flex: 0 0 auto;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.18);
+}
+
+.punkt[style*="transparent"] {
+    /* Ohne Auswahl gibt es keine Farbe. Ein Punkt aus `transparent` waere ein
+       Loch mit Ring; lieber gar keiner. */
+    display: none;
+}
+
+/* Der Pfeil: zwei Raelder statt eines Bildes, damit er in beiden Designs
+   stimmt und nirgends nachgeladen werden muss. */
+.pfeil {
+    flex: 0 0 auto;
+    width: 0;
+    height: 0;
+    margin-right: 0.15rem;
+    border-left: 0.32rem solid transparent;
+    border-right: 0.32rem solid transparent;
+    border-top: 0.4rem solid var(--text-secondary);
+    transition: transform 0.18s ease;
+}
+
+.knopf[aria-expanded="true"] .pfeil {
+    transform: rotate(180deg);
+}
+
+/* ---------------------------------------------------------------------------
+   Die Liste
+   --------------------------------------------------------------------------- */
+
+.liste {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    max-height: 17rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 0.3rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    /* Kein Umbruch der Liste beim Scrollen des Formulars: die Karte ist kurz
+       und der Weg ist lang, das Panel soll sich nicht mitnehmen. */
+    animation: auf 0.12s ease-out;
+}
+
+@keyframes auf {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.eintrag {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: var(--touch);
+    padding: 0.45rem 0.6rem;
+    border-radius: calc(var(--radius) - 2px);
+    color: var(--text-primary);
+    cursor: pointer;
+    /* Ohne Auswahl beim Ziehen: auf dem Handy loest ein Textmarker sonst
+       haeufig aus und nimmt den Klick mit. */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.eintragHervor {
+    background: var(--bg-elevated-2);
+}
+
+.eintragGewaehlt {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.haken {
+    margin-left: auto;
+    color: var(--sage);
+    font-size: 0.8rem;
+    flex: 0 0 auto;
+}
+
+.leer {
+    margin: 0;
+    padding: 0.6rem;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* ---------------------------------------------------------------------------
+   Ohne JavaScript
+   --------------------------------------------------------------------------- */
+
+.ohneJs {
+    width: 100%;
+    min-height: var(--touch);
+    padding: 0.65rem 1rem;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font: inherit;
+}
+
+/* ---------------------------------------------------------------------------
+   Handy
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 560px) {
+    /* Hoeher als am Desktop: mit 14 Sprachen sind 17rem etwa 5 Eintraege, und
+       wer beim Handy scrollen muss, hat beim Waehlen schon aufgehoert. */
+    .liste {
+        max-height: 22rem;
+    }
+
+    .eintrag {
+        padding: 0.6rem 0.6rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .liste {
+        animation: none;
+    }
+
+    .pfeil,
+    .knopf {
+        transition: none;
+    }
+}

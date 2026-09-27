@@ -128,7 +128,9 @@
 }
 
 .label {
-    font-size: 0.78rem;
+    /* 0.78rem waren 12.5px und damit unter der 14px-Grenze aus Phase 5.
+       Siehe die gleiche Grenze in sprach-auswahl.module.css. */
+    font-size: 0.875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-secondary);
@@ -246,13 +248,60 @@
 
 /* Eine Zeile = Begriff + Uebersetzung + Entfernen.
    Auf schmalen Displays stapeln sich die beiden Felder uebereinander. */
+/*
+ * Zwei Reihen: oben Begriff und Uebersetzung, darunter die beiden optionalen
+ * Satzfelder. Frueher standen hier nur zwei Felder im Raster, deshalb stand
+ * hier `grid-template-columns: 1fr 1fr auto` ohne Bereiche – die Felder
+ * wurden einfach der Reihe nach einsortiert. Zwei Felder mehr liessen sich so
+ * nicht unterbringen, ohne dass der Knopf zum Entfernen auf eine eigene Zeile
+ * rutschte. Mit benannten Bereichen ist die Reihenfolge ausgeschrieben und
+ * damit auch nach vier Feldern noch eindeutig.
+ */
 .paarZeile {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
-    gap: 0.6rem;
+    grid-template-areas:
+        "frage antwort weg"
+        "beispiel beispielUebersetzung weg";
+    gap: 0.6rem 0.6rem 0.8rem;
     align-items: end;
     padding-bottom: 0.9rem;
     border-bottom: 1px solid var(--line);
+}
+
+.paarZeile > .feld:nth-of-type(1) {
+    grid-area: frage;
+}
+
+.paarZeile > .feld:nth-of-type(2) {
+    grid-area: antwort;
+}
+
+.paarZeile > .feld:nth-of-type(3) {
+    grid-area: beispiel;
+}
+
+.paarZeile > .feld:nth-of-type(4) {
+    grid-area: beispielUebersetzung;
+}
+
+/* Der Knopf steht ueber beide Zeilen, statt eine dritte Zeile zu brauchen. */
+.paarZeile > .entfernen {
+    grid-area: weg;
+    align-self: center;
+}
+
+/* "optional" an der Beschriftung. Kein Pflichtzeichen, sondern ein Wort, das
+   sagt, dass das Feld leer bleiben darf – ein Sternchen wuerde falsch dringlich
+   wirken und Platz brauchen, den ein Wegweiser-Zeichen auf dem Handy eher
+   wegraeumt. */
+.optional {
+    margin-left: 0.45rem;
+    /* Auch ein Hinweis ist Text, den jemand liest. 0.75rem waren 12px. */
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.02em;
 }
 
 .paarZeile:last-of-type {
@@ -294,26 +343,17 @@
 }
 
 @media (max-width: 560px) {
+    /* Eine Spalte, Knopf rechts ueber alle vier Zeilen. Die beiden Satzfelder
+       bekommen je eine eigene Zeile: nebeneinander waeren sie auf 360 Pixel
+       so schmal, dass die Beschriftung umbricht. */
     .paarZeile {
         grid-template-columns: 1fr auto;
         grid-template-areas:
             "frage weg"
-            "antwort weg";
+            "antwort weg"
+            "beispiel weg"
+            "beispielUebersetzung weg";
         row-gap: 0.5rem;
-    }
-
-    .paarZeile > .feld:nth-of-type(1) {
-        grid-area: frage;
-    }
-
-    .paarZeile > .feld:nth-of-type(2) {
-        grid-area: antwort;
-    }
-
-    /* Der Knopf zieht über beide Zeilen, statt eine dritte Zeile zu brauchen. */
-    .entfernen {
-        grid-area: weg;
-        align-self: center;
     }
 }
 
@@ -427,3 +467,9 @@
     opacity: 0.55;
     cursor: not-allowed;
 }
+
+/* Das Sprachfeld seit 0.1 ist eine Auswahl aus public.sprachen statt eines
+   getippten Namens. Es sieht wie die anderen Felder aus und richtet sich nach
+   denselben Variablen, hat aber ein eigenes Modul: sprach-auswahl.module.css.
+   Grund ist das Menue mit Farbpunkt und Haken, und das hat mit einem
+   <select> nichts mehr zu tun. */

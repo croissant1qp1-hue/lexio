@@ -1,17 +1,10 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
 import { slugifySetzName } from "@/lib/set-slug";
+import { holeSprachen, verlangteSprache } from "@/lib/sprachen-server";
+import { migrationsMeldung } from "@/lib/db-fehler";
 
 const MAX_NAME = 60;
-
-/**
- * Grenze fuer die Sprache. Der Wert wird fuer die Sprachfarbe benutzt
- * (lib/sprachen-farbe.ts) und steht als Beschriftung auf der Kachel. 40
- * Zeichen reichen fuer "Italienisch (Suedtirol)" und halten die Kachel
- * lesbar. Muss mit der Grenze im Wizard uebereinstimmen – sonst schlaegt der
- * Server eine Eingabe ab, die das Formular als gueltig durchgelassen hat.
- */
-const MAX_SPRACHE = 40;
 
 /**
  * Legt ein neues Vokabel-Set an.
@@ -24,6 +17,14 @@ const MAX_SPRACHE = 40;
  * `user_id` wird aus der Session gesetzt, nicht aus dem Body. Ein Feld, das
  * der Aufrufer selbst setzen darf, ist ein Feld, in das jeder seine eigene
  * uid schreiben und damit die Anonymfilterung umgehen kann.
+ *
+ * Die Sprache kommt als CODE und wird gegen public.sprachen geprueft. Vorher
+ * stand hier ein Freitext mit einer Grenze von 40 Zeichen, und alles, was
+ * oben eintraf, wurde als Sprache gespeichert: "Englisch", "englisch",
+ * "Englisch Unterricht", "Englischkenntnisse". Vier Sets, vier Farben, von
+ * denen keine zuordenbar war. Der Name ist damit abgeleitet und nicht mehr
+ * eingegeben – dieselbe Sprache laesst sich nicht zweimal verschieden
+ * schreiben.
  */
 export async function POST(request: Request) {
   const { supabase, user, antwort: nichtAngemeldet } = await mitUserOder401();
@@ -36,10 +37,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Ungültiges JSON" }, { status: 400 });
   }
 
-  const { name, sprache } = (body ?? {}) as { name?: unknown; sprache?: unknown };
+  const { name, spracheCode } = (body ?? {}) as { name?: unknown; spracheCode?: unknown };
 
   const setzName = typeof name === "string" ? name.trim() : "";
-  const setzSprache = typeof sprache === "string" && sprache.trim() ? sprache.trim() : "";
 
   if (!setzName) {
     return NextResponse.json({ error: "Name fehlt" }, { status: 400 });
@@ -47,11 +47,28 @@ export async function POST(request: Request) {
   if (setzName.length > MAX_NAME) {
     return NextResponse.json({ error: `Maximal ${MAX_NAME} Zeichen` }, { status: 400 });
   }
-  if (!setzSprache) {
-    return NextResponse.json({ error: "Sprache fehlt" }, { status: 400 });
+
+  const { sprachen: sprachListe, fehler: sprachFehler } = await holeSprachen(supabase);
+
+  if (sprachFehler) {
+    /*
+     * Kein Sprachcode, keine Sets. public.sprachen ist die Quelle fuer die
+     * Sprache, also ist ein Ausfall dort kein Detail – ohne sie laesst sich
+     * kein Set anlegen, und die Meldung muss das sagen.
+     */
+    return NextResponse.json(
+      {
+        error:
+          "Die Sprachliste konnte nicht geladen werden. Bitte " +
+          "supabase/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
+      },
+      { status: 503 },
+    );
   }
-  if (setzSprache.length > MAX_SPRACHE) {
-    return NextResponse.json({ error: `Maximal ${MAX_SPRACHE} Zeichen` }, { status: 400 });
+
+  const sprache = verlangteSprache(sprachListe, spracheCode);
+  if ("fehler" in sprache) {
+    return NextResponse.json({ error: sprache.fehler, felder: { sprache: sprache.fehler } }, { status: 400 });
   }
 
   const basis = slugifySetzName(setzName);
@@ -74,15 +91,30 @@ export async function POST(request: Request) {
       .insert({
         slug,
         name: setzName,
-        sprache: setzSprache,
+        // Die Freitextspalte ist NOT NULL und wird erst in Phase 4 entfernt.
+        // Sie bekommt ab hier den Namen aus der Sprachliste geschrieben und
+        // ist damit nur noch ein Abkömmling von sprache_code.
+        sprache: sprache.name,
+        sprache_code: sprache.code,
         anzahl_karten: 0,
         eigenes_set: true,
         user_id: user.id,
       })
-      .select("id, slug, name, sprache")
+      .select("id, slug, name, sprache_code, sprache")
       .single();
 
+
     if (error) {
+      /*
+       * Der Insert schreibt seit 0.1 auch `sprache_code`. Fehlt die Spalte
+       * (005 nicht gelaufen), kommt 42703 mit dem Spaltennamen im Text – und
+       * dann muss die Meldung 005 nennen, nicht 003.
+       */
+      const migration = migrationsMeldung(error);
+      if (migration) {
+        return NextResponse.json({ error: migration }, { status: 503 });
+      }
+
       /*
        * 42501 = insufficient_privilege, also RLS hat blockiert. Kommt vor,
        * wenn 003 nicht gelaufen ist, denn dann kennt die Tabelle user_id

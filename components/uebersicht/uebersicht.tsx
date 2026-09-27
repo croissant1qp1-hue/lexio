@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSprachFarbe } from "@/lib/sprachen-farbe";
+import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, ApiFehler } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import type { ProfilDaten } from "@/components/navbar/profil-karte";
@@ -11,7 +11,8 @@ import styles from "./uebersicht.module.css";
 type SetZeile = {
   id: string;
   name: string;
-  sprache: string;
+  /** Seit 0.1 ein Objekt aus public.sprachen, kein Freitext. */
+  sprache: SpracheInfo;
   kartenGesamt: number;
   kartenGelernt: number;
   kartenFaellig: number;
@@ -225,7 +226,7 @@ export default function Uebersicht() {
             </button>
 
             {sets.map((set) => {
-              const farbe = getSprachFarbe(set.sprache);
+              const farbe = farbeVonSprache(set.sprache);
               return (
                 <div
                   key={set.id}
@@ -243,7 +244,7 @@ export default function Uebersicht() {
                     onClick={() => router.push(`/lernen/${set.id}`)}
                     aria-label={`${set.name} lernen, ${set.kartenGelernt} von ${set.kartenGesamt} gelernt`}
                   >
-                    <span className={styles.kachelSprache}>{set.sprache}</span>
+                    <span className={styles.kachelSprache}>{nameVonSprache(set.sprache)}</span>
                     <span className={styles.kachelName}>{set.name}</span>
                     <span className={styles.kachelFortschritt}>
                       {set.kartenGelernt}/{set.kartenGesamt} gelernt

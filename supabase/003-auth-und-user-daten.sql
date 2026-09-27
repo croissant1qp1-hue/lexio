@@ -240,6 +240,10 @@ drop policy if exists "karten aktualisieren (nur entwicklung)" on public.karten;
 -- Und die oeffentlichen Leserechte neu gefasst: globale Sets bleiben offen,
 -- eigene Sets sind privat.
 drop policy if exists "sets sind oeffentlich lesbar" on public.karteikarten_sets;
+-- Auch der neue Name wird gedroppt: 003 ist idempotent gebaut, damit ein
+-- halb gelaufener Lauf wiederholbar ist. Ohne diese Zeile bricht der
+-- zweite Lauf mit 42710 ab, sobald "sets lesen" schon existiert.
+drop policy if exists "sets lesen" on public.karteikarten_sets;
 create policy "sets lesen"
   on public.karteikarten_sets for select
   using (user_id is null or user_id = auth.uid());
@@ -265,6 +269,7 @@ create policy "eigene sets loeschen"
 -- Policy von karteikarten_sets. Ohne diese Policy wuerde die Abfrage den
 -- Satz finden und eine fremde Karte preisgeben.
 drop policy if exists "karten sind oeffentlich lesbar" on public.karten;
+drop policy if exists "karten lesen" on public.karten;
 create policy "karten lesen"
   on public.karten for select
   using (exists (select 1 from public.karteikarten_sets s where s.id = set_id));

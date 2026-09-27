@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
+import { holeSprachen, spracheNachCode } from "@/lib/sprachen-server";
+import { UNBEKANNTE_SPRACHE, type SpracheInfo } from "@/lib/sprachen";
+import { migrationsMeldung } from "@/lib/db-fehler";
 
 const MAX_KARTEN = 20;
 
@@ -34,6 +37,9 @@ type RohKarte = {
   id: string;
   frage: string;
   antwort: string;
+  /** Seit 005. Null, wenn die Karte ohne Satz angelegt wurde. */
+  beispielsatz?: string | null;
+  beispiel_uebersetzung?: string | null;
   fortschritt: FortschrittsZeile[] | FortschrittsZeile | null;
 };
 
@@ -71,16 +77,41 @@ export async function GET(request: Request) {
    */
   const { data: set, error: setFehler } = await supabase
     .from("karteikarten_sets")
-    .select("id, slug, name, sprache")
+    .select("id, slug, name, sprache, sprache_code")
     .eq("slug", setSlug)
     .maybeSingle();
 
   if (setFehler) {
+    /*
+     * 42703 an dieser Stelle heisst: `sprache_code` fehlt, also ist 005 nicht
+     * gelaufen. Ohne diese Unterscheidung kaeme hier ein 500 mit einem
+     * Postgres-Satz, und wer danach sucht, findet nichts.
+     */
+    const migration = migrationsMeldung(setFehler);
+    if (migration) {
+      return NextResponse.json({ error: migration }, { status: 503 });
+    }
     return NextResponse.json({ error: setFehler.message }, { status: 500 });
   }
   if (!set) {
     return NextResponse.json({ error: "Sprache nicht gefunden" }, { status: 404 });
   }
+
+  /*
+   * Die Sprache des Sets als Objekt, damit die Lernansicht weder eine Farbe
+   * raten noch einen Code zaehlen muss. Sie braucht den Code fuer
+   * speechSynthesis (1.3) und die Farbe fuer die Karte (006).
+   *
+   * Aus der Sprachliste und nicht aus dem Set: die Liste enthaelt die Farben,
+   * und sie ist der Ort, an dem eine Sprache etwas ueber ihren Namen weiss.
+   * Faellt die Liste aus, laeuft das Lernen trotzdem – dann steht der
+   * Rueckfall da, und die Karten sind wichtiger als ihre Farbe.
+   */
+  const { sprachen: sprachListe } = await holeSprachen(supabase);
+  const bekannt = spracheNachCode(sprachListe, set.sprache_code);
+  const sprache: SpracheInfo = bekannt
+    ? { code: bekannt.code, name: bekannt.name, flaeche: bekannt.flaeche, akzent: bekannt.akzent }
+    : { ...UNBEKANNTE_SPRACHE, name: set.sprache || UNBEKANNTE_SPRACHE.name };
 
   /*
    * Eine Anfrage statt zwei.
@@ -111,7 +142,12 @@ export async function GET(request: Request) {
   const { data, error: kartenFehler } = await supabase
     .from("karten")
     .select(
-      "id, frage, antwort, " +
+      /*
+       * beispielsatz und beispiel_uebersetzung kommen mit, weil die Lernseite
+       * den Satz zeigen soll. Sie sind nullable, also kommen sie als
+       * `string | null` an – die Seite muss den Fall "kein Satz" auch kennen.
+       */
+      "id, frage, antwort, beispielsatz, beispiel_uebersetzung, " +
         "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am)",
     )
     .eq("set_id", set.id)
@@ -183,6 +219,8 @@ export async function GET(request: Request) {
       id: karte.id,
       frage: karte.frage,
       antwort: karte.antwort,
+      beispielsatz: karte.beispielsatz ?? null,
+      beispielUebersetzung: karte.beispiel_uebersetzung ?? null,
       stufe: zeile?.stufe ?? 0,
       gelernt: zeile?.gelernt ?? false,
       // Ohne Zeile: heute. Mit Zeile: ihr Datum.
@@ -195,7 +233,7 @@ export async function GET(request: Request) {
     // Oberflaeche zeigt dafuer "Noch keine Vokabeln" mit einem Knopf zum
     // Hinzufuegen. Ein 404 wuerde dort eine Fehlermeldung erzeugen.
     return NextResponse.json({
-      set: { slug: set.slug, name: set.name, sprache: set.sprache },
+      set: { slug: set.slug, name: set.name, sprache },
       karten: [],
       faelligGesamt: 0,
     });
@@ -212,7 +250,7 @@ export async function GET(request: Request) {
     .sort((a, b) => a.stufe - b.stufe);
 
   return NextResponse.json({
-    set: { slug: set.slug, name: set.name, sprache: set.sprache },
+    set: { slug: set.slug, name: set.name, sprache },
     karten: faelligeKarten.slice(0, MAX_KARTEN),
     // Gesamt, nicht die Zahl der gelieferten Karten: 20 sind die Obergrenze
     // fuer eine Runde, nicht der Bestand.

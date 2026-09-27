@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getSprachFarbe } from "@/lib/sprachen-farbe";
 /*
  * Zentraler fetch statt eigener Hilfsfunktion.
  *
@@ -182,7 +181,7 @@ export default function StatistikenSeite() {
                 {sprachen.map((s) => {
                   const quote = s.total > 0 ? Math.round(((s.gelernt ?? 0) / s.total) * 100) : 0;
                   return (
-                    <li className={styles.sprache} key={s.id ?? s.sprache}>
+                    <li className={styles.sprache} key={s.code ?? s.sprache}>
                       <button
                         type="button"
                         className={styles.spracheKopf}
@@ -190,7 +189,7 @@ export default function StatistikenSeite() {
                       >
                         <span
                           className={styles.punkt}
-                          style={{ backgroundColor: getSprachFarbe(s.sprache).flaeche }}
+                          style={{ backgroundColor: s.flaeche }}
                           aria-hidden="true"
                         />
                         <span className={styles.spracheName}>{s.sprache}</span>

@@ -3,14 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { getSprachFarbe } from "@/lib/sprachen-farbe";
+import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson } from "@/lib/api-client";
 import styles from "./karteikarten.module.css";
 
 type SetZeile = {
   id: string;
   name: string;
-  sprache: string;
+  /** Seit 0.1 ein Objekt aus public.sprachen, kein Freitext. */
+  sprache: SpracheInfo;
   kartenGesamt: number;
   kartenGelernt: number;
   kartenFaellig: number;
@@ -21,7 +22,7 @@ type SetZeile = {
   zuletztGelernt: string | null;
 };
 
-type SprachStat = { sprache: string; xp: number };
+type SprachStat = { code: string | null; xp: number };
 
 /**
  * Holt die Sets. Freie Funktion ohne State, damit der Effekt sie aufrufen
@@ -107,12 +108,20 @@ export default function KarteikartenSeite() {
     };
   }, []);
 
+  /*
+   * Die XP einer Sprache an ihrem Code, nicht an ihrem Namen.
+   *
+   * Vorher stand hier `eintrag.sprache.trim().toLowerCase().split(...)[0]` –
+   * dieselbe Umformung wie in lib/sprachen-farbe.ts, ein zweites Mal an einer
+   * zweiten Stelle. Jetzt ist der Code der Schluessel, und beide Seiten
+   * kommen aus derselben Sprachliste: ein Fehler ist nicht mehr an zwei Orten
+   * gleichzeitig noetig.
+   */
   const xpNachSprache = useMemo(() => {
     const karte: Record<string, number> = {};
     for (const eintrag of xpJeSprache) {
-      // Wie in sprachen-farbe.ts: "Italienisch Urlaub" -> "italienisch".
-      const key = eintrag.sprache.trim().toLowerCase().split(/[\s\-_/]+/)[0] ?? "";
-      karte[key] = eintrag.xp ?? 0;
+      if (!eintrag.code) continue;
+      karte[eintrag.code] = eintrag.xp ?? 0;
     }
     return karte;
   }, [xpJeSprache]);
@@ -122,12 +131,10 @@ export default function KarteikartenSeite() {
     if (!begriff) return sets;
     return sets.filter(
       (set) =>
-        set.name.toLowerCase().includes(begriff) || set.sprache.toLowerCase().includes(begriff),
+        set.name.toLowerCase().includes(begriff) ||
+        set.sprache.name.toLowerCase().includes(begriff),
     );
   }, [sets, suche]);
-
-  const spracheKey = (sprache: string) =>
-    sprache.trim().toLowerCase().split(/[\s\-_/]+/)[0] ?? "";
 
   return (
     <div className={styles.seite}>
@@ -208,7 +215,7 @@ export default function KarteikartenSeite() {
                   <th scope="row" className={styles.sprachZelle}>
                     <span
                       className={styles.punkt}
-                      style={{ backgroundColor: getSprachFarbe(set.sprache).flaeche }}
+                      style={{ backgroundColor: farbeVonSprache(set.sprache).flaeche }}
                       aria-hidden="true"
                     />
                     <span className={styles.text}>
@@ -220,7 +227,7 @@ export default function KarteikartenSeite() {
                         {set.name}
                       </Link>
                       <span className={styles.meta}>
-                        {set.sprache}
+                        {nameVonSprache(set.sprache)}
                         {set.eigen ? " · eigenes Set" : ""}
                         {set.kartenFaellig > 0 ? ` · ${set.kartenFaellig} fällig` : ""}
                       </span>
@@ -229,7 +236,7 @@ export default function KarteikartenSeite() {
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGelernt}</td>
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGesamt}</td>
                   <td className={`${styles.rechts} ${styles.zahl} ${styles.xp}`}>
-                    {xpNachSprache[spracheKey(set.sprache)] ?? 0}
+                    {set.sprache.code ? (xpNachSprache[set.sprache.code] ?? 0) : 0}
                   </td>
                   <td className={styles.datum}>{zeitHer(set.zuletztGelernt)}</td>
                 </tr>
