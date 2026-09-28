@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from "react";
+import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useDesign } from "@/components/design/design-anbieter";
 import { liesStand, setzeMerken, vergissAnmeldung } from "@/lib/geraet";
 import { liesTon, setzeTon, type TonStand } from "@/lib/ton";
+import { holeAbo, pushAn, pushAus } from "@/lib/push-client";
 import { setzeSessionDauer } from "@/lib/supabase/session-dauer";
 import "./einstellung.css";
 import { MIN_PASSWORT, PASSWORT_FEHLER } from "@/lib/passwort";
@@ -49,6 +51,37 @@ export default function Einstellungen() {
         text: string;
     } | null>(null);
 
+    /*
+     * Tägliche Erinnerung. `null` bedeutet "noch unbekannt": der Stand wird
+     * erst beim Öffnen der Seite geladen (hat dieses Gerät ein Abo?).
+     */
+    const [erinnerung, setErinnerung] = useState<boolean | null>(null);
+    const [erinnerungLaeuft, setErinnerungLaeuft] = useState(false);
+    const [erinnerungMeldung, setErinnerungMeldung] = useState<{
+        art: "ok" | "fehler";
+        text: string;
+    } | null>(null);
+    const [pushUnterstuetzt] = useState(
+        () =>
+            typeof window !== "undefined" &&
+            "serviceWorker" in navigator &&
+            "PushManager" in window,
+    );
+
+    useEffect(() => {
+        let weg = false;
+        holeAbo()
+            .then((abo) => {
+                if (!weg) setErinnerung(abo !== null);
+            })
+            .catch(() => {
+                if (!weg) setErinnerung(false);
+            });
+        return () => {
+            weg = true;
+        };
+    }, []);
+
     async function abmelden() {
         if (abmeldenLaeuft) return;
         setAbmeldenLaeuft(true);
@@ -89,6 +122,25 @@ export default function Einstellungen() {
             setzeTon(neu);
             return neu;
         });
+    }
+
+    async function erinnerungUmschalten(an: boolean) {
+        if (erinnerungLaeuft) return;
+        setErinnerungLaeuft(true);
+        setErinnerungMeldung(null);
+        const ergebnis = an ? await pushAn() : await pushAus();
+        if (ergebnis.ok) {
+            setErinnerung(an);
+            setErinnerungMeldung(an ? { art: "ok", text: "Die Erinnerung wird täglich zugestellt." }
+                : { art: "ok", text: "Die Erinnerung ist ausgeschaltet." });
+        } else {
+            setErinnerung(!an);
+            setErinnerungMeldung({
+                art: "fehler",
+                text: ergebnis.fehler ?? "Das Umschalten hat nicht geklappt.",
+            });
+        }
+        setErinnerungLaeuft(false);
     }
 
     async function passwortSpeichern(event: React.FormEvent) {
@@ -213,22 +265,36 @@ export default function Einstellungen() {
 
                 <div className="restliche-einstellungen">
                     <div className="benarichtigung">
-                        <h4 className="text-prog">Benachrichtigung</h4>
-                        <fieldset className="todo-gruppe" disabled>
-                            <div className="dayly-reminders">
-                                <div>
-                                    <p className="überschrift-reminder">Tägliche Erinnerung</p>
-                                    <p className="unterüberschrift-reminder">
-                                        Erhalte eine tägliche Lernerinnerung
-                                    </p>
-                                </div>
-                                <label className="switch">
-                                    <input id="dailyReminder" type="checkbox" />
-                                    <span className="slider" />
-                                </label>
-                            </div>
-                        </fieldset>
+                <h4 className="text-prog">Benachrichtigung</h4>
+                <div className="dayly-reminders">
+                    <div>
+                        <p className="überschrift-reminder">Tägliche Erinnerung</p>
+                        <p className="unterüberschrift-reminder">
+                            {pushUnterstuetzt
+                                ? "Erhalte eine tägliche Lernerinnerung, auch wenn Lexio zu ist."
+                                : "Dieser Browser unterstützt keine Push-Benachrichtigungen."}
+                        </p>
                     </div>
+                    <label className={`switch ${pushUnterstuetzt ? "" : "switch-deaktiviert"}`} aria-label="Tägliche Erinnerung">
+                        <input
+                            id="dailyReminder"
+                            type="checkbox"
+                            checked={erinnerung === true}
+                            disabled={!pushUnterstuetzt || erinnerungLaeuft || erinnerung === null}
+                            onChange={(e) => void erinnerungUmschalten(e.target.checked)}
+                        />
+                        <span className="slider" />
+                    </label>
+                </div>
+                {erinnerungMeldung && (
+                    <p
+                        className={erinnerungMeldung.art === "ok" ? "meldung-ok" : "meldung-fehler"}
+                        role="status"
+                    >
+                        {erinnerungMeldung.text}
+                    </p>
+                )}
+            </div>
 
                     <div className="daten">
                         <h4 className="text-prog">Konto</h4>
