@@ -190,6 +190,40 @@
     text-overflow: ellipsis;
 }
 
+/* "Nochmal lernen" unter dem Set-Namen.
+ *
+ * Absichtlich kein Knopf mit voller Gewichtung: der normale Weg ist der
+ * Name, und dieser hier ist der Ausweg fuer den Fall, dass der normale Weg
+ * nicht fuehrt. Wer ihn sieht, braucht ihn gerade – und wem er nichts sagt,
+ * stoert er nicht.
+ *
+ * 0.8125rem statt 0.75rem: bei 13px liegt die Zeile knapp ueber der
+ * 14px-Grenze aus Phase 5, und die Phase gilt fuer den Text dieser Seite
+ * genauso wie fuer den auf der Karte. */
+.nochmal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.3rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.nochmal:hover {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.nochmal:focus-visible {
+    outline: 2px solid var(--text-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
 .zahl {
     padding: 0.8rem 0.9rem;
     font-family: var(--mono);

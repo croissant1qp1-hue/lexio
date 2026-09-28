@@ -249,12 +249,35 @@ export default function KarteikartenSeite() {
                       >
                         {set.name}
                       </Link>
-                      <span className={styles.meta}>
+                    <span className={styles.meta}>
                         {nameVonSprache(set.sprache)}
                         {set.eigen ? " · eigenes Set" : ""}
                         {set.kartenFaellig > 0 ? ` · ${set.kartenFaellig} fällig` : ""}
-                      </span>
                     </span>
+                    {/*
+                     * "Nochmal lernen", und zwar genau dann, wenn der normale
+                     * Weg nicht fuehrt: nichts mehr faellig. Klick auf ein
+                     * bereits gelerntes Set fuehrt sonst zur Meldung "Alles
+                     * geschafft" – und der einzige Weg zurueck in die
+                     * Karten waere morgen. Das ist die haeufigste Form von
+                     * "ich will lernen und die App laesst mich nicht".
+                     *
+                     * Der Link traegt `modus=ueben`, weil die Fälligkeit in
+                     * der Route gefiltert wird. Ein eigener Pfad statt eines
+                     * Zustands im Client: die Lernseite ist damit auch per
+                     * Lesezeichen und vom Startbildschirm aus aufrufbar.
+                     */}
+                    {set.kartenFaellig === 0 && set.kartenGesamt > 0 && (
+                        <Link
+                            href={`/lernen/${set.id}?modus=ueben`}
+                            className={styles.nochmal}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <i className="fa-solid fa-rotate-right" aria-hidden="true" />
+                            Nochmal lernen
+                        </Link>
+                    )}
+                  </span>
                     {/*
                      * Nur fuer eigene Sets. Bei den vorgefertigten Sets waere
                      * der Knopf eine Sackgasse: die Route gibt 403 zurueck,

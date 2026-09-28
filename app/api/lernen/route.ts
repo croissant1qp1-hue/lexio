@@ -25,6 +25,17 @@ const MAX_KARTEN = 20;
  */
 const MAX_SET_KARTEN = 1000;
 
+/**
+ * Wie viele Karten "Nochmal lernen" ausliefert.
+ *
+ * Kleiner als MAX_KARTEN, und aus einem Grund: wer freiwillig uebt, will
+ * Wiederholung, nicht den kompletten Bestand. Bei 300 Karten waere eine
+ * Runde von 300 dann eine Sache von zwei Stunden, die niemand zu Ende
+ * macht. 40 sind etwa eine gute Sitzung – lang genug, dass sich ein
+ * Stapelwechsel lohnt, kurz genug, dass man ihn beendet.
+ */
+const MAX_WIEDERHOLUNG = 40;
+
 /** Eine Fortschrittszeile, wie die eingebettete Abfrage sie zurueckgibt. */
 type FortschrittsZeile = {
   stufe: number;
@@ -60,11 +71,33 @@ export async function GET(request: Request) {
   const { supabase, user, antwort: nichtAngemeldet } = await mitUserOder401();
   if (nichtAngemeldet) return nichtAngemeldet;
 
-  const setSlug = new URL(request.url).searchParams.get("set");
+  const suche = new URL(request.url).searchParams;
+  const setSlug = suche.get("set");
 
   if (!setSlug) {
     return NextResponse.json({ error: "Parameter 'set' fehlt" }, { status: 400 });
   }
+
+  /*
+   * `modus=ueben` ignoriert die Faelligkeit.
+   *
+   * Wofuer: der Knopf "Nochmal lernen" auf der_sets-Uebersicht. Wer ein Set
+   * anklickt, das heute schon dran war, sieht sonst "Alles geschafft" und
+   * kommt nicht hinein – der einzige Weg zurueck in die Karten waere, auf
+   * den naechsten Tag zu warten. Das ist die haeufigste Form von
+   * "ich will lernen und die App laesst mich nicht".
+   *
+   * Warum ein Parameter und kein zweiter Endpunkt: die Regel, welche Karten
+   * es gibt, bleibt an einer Stelle. Ein zweiter Endpunkt muesste die
+   * Besitzpruefung und den Fälligkeitsfilter ein zweites Mal richtig
+   * hinkriessen, und diese beiden Regeln sind genau die, die man nicht
+   * doppelt pflegen will.
+   *
+   * `true` ist die einzige gueltige Form. Alles andere faellt auf den
+   * normalen Modus zurueck, damit ein Tippfehler nicht ungefragt eine
+   * Wiederholung mit 40 Karten startet.
+   */
+  const ueben = suche.get("modus") === "ueben";
 
   const heute = new Date().toISOString().slice(0, 10);
 
@@ -228,6 +261,14 @@ export async function GET(request: Request) {
     };
   });
 
+  /*
+   * Karten ohne Fortschrittszeile sind neu. Eine neue Karte ist sofort
+   * faellig – das ist der coalesce in der View und hier dieselbe Regel.
+   * Ohne den Vergleich `faelligAm <= heute` kaeme man nie an: alle Karten
+   * eines neuen Sets waeren unsichtbar, und die App wuerde bei jedem Start
+   * "nichts zu lernen" behaupten. Der Vergleich steht deshalb unten beim
+   * Filtern und nicht hier beim Bauen der Liste.
+   */
   if (alle.length === 0) {
     // Nicht als Fehler: ein leeres Set ist ein gueltiger Zustand, und die
     // Oberflaeche zeigt dafuer "Noch keine Vokabeln" mit einem Knopf zum
@@ -239,22 +280,42 @@ export async function GET(request: Request) {
     });
   }
 
-  const faelligeKarten = alle
-    // Karten ohne Fortschrittszeile sind neu. Eine neue Karte ist sofort
-    // faellig – das ist der coalesce in der View und hier dieselbe Regel.
-    // Ohne sie kaeme man nie an: alle Karten eines neuen Sets waeren unsichtbar
-    // und die App wuerde bei jedem Start "nichts zu lernen" behaupten.
-    .filter((karte) => karte.faelligAm <= heute)
-    // Faellige zuerst, danach die mit der niedrigsten Stufe. Neue Karten
-    // haben Stufe 0 und kommen dadurch vor, ohne eine zweite Abfrage.
-    .sort((a, b) => a.stufe - b.stufe);
+  /*
+   * Sortierung in beiden Modi gleich – und das ist Absicht. "Nochmal lernen"
+   * sortiert die niedrigsten Stufen nach vorn, also genau die Karten, die am
+   * weitesten weg sind. Ein Stapel, der mit dem Schwierigsten beginnt, faengt
+   * an zu lernen; einer, der mit dem Leichtesten beginnt, endet bei den
+   * mittleren, weil die letzten vier den ganzen Rest der Sitzung kosten.
+   */
+  const sortiert = alle.sort((a, b) => a.stufe - b.stufe);
+
+  /*
+   * Im Uebungsmodus zaehlt nicht die Faelligkeit, sondern der Bestand. Sonst
+   * waere der Knopf bei einem Set, das man heute schon gemacht hat, genau
+   * dort wirkungslos, wo man ihn braucht.
+   */
+  const genutzt = ueben
+    ? sortiert.slice(0, MAX_WIEDERHOLUNG)
+    : sortiert.filter((karte) => karte.faelligAm <= heute).slice(0, MAX_KARTEN);
 
   return NextResponse.json({
     set: { slug: set.slug, name: set.name, sprache },
-    karten: faelligeKarten.slice(0, MAX_KARTEN),
-    // Gesamt, nicht die Zahl der gelieferten Karten: 20 sind die Obergrenze
-    // fuer eine Runde, nicht der Bestand.
-    faelligGesamt: faelligeKarten.length,
+    karten: genutzt,
+    /*
+     * Gesamt, nicht die Zahl der gelieferten Karten: 20 sind die Obergrenze
+     * fuer eine Runde, nicht der Bestand. Im Uebungsmodus ist es die
+     * Obergrenze von 40, damit "12 von 40 geschafft" dasselbe meint wie
+     * vorher, nur eben in einem anderen Umfang.
+     */
+    faelligGesamt: ueben
+      ? Math.min(sortiert.length, MAX_WIEDERHOLUNG)
+      : sortiert.filter((karte) => karte.faelligAm <= heute).length,
+    /*
+     * Der Client braucht das, um den Endschirm ehrlich zu halten: ohne diesen
+     * Hinweis wuerde er bei "7 von 40" nach einer Runde von 7 behaupten, es
+     * sei nichts mehr da, obwohl 33 im Set liegen.
+     */
+    ...(ueben ? { uebungsmodus: true } : {}),
     /*
      * Nur gesetzt, wenn es wirklich zu viel ist. Die Oberflaeze kann das
      * anzeigen; wenn sie es nicht tut, ist die Antwort wenigstens ehrlich.

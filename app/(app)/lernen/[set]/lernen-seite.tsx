@@ -42,6 +42,13 @@ type LernAntwort = {
     /** Nur gesetzt, wenn das Set groesser ist als die Lesegrenze der Route. */
     setZuGross?: boolean;
     hinweis?: string;
+    /**
+     * Von der Route gesetzt, wenn sie auf `?modus=ueben` ignored hat. Nur zum
+     * Anzeigen: die Karten sind dieselben, es sind nur mehr und andere. Der
+     * Endschirm braucht es, um "7 von 40 geschafft" nicht mit "Alles
+     * geschafft" zu verwechseln.
+     */
+    uebungsmodus?: boolean;
 };
 
 /**
@@ -61,7 +68,27 @@ type Punkte = { xp: number; streak: number };
 
 const NULL_PUNKTE: Punkte = { xp: 0, streak: 0 };
 
-export default function LernenSeite({ setSlug }: { setSlug: string }) {
+export default function LernenSeite({
+    setSlug,
+    ueben = false,
+    rundeNr = 0,
+}: {
+    setSlug: string;
+    /**
+     * Aus `?modus=ueben` in der Adresse, nicht aus einem Klick. Ein Knopf im
+     * Client wuerde den Zustand verlieren, sobald die Seite neu geladen wird
+     * – und "Nochmal lernen" ist genau der Knopf, den man nach einem Fehler
+     * oder einer Unterbrechung noch einmal braucht.
+     */
+    ueben?: boolean;
+    /**
+     * Zaehler der Wiederholungsrunden aus `?runde=`. Er gehoert in die
+     * Abhaengigkeit des Ladeeffekts, damit "Weitere Runde" die Karten
+     * wirklich neu holt statt dieselbe Server-Ausgabe noch einmal zu zeigen.
+     * Sonst waere der Knopf eine Attrappe – und zwar eine, die man bemerkt.
+     */
+    rundeNr?: number;
+}) {
     const router = useRouter();
 
     const [set, setSet] = useState<SetInfo | null>(null);
@@ -77,6 +104,13 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
     const [hinweis, setHinweis] = useState<string | null>(null);
     const [punkte, setPunkte] = useState<Punkte>(NULL_PUNKTE);
     const [aufblitzen, setAufblitzen] = useState<number | null>(null);
+    /**
+     * Kommt von der Route, nicht von `ueben`: `ueben` sagt, was der Nutzer
+     * angefragt hat, `uebungsmodus` sagt, was tatsaechlich geliefert wurde.
+     * Bei einem leeren Set liefert die Route keine Karten, und dann waere
+     * ein Knopf "Nochmal lernen" eine Sackgasse.
+     */
+    const [uebungsmodus, setUebungsmodus] = useState(false);
 
     /**
      * Wie viele Karten heute faellig sind – vor der Grenze von 20.
@@ -149,7 +183,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 // aufhalten.
                 const [daten, profil] = await Promise.all([
                     holeJson<LernAntwort | null>(
-                        `/api/lernen?set=${encodeURIComponent(setSlug)}`,
+                        `/api/lernen?set=${encodeURIComponent(setSlug)}${ueben ? "&modus=ueben" : ""}`,
                         null,
                     ),
                     // Fehlgeschlagenes /api/profil ist in der Regel kein
@@ -174,6 +208,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 setSet(daten.set);
                 setKarten(daten.karten ?? []);
                 setFaelligGesamt(daten.faelligGesamt ?? 0);
+                setUebungsmodus(daten.uebungsmodus === true);
                 setIndex(0);
                 setAufgedeckt(false);
                 if (profil) setPunkte({ xp: profil.xp, streak: profil.streak });
@@ -203,7 +238,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
         return () => {
             abgebrochen = true;
         };
-    }, [setSlug, runde]);
+    }, [setSlug, runde, ueben, rundeNr]);
 
     const karte = karten[index];
     const fertig = !laden && !fehler && karten.length > 0 && index >= karten.length;
@@ -477,13 +512,27 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                         {uebrig > 0 ? "🎉" : "🏁"}
                     </span>
                     <h2 className={styles.endeTitel}>
-                        {uebrig > 0 ? "Runde geschafft" : "Alles geschafft"}
+                        {uebrig > 0
+                            ? "Runde geschafft"
+                            : uebungsmodus
+                              ? "Wiederholt"
+                              : "Alles geschafft"}
                     </h2>
                     <p className={styles.endeText}>
                         {uebrig > 0 ? (
                             <>
                                 {karten.length} von {faelligGesamt} geschafft – {uebrig}{" "}
-                                {uebrig === 1 ? "bleibt" : "bleiben"} noch. Morgen geht es weiter.
+                                {uebrig === 1 ? "bleibt" : "bleiben"} noch.
+                                {uebungsmodus
+                                    ? " Der Rest folgt beim nächsten Mal."
+                                    : " Morgen geht es weiter."}
+                            </>
+                        ) : uebungsmodus ? (
+                            <>
+                                {karten.length} {karten.length === 1 ? "Karte" : "Karten"} aus{" "}
+                                {set?.name} nochmal durchgegangen. Jede Antwort zählt wie beim
+                                Lernen: sichere Karten rücken weiter hinaus, unsichere kommen
+                                früher wieder.
                             </>
                         ) : (
                             <>
@@ -508,9 +557,27 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                             <span className={styles.endeLabel}>Serie</span>
                         </div>
                     </div>
-                    <button type="button" className={styles.knopf} onClick={neuStarten}>
-                        Noch eine Runde
-                    </button>
+                    {/*
+                     * "Nochmal lernen" nur im normalen Modus. Im Uebungsmodus
+                     * waere "Noch eine Runde" dasselbe in zwei Worten – und
+                     * `neuStarten` laedt dieselben 40 Karten noch einmal, was
+                     * sich anfuehlt wie ein Fehler.
+                     */}
+                    {uebungsmodus ? (
+                        <button
+                            type="button"
+                            className={styles.knopf}
+                            onClick={() =>
+                                router.push(`/lernen/${setSlug}?modus=ueben&runde=${rundeNr + 1}`)
+                            }
+                        >
+                            Weitere Runde
+                        </button>
+                    ) : (
+                        <button type="button" className={styles.knopf} onClick={neuStarten}>
+                            Noch eine Runde
+                        </button>
+                    )}
                     <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
                         Zur Übersicht
                     </button>
