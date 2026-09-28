@@ -363,6 +363,13 @@ Import und Wortlisten-Generator gefüllt, bei manuellen Karten leer.
 Balken. Vorschlag: `gelernt` ab Stufe ≥ 2, plus eigene Spalte für „gesehen".
 Braucht Migration plus Anpassung aller drei Views.
 
+> **Erledigt, live geprüft.** Migration 007: neue Spalte `gesehen` (Backfill
+> für Bestand), `gelernt` ab Stufe ≥ 2, `antwort_verbuchen` mit `p_gesehen`.
+> Beide Views zählen `karten_gesehen`/`gesehen` zusätzlich, während der
+> Fortschrittsbalken weiter die ehrliche `gelernt`-Zahl nutzt. Treffer/Fehler
+> hängen nun an der Bewertung, nicht am Lernstand — die Leech-Statistik (1.7)
+> bleibt damit aussagekräftig.
+
 **1.6 Trefferquote korrigieren.** `lernen-seite.tsx:163` — nur „gut" und
 „einfach" als richtig zählen, damit die Zahl etwas Wahres sagt.
 
@@ -375,7 +382,7 @@ nochmal. Ton kommt auf der Rückseite (der Begriff klingt, die Vorderseite
 bleibt still). Beispiel steht auf der Rückseite.
 Fortschrittsbalken stimmen.
 
-**Stand Phase 1:** 1.1, 1.2 und 1.3 erledigt. Offen sind 1.5, 1.6 und 1.7.
+**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5 und 1.6 erledigt. Offen ist 1.7.
 1.4 ist inhaltlich in 0.2 erledigt, die automatische Fuellung folgt mit 2.2
 und 2.3.
 
