@@ -333,6 +333,12 @@ Lautsprecher-Knopf auf der Kartenvorderseite, `voiceschanged` abfangen
 (Safari lädt Stimmen asynchron — sonst ist der erste Klick stumm),
 Großbuchstaben-Automatik aus, sonst buchstabiert es.
 
+> **Erledigt am 2026-09-28, Commit `ee984f3`.** Die Logik liegt in
+> `lib/sprachausgabe.ts`, nicht in der Seite: Stimmen asynchron, `lang`
+> gesetzt (Chrome buchstabiert ohne), `cancel()` vor jedem neuen Satz.
+> 45 Fälle gegen eine nachgebaute `speechSynthesis` geprüft. Nicht live am
+> Lautsprecher geprüft — dafür fehlt dem Browser-Werkzeug das TTY.
+
 **1.4 Beispielsatz anzeigen.** Auf der Rückseite unter der Übersetzung. Bei
 Import und Wortlisten-Generator gefüllt, bei manuellen Karten leer.
 
@@ -355,6 +361,10 @@ die letzte Antwort.
 **Abnahme:** Runde fühlen sich ehrlich an. „Nochmal" zeigt die Karte
 nochmal. Ton kommt auf der Vorderseite. Beispiel steht auf der Rückseite.
 Fortschrittsbalken stimmen.
+
+**Stand Phase 1:** 1.1, 1.2 und 1.3 erledigt. Offen sind 1.5, 1.6 und 1.7.
+1.4 ist inhaltlich in 0.2 erledigt, die automatische Fuellung folgt mit 2.2
+und 2.3.
 
 ### Phase 2 — Inhalt und Import
 
