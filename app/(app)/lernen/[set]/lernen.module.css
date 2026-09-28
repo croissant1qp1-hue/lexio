@@ -243,7 +243,31 @@
    dazugedeckt – der aeussere Container stand damit fest auf Null Pixeln
    innerhalb seines Elternteils, und die Kopfzeile, der Fortschrittsbalken
    und die Bewertungsknoepfe lagen uebereinander am oberen Rand. */
+/* Farbe des Textes auf der Karte – und der Grund, warum sie hier steht.
+ *
+ * Die Kartenflaeche ist die SPRACHFARBE, nicht die Theme-Flaeche. Alle zwoelf
+ * Farben in public.sprachen sind gesaettigte Toene zwischen #FFC857 und
+ * #5B8DEF. Damit ist die Karte in JEDEM Theme eine mittelhelle Flaeche, und
+ * die Theme-Textfarbe passt nicht darauf:
+ *
+ *   dunkles Theme  #f3f0e7 auf #FFC857  =  1.35:1   unlesbar
+ *   helles Theme   #20252a auf #FFC857  = 10.04:1   in Ordnung
+ *
+ * Im dunklen Theme standen 12 von 12 Sprachen unter der Grenze von 4.5:1,
+ * die auf der Rueckseite mit dem Beispieltext noch schlechter. Das Wort war
+ * da, nur nicht lesbar.
+ *
+ * Warum es hier KEIN "graues" Sekundaer gibt: gemessen ueber alle zwoelf
+ * Flaechen liegt der hellste Wert, der die 4.5:1 ueberall haelt, bei
+ * #1c252b. Zwischen #0d171d und #1c252b ist der ganze Spielraum. Wer hier
+ * ein measbares Grau einsetzt, faellt auf den dunkleren Sprachfarben
+ * (Russisch #5B8DEF, Tuerkisch #E85D9E) unter die Grenze. Die Hierarchie
+ * kommt deshalb aus Groesse und Gewicht, nicht aus hellerer Farbe.
+ */
 .kartenSeite {
+    --karten-tinte: var(--ink);
+    --karten-tinte-soft: #1c252b;
+
     position: absolute;
     inset: 0;
     border-radius: 22px;
@@ -256,7 +280,7 @@
     gap: 0.9rem;
     padding: 2.4rem 1.5rem 3.8rem;
     text-align: center;
-    color: var(--text-primary);
+    color: var(--karten-tinte);
     overflow: hidden;
 }
 
@@ -272,7 +296,10 @@
     font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    opacity: 0.6;
+    /* Statt `opacity: 0.6`. Die Opazitaet misste sich gegen die Sprachfarbe
+     * und ergab im schlimmsten Fall 3.03:1. Siehe die Erklaerung an
+     * .kartenSeite: heller geht nicht. */
+    color: var(--karten-tinte-soft);
 }
 
 .karteText {
@@ -296,7 +323,10 @@
     margin-top: 0.5rem;
     font-size: clamp(0.95rem, 3.6vw, 1.15rem);
     line-height: 1.35;
-    color: var(--text-secondary);
+    /* Ebenfalls nicht --text-secondary. Das stand im dunklen Theme bei
+     * 1.09:1 bis 1.55:1 – auf der Rueckseite, also genau dort, wo der Text
+     * steht. Siehe die Erklaerung an .kartenSeite. */
+    color: var(--karten-tinte-soft);
     overflow-wrap: break-word;
     hyphens: auto;
 }
@@ -306,8 +336,11 @@
     bottom: 1.1rem;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 0.74rem;
-    opacity: 0.55;
+    /* 0.74rem waren 11.8px, also unter der 14px-Grenze aus Phase 5, und
+     * `opacity: 0.55` ergab 2.77:1. Beides ist hier angefasst, weil dieser
+     * Text auf der Sprachflaeche steht und damit unter beiden Regeln litt. */
+    font-size: 0.875rem;
+    color: var(--karten-tinte-soft);
     white-space: nowrap;
 }
 
