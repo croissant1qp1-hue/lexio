@@ -327,8 +327,13 @@
     right: 0.6rem;
     padding: 0.1rem 0.45rem;
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.42);
-    color: var(--gold);
+    /* Fester Champagner-Ton und fester dunkler Chip. Die Kachelflaeche ist
+       in BEIDEN Designs dieselbe Sprachfarbe, also braucht der Text hier
+       denselben hellen Wert – `var(--gold)` ist im hellen Design ein
+       dunkles Gold (#b57f1c) und fiel dort auf dem dunklen Chip ins
+       Unlesbare zurueck. Gleiche Begruendung wie --karten-tinte. */
+    background: rgba(13, 23, 29, 0.85);
+    color: #eec76b;
     font-family: var(--mono);
     font-size: 0.66rem;
     font-weight: 700;
