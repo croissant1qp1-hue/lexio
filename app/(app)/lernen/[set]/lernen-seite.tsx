@@ -321,7 +321,12 @@ export default function LernenSeite({
      *  auseinanderlaufen koennen. */
     const sitzung = useMemo(() => {
         const beantwortet = bilanz.nochmal + bilanz.schwer + bilanz.gut + bilanz.einfach;
-        const richtig = beantwortet - bilanz.nochmal;
+        /*
+         * Trefferquote ehrlich (Plan 1.6): nur "gut" und "einfach" zaehlen
+         * als richtig. Vorher war `richtig = beantwortet - nochmal` und
+         * "schwer" zaehlte mit – wer immer "schwer" klickte, hatte 100 %.
+         */
+        const richtig = bilanz.gut + bilanz.einfach;
         return {
             beantwortet,
             richtig,
