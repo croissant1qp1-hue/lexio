@@ -78,6 +78,15 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
     const [aufblitzen, setAufblitzen] = useState<number | null>(null);
 
     /**
+     * Wie viele Karten heute faellig sind – vor der Grenze von 20.
+     *
+     * `karten.length` ist die Runde, `faelligGesamt` ist der Stapel. Ohne die
+     * zweite Zahl war "Sitzung geschafft" nach 20 Karten eine Aussage ueber
+     * 47, und niemand konnte sehen, dass 27 liegen bleiben.
+     */
+    const [faelligGesamt, setFaelligGesamt] = useState(0);
+
+    /**
      * Bilanz dieser Runde. Getrennt vom Gesamt-Fortschritt, weil "XP gesamt"
      * und "XP in dieser Runde" zwei verschiedene Fragen sind und die
      * Gesamtzahl sich mit jeder Runde veraendert.
@@ -136,6 +145,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 setHinweis(daten.setZuGross ? (daten.hinweis ?? null) : null);
                 setSet(daten.set);
                 setKarten(daten.karten ?? []);
+                setFaelligGesamt(daten.faelligGesamt ?? 0);
                 setIndex(0);
                 setAufgedeckt(false);
                 if (profil) setPunkte({ xp: profil.xp, streak: profil.streak });
@@ -234,7 +244,28 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 // Fortschrittsverlust. Jetzt bleibt die Karte stehen, und
                 // dieselbe Bewertung kann erneut gesendet werden.
                 setAufgedeckt(false);
-                setIndex((i) => i + 1);
+
+                /*
+                 * "Nochmal" heisst: dieselbe Karte gleich nochmal. Vorher
+                 * stand hier fuer JEDE Bewertung `setIndex(i => i + 1)`,
+                 * also wanderte die Karte aus der Runde heraus und kam erst
+                 * wieder, wenn jemand die Seite neu lud. `INTERVALLE[0] = 0`
+                 * sagt dem Server "heute noch faellig" – die Karte war also
+                 * nicht weg, nur aus der Warteschlange. Der meistgeklickte
+                 * Knopf wirkte damit kaputt.
+                 *
+                 * Die Karte wandert jetzt ans Ende der Schlange und `index`
+                 * bleibt stehen: die naechste rueckt in dieselbe Position, und
+                 * der Fortschrittsbalken zaehlt nur Karten, die wirklich
+                 * weiterkommen. Nach hinten gehaengt wird sie erst, wenn alle
+                 * anderen durch sind – sonst wuerde sie sofort wieder
+                 * erscheinen und die Runde nie enden.
+                 */
+                if (bewertung === "nochmal") {
+                    setKarten((liste) => [...liste.slice(index + 1), karte]);
+                } else {
+                    setIndex((i) => i + 1);
+                }
             } catch (antwortFehler) {
                 // Optimistische Zaehlung zuruecknehmen, sonst zeigt die
                 // Kopfzeile XP, die es nie gab.
@@ -259,7 +290,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 setSenden(false);
             }
         },
-        [karte, senden],
+        [karte, senden, index],
     );
 
     // Tastaturbedienung: Leertaste deckt auf, 1-4 bewerten.
@@ -355,16 +386,35 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
         );
     }
 
+    /*
+     * Was nach der Runde noch da ist. `faelligGesamt` ist der Stapel von
+     * heute, `karten.length` die Runde davon (maximal 20). Die Differenz ist
+     * die Zahl, die vorher nirgends stand.
+     */
+    const uebrig = Math.max(0, faelligGesamt - karten.length);
+
     if (fertig) {
         return (
             <div className={styles.seite}>
                 <div className={styles.ende}>
                     <span className={styles.endeZeichen} aria-hidden="true">
-                        🎉
+                        {uebrig > 0 ? "🎉" : "🏁"}
                     </span>
-                    <h2 className={styles.endeTitel}>Sitzung geschafft</h2>
+                    <h2 className={styles.endeTitel}>
+                        {uebrig > 0 ? "Runde geschafft" : "Alles geschafft"}
+                    </h2>
                     <p className={styles.endeText}>
-                        {karten.length} {karten.length === 1 ? "Karte" : "Karten"} in {set?.name}.
+                        {uebrig > 0 ? (
+                            <>
+                                {karten.length} von {faelligGesamt} geschafft – {uebrig}{" "}
+                                {uebrig === 1 ? "bleibt" : "bleiben"} noch. Morgen geht es weiter.
+                            </>
+                        ) : (
+                            <>
+                                {karten.length} {karten.length === 1 ? "Karte" : "Karten"} in{" "}
+                                {set?.name}. Für heute ist nichts mehr fällig.
+                            </>
+                        )}
                     </p>
                     <div className={styles.endeStats}>
                         <div className={styles.endeStat}>
