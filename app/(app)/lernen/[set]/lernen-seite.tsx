@@ -7,6 +7,7 @@ import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik"
 import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
+import { spreche, stimmen, stoppe, tonVerfuegbar } from "@/lib/sprachausgabe";
 import styles from "./lernen.module.css";
 
 type Karte = {
@@ -103,11 +104,38 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
     // Effekt-Rumpf, wo es einen zweiten Render-Durchlauf erzwingen wuerde.
     const [runde, setRunde] = useState(0);
 
+    /*
+     * Vorlesen (Plan 1.3).
+     *
+     * `tonDa` heisst nicht "der Browser kann sprechen", sondern "es gibt
+     * ueberhaupt eine Stimme". Ohne Stimmenliste waere der Knopf ein
+     * Kontakt, der nichts tut, und ein Knopf, der nichts tut, ist schlimmer
+     * als kein Knopf. Die Liste wird einmal geholt und dann behalten: sie
+     * aendert sich waehrend einer Sitzung nicht.
+     */
+    const [tonDa, setTonDa] = useState(false);
+    const [spricht, setSpricht] = useState(false);
+
+    useEffect(() => {
+        let weg = false;
+        if (!tonVerfuegbar()) return;
+        /* Safari fuellt die Liste erst nach `voiceschanged`. */
+        stimmen().then((liste) => {
+            if (!weg) setTonDa(liste.length > 0);
+        });
+        return () => {
+            weg = true;
+            stoppe();
+        };
+    }, []);
+
     const neuStarten = useCallback(() => {
         setLaden(true);
         setFehler(null);
         setSpeicherFehler(null);
         setBilanz({ nochmal: 0, schwer: 0, gut: 0, einfach: 0 });
+        stoppe();
+        setSpricht(false);
         setRunde((r) => r + 1);
     }, []);
 
@@ -180,6 +208,53 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
     const karte = karten[index];
     const fertig = !laden && !fehler && karten.length > 0 && index >= karten.length;
 
+    /**
+     * Karte vorlesen: erst der Begriff, dann – wenn da – der Beispielsatz.
+     *
+     * Beides steht auf der Vorderseite, und beides in der Zielsprache. Der
+     * Beispielsatz gehoert dazu, weil ein Begriff ohne seinen Gebrauch
+     * nichts zu lernen ist; er wird deshalb als zweiter Satz derselben
+     * Ausgabe gequeue't statt in einem zweiten Klick.
+     *
+     * Zweiter Klick waehrend des Sprechens bricht ab. Sonst gibt es zwei
+     * Wege zum Stoppen, und der ungedachte laeuft weiter.
+     */
+    const vorlesen = useCallback(() => {
+        if (!karte) return;
+        if (spricht) {
+            stoppe();
+            setSpricht(false);
+            return;
+        }
+        const teile = [karte.frage, karte.beispielsatz ?? ""];
+        if (!spreche(teile, set?.sprache.code ?? null)) return;
+        setSpricht(true);
+        /*
+         * Die API meldet kein Ende, auf das man sich verlassen kann
+         * (`onend` fehlt in manchen Builds). Darum wird der Zustand nach
+         * einer grosszuegigen Obergrenze zurueckgesetzt – lieber ein Icon,
+         * das kurz zu frueh zurueckfaellt, als eines, das haengen bleibt.
+         */
+        window.setTimeout(() => setSpricht(false), 12000);
+    }, [karte, set, spricht]);
+
+    /*
+     * Das Abbrechen haengt an den EREIGNISSEN, nicht an den Werten: Karte
+     * gewechselt, umgedreht, Runde neu gestartet. Ein Effekt auf `index`
+     * waere kuerzer, ruft aber setState im Effekt-Rumpf auf – und das ist
+     * genau die Form, die beim Rendern einen zweiten Durchlauf erzwingt.
+     */
+    const tonAnhalten = useCallback(() => {
+        setSpricht(false);
+        stoppe();
+    }, []);
+
+    /** Umdrehen: die Karte wechselt die Seite, also auch die Stimme. */
+    const umdrehen = useCallback(() => {
+        tonAnhalten();
+        setAufgedeckt((a) => !a);
+    }, [tonAnhalten]);
+
     /** Aus der Bilanz abgeleitet, damit Anzeige und Zaehler nicht
      *  auseinanderlaufen koennen. */
     const sitzung = useMemo(() => {
@@ -198,6 +273,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
             if (!karte || senden) return;
             setSenden(true);
             setSpeicherFehler(null);
+            tonAnhalten();
 
             const xp = BEWERTUNGEN.find((b) => b.id === bewertung)?.xp ?? 0;
 
@@ -290,7 +366,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                 setSenden(false);
             }
         },
-        [karte, senden, index],
+        [karte, senden, index, tonAnhalten],
     );
 
     // Tastaturbedienung: Leertaste deckt auf, 1-4 bewerten.
@@ -500,7 +576,7 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                     type="button"
                     className={`${styles.karte} ${aufgedeckt ? styles.karteAufgedeckt : ""}`}
                     style={farbe ? ({ ["--kartenFarbe" as string]: farbe } as React.CSSProperties) : undefined}
-                    onClick={() => setAufgedeckt((a) => !a)}
+                    onClick={umdrehen}
                     aria-label={aufgedeckt ? "Antwort verbergen" : "Antwort aufdecken"}
                     aria-pressed={aufgedeckt}
                 >
@@ -558,6 +634,81 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                                             </span>
                                         )}
                                         <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
+
+                                        {/*
+                                         * Vorlesen.
+                                         *
+                                         * `role="button"` auf einem span, KEIN
+                                         * <button>: die Karte ist selbst ein
+                                         * <button>, und ein Knopf in einem
+                                         * Knopf ist ungueltiges HTML – React
+                                         * warnt mit validateDOMNesting, und die
+                                         * Bedienung mit der Tastatur ist
+                                         * dann von der des Knopfes abhaengig.
+                                         * So bleibt die Karte der einzige
+                                         * echte Knopf, und der Lautsprecher
+                                         * bringt seine eigene Tastaturbedienung
+                                         * mit (Enter und Leertaste), weil ein
+                                         * role-Button sonst gar nicht
+                                         * bedienbar waere.
+                                         *
+                                         * `stopPropagation` in beiden
+                                         * Handlern: ohne das dreht sich beim
+                                         * Vorlesen die Karte gleich mit, und
+                                         * man hoert die Rueckseite vor, waehrend
+                                         * man die Vorderseite liest.
+                                         */}
+                                        {tonDa && (
+                                            <span
+                                                role="button"
+                                                tabIndex={0}
+                                                className={`${styles.karteTon} ${
+                                                    spricht ? styles.karteTonAktiv : ""
+                                                }`}
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    vorlesen();
+                                                }}
+                                                onKeyDown={(e) => {
+                                                    if (e.key !== "Enter" && e.key !== " ") return;
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    vorlesen();
+                                                }}
+                                                aria-label={`${karte.frage} vorlesen`}
+                                                title="Vorlesen"
+                                            >
+                                                <svg
+                                                    viewBox="0 0 24 24"
+                                                    width="20"
+                                                    height="20"
+                                                    aria-hidden="true"
+                                                    focusable="false"
+                                                >
+                                                    <path
+                                                        d="M4 9v6h4l5 4V5L8 9H4z"
+                                                        fill="currentColor"
+                                                    />
+                                                    {spricht ? (
+                                                        <path
+                                                            d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                            strokeLinecap="round"
+                                                            fill="none"
+                                                        />
+                                                    ) : (
+                                                        <path
+                                                            d="M16.5 8.5a5 5 0 0 1 0 7"
+                                                            stroke="currentColor"
+                                                            strokeWidth="2"
+                                                            strokeLinecap="round"
+                                                            fill="none"
+                                                        />
+                                                    )}
+                                                </svg>
+                                            </span>
+                                        )}
 
                                         <span className={styles.karteZeichen}>
                                             <Image

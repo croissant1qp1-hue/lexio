@@ -381,8 +381,72 @@
     white-space: nowrap;
 }
 
-/* Sprachzeichen. Liegt in .seite, dreht sich also mit – und steht nach dem
-   Umdrehen auf der Rueckseite unten links, wie es hingehört. */
+/* Der Lautsprecher auf der Kartenvorderseite (Plan 1.3).
+ *
+ * Position spiegelbildlich zu .karteZeichen unten links: oben links, damit
+ * er nicht mit dem Sprachzeichen kollidiert. Rechts oben sitzen die
+ * Lernstufen-Punkte.
+ *
+ * Ein span mit role="button", weil die Karte selbst ein <button> ist und ein
+ * Knopf in einem Knopf ungueltiges HTML waere. Der span traegt deshalb
+ * tabIndex und eine eigene Tastaturbedienung.
+ *
+ * Farben wie beim Sprachzeichen: dunkler Chip auf der Sprachflaeche, heller
+ * Inhalt. Das gilt in beiden Designs, weil die Kartenflaeche in beiden
+ * Designs dieselbe mittelhelle Sprachfarbe ist – dieselbe Begruendung wie bei
+ * --karten-tinte.
+ */
+.karteTon {
+    position: absolute;
+    top: 0.85rem;
+    left: 0.85rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    background: rgba(13, 23, 29, 0.82);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: var(--paper-text-soft);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.karteTon:hover {
+    background: rgba(13, 23, 29, 0.94);
+}
+
+/* Sichtbarer Fokus: der Chip ist klein, und die globale Fokusregel haengt am
+   aeusseren Knopf, nicht an diesem span. */
+.karteTon:focus-visible {
+    outline: 3px solid var(--paper-text-soft);
+    outline-offset: 2px;
+}
+
+/* Solange gesprochen wird, wachsen die Schallwellen. */
+.karteTonAktiv svg {
+    animation: tonPuls 900ms ease-in-out infinite;
+}
+
+@keyframes tonPuls {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.18);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .karteTonAktiv svg {
+        animation: none;
+    }
+}
+
+/* Sprachzeichen. Liegt in .kartenSeite, dreht sich also mit – und steht nach
+   dem Umdrehen auf der Rueckseite unten links, wie es hingehört. */
 .karteZeichen {
     position: absolute;
     bottom: 0.85rem;
