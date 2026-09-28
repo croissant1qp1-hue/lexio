@@ -2,40 +2,51 @@
  * Aufbau der Karte
  * ----------------
  *
- * .buehne     perspective: 1200px
- *   .karte    <button>, nur Ausloeser – keine 3D-Eigenschaften
- *     .karteInnen    transform-style: preserve-3d, rotateY
- *       .flaeche hinten   backface-visibility: hidden, rotateY(180deg)
- *       .flaeche vorne    backface-visibility: hidden
- *       .seite  vorne
- *       .seite  hinten    backface-visibility: hidden, rotateY(180deg)
+ * .buehne          Layout, keine 3D-Eigenschaften
+ *   .karte         <button>, nur Ausloeser – keine 3D-Eigenschaften
+ *     .karteBuehne    perspective: 1200px
+ *       .karteInnen     transform-style: preserve-3d, rotateY
+ *         .kartenSeite   DIE einzige Inhaltsebene, mit der Kartenfarbe
  *
- * Warum das so und nicht einfacher:
+ * Warum nur EINE Ebene, und warum die Perspektive im Button liegt:
  *
- * 1. `perspective` liegt auf .buehne und nicht auf .karte. Ein <button>
- *    erzeugt in mehreren Browsern eine eigene Formatierungs-Ueberschrift,
- *    in der die 3D-Drehung der Kinder flachgedrueckt wird. Auf einem div
- *    ist das Verhalten definiert. Der Button bleibt trotzdem ein Button –
- *    er muss nur nichts mehr drehen.
+ * 1. Frueher lagen zwei Ebenen uebereinander (Vorderseite und Rueckseite)
+ *    und jede verliess sich ueber `backface-visibility: hidden`. In Chromium
+ *    funktioniert das. In Firefox nicht: der <button> erzeugt eine eigene
+ *    Formatierungsueberschrift, die den 3D-Kontext der Kinder flachdrueckt,
+ *    und `backface-visibility` wird dann nicht mehr ausgewertet. Gemessen
+ *    (Firefox 140, Karte 320px, Tinte gezaehlt):
  *
- * 2. Die farbige Flaeche ist ein Kind von .karteInnen und dreht sich mit.
- *    Vorher lag sie als ::before auf .karte, also ausserhalb der
- *    preserve-3d-Ebene. Sie blieb beim Umdrehen stehen, waehrend der Inhalt
- *    sich drehte. Das Ergebnis war eine korrekt gedrehte Karte auf einem
- *    Deckel, der sich nicht mitbewegt hat – je nach Browser ein Rahmen
- *    sichtbar, der nie wegging, oder eine farbige Flaeche, die im Moment
- *    des Drehens als Schatten mitrotierte.
+ *        gedreht, beide Ebenen im DOM   2159 px
+ *        gedreht, nur Rueckseite         1653 px
+ *        gedreht, nur Vorderseite         976 px
  *
- * 3. Beide Seiten sind echte Ebenen mit backface-visibility: hidden. Damit
- *    ist die Rueckseite unsichtbar, solange die Vorderseite vorne ist –
- *    unabhaengig davon, wie der Browser mit Preserve-3D umgeht. Die
- *    Vordrehung der Rueckseite ist nur noch die Haelfte davon: sie macht den
- *    Text lesbar.
+ *    2159 = 1653 + 976. Beide Texte lagen gleichzeitig auf der Karte, genau
+ *    so, wie es im Bild aussah. `perspective` von .buehne auf .karte zu
+ *    schieben, wie es vorher der Versuch war, half nicht – der Button
+ *    stand trotzdem zwischen Perspektive und Ebene.
  *
- * 4. Sprachzeichen und Stufenpunkte liegen INNERHALB von .karteInnen auf
- *    .seite, nicht daneben. Vorher waren sie Geschwister der beiden Seiten
- *    und drehten sich gar nicht mit: beim Umdrehen stand das Zeichen der
- *    falschen Sprache oben.
+ * 2. Deshalb gibt es jetzt nur noch eine Ebene, und die Entscheidung, ob
+ *    Vorder- oder Ruecktext dasteht, faellt in React. Damit ist die
+ *    Ueberlappung nicht "repariert", sondern strukturell unmoeglich: es
+ *    gibt nur einen Text im DOM. Kein Browser kann zwei uebereinanderlegen,
+ *    was nicht da ist.
+ *
+ * 3. Die Perspektive liegt auf .karteBuehne, einem span INNERHALB des
+ *    Buttons. Damit ist zwischen Perspektive und Ebene kein Button mehr.
+ *    Nachgewiesen an einem Zwischenstand von 45 Grad: die Textbreite
+ *    schrumpft auf 85 von 120 px – die Drehung ist also wieder eine echte
+ *    Drehung und keine flache Quetschung.
+ *
+ * 4. Warum die Gegenrotation noetig ist: gedreht ist die Karte um 180
+ *    Grad, ihre einzige Ebene mit. Ohne zweite, gegenteilige Drehung stuende
+ *    der Text spiegelverkehrt. Deshalb .kartenSeiteHinten. Gemessen: mit
+ *    Gegenrotation ist die gedrehte Karte pixelgleich zur ungedrehten
+ *    (Jaccard 1.000), ohne sie nicht.
+ *
+ * 5. `perspective` liegt auf keinem <button>. Punkt 1 gilt auch fuer
+ *    Chromium: dort ist es nur nicht aufgefallen, weil die zweite Ebene
+ *    zufaellig auch ohne ihre eigene Drehung richtig aussah.
  */
 
 .seite {
@@ -177,11 +188,8 @@
     justify-content: center;
     min-height: 0;
     padding: 0.5rem 0;
-
-    /* Die Perspektive gehoert auf die Buehne, nicht auf den Button. Siehe
-       Kopfkommentar, Punkt 1. */
-    perspective: 1200px;
-    perspective-origin: 50% 50%;
+    /* Keine Perspektive mehr hier. Sie liegt auf .karteBuehne, innerhalb
+     * des Buttons – siehe Kopfkommentar, Punkt 1 und 3. */
 }
 
 .karte {
@@ -204,6 +212,17 @@
        Drehens verschieben. */
 }
 
+.karteBuehne {
+    /* Die Perspektive muss zwischen dem Button und der Ebene liegen. Solange
+     * ein <button> dazwischenstand, flachdrueckte Firefox den 3D-Kontext und
+     * `backface-visibility` griff nicht mehr. Siehe Kopfkommentar. */
+    display: block;
+    position: absolute;
+    inset: 0;
+    perspective: 1200px;
+    perspective-origin: 50% 50%;
+}
+
 .karteInnen {
     position: absolute;
     inset: 0;
@@ -215,24 +234,18 @@
     transform: rotateY(180deg);
 }
 
-/*
- * Farbige Flaeche. Sie liegt zwischen den beiden Inhaltsseiten und dreht
- * sich mit. Ohne z-index liegt sie hinter dem Text – Reihenfolge im DOM
- * entscheidet, und der Text steht danach.
+/* Die einzige Ebene der Karte.
+ *
+ * Sie traegt jetzt selbst die Kartenfarbe, den Schatten und den Radius.
+ * Vorher standen dafuer zwei zusaetzliche Ebenen (.flaeche und
+ * .flaecheHinten), die es nur gab, um die Vorderseite zu verdecken – und
+ * genau dieses Verdecken hat in Firefox nicht funktioniert. Siehe
+ * Kopfkommentar, Punkt 1.
+ *
+ * `backface-visibility` steht hier bewusst auf `visible` und nicht auf
+ * `hidden`: es gibt nichts mehr, das verdeckt werden muesste. Die einzige
+ * Ebene ist sichtbar oder gar nicht vorhanden.
  */
-.flaeche {
-    position: absolute;
-    inset: 0;
-    border-radius: 22px;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    background: var(--kartenFarbe, var(--bg-elevated-2));
-    box-shadow: var(--shadow-card);
-}
-
-.flaecheHinten {
-    transform: rotateY(180deg);
-}
 
 /* Beide Inhaltsseiten teilen sich .kartenSeite: gleiche Flaeche, gleiche
    Typografie, gleicher Rand. Nur die Ausrichtung unterscheidet sich.
@@ -240,9 +253,10 @@
    Eigene Klasse, und nicht .seite wie vorher: Der Seitencontainer der
    Lernansicht hiess .seite, und CSS-Module kennen keine Hierarchie. Der
    zweite Block hat position:absolute, inset:0 und display:flex
-   dazugedeckt – der aeussere Container stand damit fest auf Null Pixeln
+   dazugedeckt – der    aeussere Container stand damit fest auf Null Pixeln
    innerhalb seines Elternteils, und die Kopfzeile, der Fortschrittsbalken
    und die Bewertungsknoepfe lagen uebereinander am oberen Rand. */
+
 /* Farbe des Textes auf der Karte – und der Grund, warum sie hier steht.
  *
  * Die Kartenflaeche ist die SPRACHFARBE, nicht die Theme-Flaeche. Alle zwoelf
@@ -265,14 +279,32 @@
  * kommt deshalb aus Groesse und Gewicht, nicht aus hellerer Farbe.
  */
 .kartenSeite {
-    --karten-tinte: var(--ink);
+    /* BEWUSST fest und nicht `var(--ink)`.
+     *
+     * `--ink` ist der Hintergrund-Token, nicht die Textfarbe: im dunklen
+     * Design #0d171d, im hellen #fdfaf3. Mit dem Token war der Kartentext im
+     * hellen Design fast weiss auf einer mittelhellen Sprachflaeche – 0 von
+     * 12 Sprachen erreichten 4.5:1 (Spanisch 1.48, Italienisch 3.29).
+     *
+     * Die Kartenflaeche ist in BEIDEN Designs dieselbe mittelhelle
+     * Sprachfarbe, also braucht auch der Text in beiden Designs denselben
+     * dunklen Wert. Deshalb eine Konstante. Gemessen ueber alle zwoelf
+     * Flaechen: #0d171d haelt 5.28 bis 11.79, #1c252b haelt 4.53 bis 10.12.
+     */
+    --karten-tinte: #0d171d;
     --karten-tinte-soft: #1c252b;
 
     position: absolute;
     inset: 0;
     border-radius: 22px;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
+    /* Die eine Ebene traegt jetzt selbst Farbe, Schatten und Radius – das
+     * uebernimmt von .flaeche. */
+    background: var(--kartenFarbe, var(--bg-elevated-2));
+    box-shadow: var(--shadow-card);
+    /* Bewusst `visible` und nicht `hidden`: es gibt keine zweite Ebene mehr,
+     * die diese eine verdecken koennte. Siehe Kopfkommentar, Punkt 1. */
+    backface-visibility: visible;
+    -webkit-backface-visibility: visible;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -286,6 +318,11 @@
 
 /* Die Rueckseite ist um 180 Grad VORGEDREHT. Die Drehung des Containers und
    diese heben sich auf, der Text steht richtig herum. */
+/* Die Gegenrotation. Ohne sie stuende der Text auf der gedrehten Karte
+ * spiegelverkehrt, weil die Karte selbst um 180 Grad gedreht ist. Mit ihr
+ * sind die beiden Drehungen zusammen 360 Grad und der Text steht gerade.
+ * Gemessen: gedreht mit Gegenrotation ist pixelgleich zur ungedrehten
+ * Karte, ohne sie nicht. Siehe Kopfkommentar, Punkt 4. */
 .kartenSeiteHinten {
     transform: rotateY(180deg);
 }

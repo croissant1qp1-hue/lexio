@@ -504,72 +504,86 @@ export default function LernenSeite({ setSlug }: { setSlug: string }) {
                     aria-label={aufgedeckt ? "Antwort verbergen" : "Antwort aufdecken"}
                     aria-pressed={aufgedeckt}
                 >
-                    <span className={styles.karteInnen}>
-                        {/* Die farbigen Flaechen liegen unter dem Text und
-                            drehen sich mit ihm. Ohne sie haette die gedrehte
-                            Karte keinen Grund, sich zu drehen. */}
-                        <span className={styles.flaeche} />
-                        <span className={`${styles.flaeche} ${styles.flaecheHinten}`} />
+                    <span className={styles.karteBuehne}>
+                        <span className={styles.karteInnen}>
+                            {/* NUR EINE Ebene, und React entscheidet, ob der
+                                Begriff oder die Antwort darin steht. Frueher
+                                lagen hier zwei Ebenen uebereinander, die sich
+                                ueber `backface-visibility` gegenseitig
+                                versteckt haben. In Firefox hat das nicht
+                                funktioniert: der Button dazwischen flachdrueckt
+                                den 3D-Kontext, und beide Texte lagen
+                                sichtbar aufeinander. So kann es nicht mehr
+                                passieren – es ist nur einer im DOM.
+                                Siehe Kopfkommentar in lernen.module.css. */}
+                            <span
+                                className={`${styles.kartenSeite} ${
+                                    aufgedeckt ? styles.kartenSeiteHinten : ""
+                                }`}
+                            >
+                                {aufgedeckt ? (
+                                    <>
+                                        <span className={styles.karteLabel}>Antwort</span>
+                                        <span className={styles.karteText}>{karte.antwort}</span>
+                                        {karte.beispielUebersetzung && (
+                                            <span className={styles.karteBeispiel}>
+                                                {karte.beispielUebersetzung}
+                                            </span>
+                                        )}
 
-                        {/* Vorderseite: der Begriff. Nie verdeckt, solange
-                            nicht gedreht wurde. */}
-                        <span className={styles.kartenSeite}>
-                            <span className={styles.karteLabel}>Begriff</span>
-                            <span className={styles.karteText}>{karte.frage}</span>
-                            {/*
-                             * Der Beispielsatz steht auf der Vorderseite, nicht
-                             * erst auf der Rueckseite. Er ist kein Spoiler,
-                             * sondern der Gebrauch, in dem der Begriff
-                             * vorkommt – aufgedeckt waere er zu spaet.
-                             */}
-                            {karte.beispielsatz && (
-                                <span className={styles.karteBeispiel}>{karte.beispielsatz}</span>
-                            )}
-                            <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
+                                        <span className={styles.karteZeichen}>
+                                            <Image
+                                                src="/images/karte/globe.svg"
+                                                alt=""
+                                                width={26}
+                                                height={26}
+                                                className={styles.karteZeichenBild}
+                                            />
+                                            <span className={styles.karteZeichenText}>{sprachName}</span>
+                                        </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className={styles.karteLabel}>Begriff</span>
+                                        <span className={styles.karteText}>{karte.frage}</span>
+                                        {/*
+                                         * Der Beispielsatz steht auf der Vorderseite, nicht
+                                         * erst auf der Rueckseite. Er ist kein Spoiler,
+                                         * sondern der Gebrauch, in dem der Begriff
+                                         * vorkommt – aufgedeckt waere er zu spaet.
+                                         */}
+                                        {karte.beispielsatz && (
+                                            <span className={styles.karteBeispiel}>
+                                                {karte.beispielsatz}
+                                            </span>
+                                        )}
+                                        <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
 
-                            <span className={styles.karteZeichen}>
-                                <Image
-                                    src="/images/karte/globe.svg"
-                                    alt=""
-                                    width={26}
-                                    height={26}
-                                    className={styles.karteZeichenBild}
-                                />
-                                <span className={styles.karteZeichenText}>{sprachName}</span>
-                            </span>
+                                        <span className={styles.karteZeichen}>
+                                            <Image
+                                                src="/images/karte/globe.svg"
+                                                alt=""
+                                                width={26}
+                                                height={26}
+                                                className={styles.karteZeichenBild}
+                                            />
+                                            <span className={styles.karteZeichenText}>{sprachName}</span>
+                                        </span>
 
-                            {karte.stufe > 0 && (
-                                <span
-                                    className={styles.stufePunkte}
-                                    aria-label={`Lernstufe ${karte.stufe}`}
-                                >
-                                    {Array.from({ length: Math.min(karte.stufe, 5) }).map((_, i) => (
-                                        <span key={i} className={styles.stufePunkt} />
-                                    ))}
-                                </span>
-                            )}
-                        </span>
-
-                        {/* Rueckseite: die Antwort. Vorgedreht, damit sich
-                            die Containerdrehung aufhebt. */}
-                        <span className={`${styles.kartenSeite} ${styles.kartenSeiteHinten}`}>
-                            <span className={styles.karteLabel}>Antwort</span>
-                            <span className={styles.karteText}>{karte.antwort}</span>
-                            {karte.beispielUebersetzung && (
-                                <span className={styles.karteBeispiel}>
-                                    {karte.beispielUebersetzung}
-                                </span>
-                            )}
-
-                            <span className={styles.karteZeichen}>
-                                <Image
-                                    src="/images/karte/globe.svg"
-                                    alt=""
-                                    width={26}
-                                    height={26}
-                                    className={styles.karteZeichenBild}
-                                />
-                                <span className={styles.karteZeichenText}>{sprachName}</span>
+                                        {karte.stufe > 0 && (
+                                            <span
+                                                className={styles.stufePunkte}
+                                                aria-label={`Lernstufe ${karte.stufe}`}
+                                            >
+                                                {Array.from({
+                                                    length: Math.min(karte.stufe, 5),
+                                                }).map((_, i) => (
+                                                    <span key={i} className={styles.stufePunkt} />
+                                                ))}
+                                            </span>
+                                        )}
+                                    </>
+                                )}
                             </span>
                         </span>
                     </span>
