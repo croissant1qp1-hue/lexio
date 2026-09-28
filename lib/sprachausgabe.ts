@@ -119,8 +119,19 @@ export function stimmeFuer(
  *
  * `code` ist der Sprachcode des Sets ("es"). Er geht als `lang` an die
  * Aussprache, damit der Browser nicht buchstabiert (siehe Kopf, Punkt 3).
+ *
+ * `onGeendet` wird gerufen, wenn der letzte Teil fertig ist – oder wenn ein
+ * Teil fehlschlaegt. Das ersetzt in der Lernseite den festen Timer: die
+ * Puls-Animation hoert auf, sobald wirklich geschlossen ist, statt mitten
+ * im Satz abzubrechen oder Minuten nachzuwackeln. Manche Browser schicken
+ * `onend` nicht; deshalb bleibt der Aufrufer dafuer zustaendig, eine
+ * Obergrenze vorzuhalten (siehe lernen-seite, `vorlesen`).
  */
-export function spreche(teile: (string | null | undefined)[], code: string | null): boolean {
+export function spreche(
+  teile: (string | null | undefined)[],
+  code: string | null,
+  onGeendet?: () => void,
+): boolean {
   if (!tonVerfuegbar()) return false;
   /*
    * `?? ""` ist hier Pflicht und nicht Geschmack: der Beispielsatz kommt aus
@@ -157,12 +168,31 @@ export function spreche(teile: (string | null | undefined)[], code: string | nul
    * `window` zu, und gemischt zu lesen war hier schon eine Fehlerquelle.
    */
   const Utterance = window.SpeechSynthesisUtterance;
+  const offen = saetze.length;
+  let beendet = 0;
+  /*
+   * `error` zaehlt wie `end`: abgebrochen oder fehlgeschlagen ist fuer die
+   * Lernseite "fertig". Ohne das hinge die Animation auf dem wackeln, das
+   * `onerror` melden wollte.
+   */
+  const zaehler = () => {
+    beendet += 1;
+    if (beendet >= offen) onGeendet?.();
+  };
+
   for (const satz of saetze) {
     const u = new Utterance(satz);
     if (lang) u.lang = lang;
     if (stimme) u.voice = stimme;
     u.rate = 0.92; /* Lernende brauchen den Ansatz, nicht das Tempus. */
     u.pitch = 1;
+    /*
+     * Das echte Ende statt des Ablauftimers (siehe Kopf dieser Funktion).
+     * Ohne das wachsen die Schallwellen noch nach dem letzten Sprechen oder
+     * falten sich vorzeitig zusammen.
+     */
+    u.onend = zaehler;
+    u.onerror = zaehler;
     synth.speak(u);
   }
   return true;

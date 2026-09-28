@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
 import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
@@ -246,7 +246,7 @@ export default function LernenSeite({
     /**
      * Karte vorlesen: erst der Begriff, dann – wenn da – der Beispielsatz.
      *
-     * Beides steht auf der Vorderseite, und beides in der Zielsprache. Der
+     * Beides steht auf der Rückseite, und beides in der Zielsprache. Der
      * Beispielsatz gehoert dazu, weil ein Begriff ohne seinen Gebrauch
      * nichts zu lernen ist; er wird deshalb als zweiter Satz derselben
      * Ausgabe gequeue't statt in einem zweiten Klick.
@@ -254,6 +254,15 @@ export default function LernenSeite({
      * Zweiter Klick waehrend des Sprechens bricht ab. Sonst gibt es zwei
      * Wege zum Stoppen, und der ungedachte laeuft weiter.
      */
+    const tonZeitueber = useRef<number | null>(null);
+
+    const tonTimerRaumen = () => {
+        if (tonZeitueber.current !== null) {
+            window.clearTimeout(tonZeitueber.current);
+            tonZeitueber.current = null;
+        }
+    };
+
     const vorlesen = useCallback(() => {
         if (!karte) return;
         if (spricht) {
@@ -262,15 +271,18 @@ export default function LernenSeite({
             return;
         }
         const teile = [karte.frage, karte.beispielsatz ?? ""];
-        if (!spreche(teile, set?.sprache.code ?? null)) return;
+        if (!spreche(teile, set?.sprache.code ?? null, () => setSpricht(false))) return;
         setSpricht(true);
         /*
-         * Die API meldet kein Ende, auf das man sich verlassen kann
-         * (`onend` fehlt in manchen Builds). Darum wird der Zustand nach
-         * einer grosszuegigen Obergrenze zurueckgesetzt – lieber ein Icon,
-         * das kurz zu frueh zurueckfaellt, als eines, das haengen bleibt.
+         * `onend` meldet das echte Ende in den meisten Browsern; die
+         * Obergrenze ist der Rest fuer die, die es verschlucken (siehe
+         * spreche). 30 Sekunden koennen nicht verfrueh abbrechen, sie
+         * raeumen nur ein haengendes Icon ab. Der Timer wird beim naechsten
+         * Sprechen und beim Stoppen geloescht, damit er keine fruehere
+         * Runde ausbremst.
          */
-        window.setTimeout(() => setSpricht(false), 12000);
+        tonTimerRaumen();
+        tonZeitueber.current = window.setTimeout(() => setSpricht(false), 30000);
     }, [karte, set, spricht]);
 
     /*
@@ -280,6 +292,7 @@ export default function LernenSeite({
      * genau die Form, die beim Rendern einen zweiten Durchlauf erzwingt.
      */
     const tonAnhalten = useCallback(() => {
+        tonTimerRaumen();
         setSpricht(false);
         stoppe();
     }, []);
@@ -649,15 +662,15 @@ export default function LernenSeite({
                 >
                     <span className={styles.karteBuehne}>
                         <span className={styles.karteInnen}>
-                            {/* NUR EINE Ebene, und React entscheidet, ob der
-                                Begriff oder die Antwort darin steht. Frueher
-                                lagen hier zwei Ebenen uebereinander, die sich
-                                ueber `backface-visibility` gegenseitig
-                                versteckt haben. In Firefox hat das nicht
-                                funktioniert: der Button dazwischen flachdrueckt
-                                den 3D-Kontext, und beide Texte lagen
-                                sichtbar aufeinander. So kann es nicht mehr
-                                passieren – es ist nur einer im DOM.
+                            {/* NUR EINE Ebene, und React entscheidet, ob die
+                                Uebersetzung oder der Begriff darin steht.
+                                Frueher lagen hier zwei Ebenen uebereinander,
+                                die sich ueber `backface-visibility`
+                                gegenseitig versteckt haben. In Firefox hat
+                                das nicht funktioniert: der Button dazwischen
+                                flachdrueckt den 3D-Kontext, und beide Texte
+                                lagen sichtbar aufeinander. So kann es nicht
+                                mehr passieren – es ist nur einer im DOM.
                                 Siehe Kopfkommentar in lernen.module.css. */}
                             <span
                                 className={`${styles.kartenSeite} ${
@@ -666,41 +679,13 @@ export default function LernenSeite({
                             >
                                 {aufgedeckt ? (
                                     <>
-                                        <span className={styles.karteLabel}>Antwort</span>
-                                        <span className={styles.karteText}>{karte.antwort}</span>
-                                        {karte.beispielUebersetzung && (
-                                            <span className={styles.karteBeispiel}>
-                                                {karte.beispielUebersetzung}
-                                            </span>
-                                        )}
-
-                                        <span className={styles.karteZeichen}>
-                                            <Image
-                                                src="/images/karte/globe.svg"
-                                                alt=""
-                                                width={26}
-                                                height={26}
-                                                className={styles.karteZeichenBild}
-                                            />
-                                            <span className={styles.karteZeichenText}>{sprachName}</span>
-                                        </span>
-                                    </>
-                                ) : (
-                                    <>
                                         <span className={styles.karteLabel}>Begriff</span>
                                         <span className={styles.karteText}>{karte.frage}</span>
-                                        {/*
-                                         * Der Beispielsatz steht auf der Vorderseite, nicht
-                                         * erst auf der Rueckseite. Er ist kein Spoiler,
-                                         * sondern der Gebrauch, in dem der Begriff
-                                         * vorkommt – aufgedeckt waere er zu spaet.
-                                         */}
                                         {karte.beispielsatz && (
                                             <span className={styles.karteBeispiel}>
                                                 {karte.beispielsatz}
                                             </span>
                                         )}
-                                        <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
 
                                         {/*
                                          * Vorlesen.
@@ -722,8 +707,8 @@ export default function LernenSeite({
                                          * `stopPropagation` in beiden
                                          * Handlern: ohne das dreht sich beim
                                          * Vorlesen die Karte gleich mit, und
-                                         * man hoert die Rueckseite vor, waehrend
-                                         * man die Vorderseite liest.
+                                         * man hoert den Begriff, waehrend
+                                         * vor einem die Uebersetzung steht.
                                          */}
                                         {tonDa && (
                                             <span
@@ -787,6 +772,25 @@ export default function LernenSeite({
                                             />
                                             <span className={styles.karteZeichenText}>{sprachName}</span>
                                         </span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <span className={styles.karteLabel}>Übersetzung</span>
+                                        <span className={styles.karteText}>{karte.antwort}</span>
+                                        {/*
+                                         * Der Satz auf Deutsch steht auf der
+                                         * Vorderseite. Er ist kein Spoiler,
+                                         * sondern der Gebrauch, in dem das
+                                         * deutsche Wort vorkommt; aufgedeckt
+                                         * wuerde er der Fremdsprache
+                                         * zuordnen, was er nicht ist.
+                                         */}
+                                        {karte.beispielUebersetzung && (
+                                            <span className={styles.karteBeispiel}>
+                                                {karte.beispielUebersetzung}
+                                            </span>
+                                        )}
+                                        <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
 
                                         {karte.stufe > 0 && (
                                             <span

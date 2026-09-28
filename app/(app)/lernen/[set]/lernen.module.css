@@ -381,11 +381,14 @@
     white-space: nowrap;
 }
 
-/* Der Lautsprecher auf der Kartenvorderseite (Plan 1.3).
+/* Der Lautsprecher auf der Kartenrueckseite (Plan 1.3, Richtung gedreht).
  *
  * Position spiegelbildlich zu .karteZeichen unten links: oben links, damit
- * er nicht mit dem Sprachzeichen kollidiert. Rechts oben sitzen die
- * Lernstufen-Punkte.
+ * er nicht mit dem Sprachzeichen kollidiert. Der Lautsprecher folgt dem
+ * Begriff: er spricht die Fremdsprache aus, und die liegt seit dem
+ * Richtungswechsel des Nutzers auf der Rueckseite. Rechts oben sitzen die
+ * Lernstufen-Punkte – die stehen bewusst auf der Vorderseite, zusammen mit
+ * der Uebersetzung.
  *
  * Ein span mit role="button", weil die Karte selbst ein <button> ist und ein
  * Knopf in einem Knopf ungueltiges HTML waere. Der span traegt deshalb

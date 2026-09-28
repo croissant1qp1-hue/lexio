@@ -106,7 +106,7 @@ gegenfrags erweitert werden.
 | Inhalt | Echte Wortlisten von Lexio, nicht Nutzerbeiträge |
 | Wortquelle | Mix aus vorhandener Liste und KI — Quellen siehe unten |
 | Karte | Begriff + deutsche Übersetzung + **Beispielsatz** + TTS |
-| TTS | **Vorderseite** hört das Wort (Aussprache nicht umgehbar) |
+| TTS | **Rückseite** hört das Wort (Aussprache der Fremdsprache) |
 | Sprachfeld | **Feste Liste mit Code** (`en`, `es`, …), kein Freitext |
 | Import | Textblock einfügen, mit **Vorschau und Korrektur vor dem Speichern** |
 | Lernrunde | 20er-Grenze bleibt; „20 von 47 geschafft"; **„Nochmal" reiht in derselben Runde wieder ein** |
@@ -269,9 +269,12 @@ Karten**, nicht 2.809. Diese Zahl vor der Planung kennen, nicht danach.
 
 ### Satzspiegel
 
-Die Wortlisten sind englisch zentriert. Beim Import gilt dieselbe Richtung:
-Vorderseite Englisch, Rückseite Deutsch. Das ist auch die Richtung, die TTS
-und die Quellen erwarten.
+Die Wortlisten sind englisch zentriert. Ein Wortpaar ist ein Begriff in
+der Zielsprache und seine deutsche Übersetzung. Beim Import gilt dieselbe
+Richtung: Vorderseite Deutsch (Übersetzung), Rückseite Englisch (Begriff).
+Das ist die Richtung, die TTS erwartet: gesprochen wird der Begriff, der
+auf der Rückseite steht. Wer umgekehrt lernen will, bekommt die Karte
+gedreht, sobald es die Richtungswahl gibt.
 
 ---
 
@@ -327,15 +330,23 @@ ist (`faelligAm(0) = heute`), das Problem ist rein die Client-Queue.
 Ende-Screen „20 von 47 geschafft — 27 bleiben". Der `hinweis` von
 `setZuGross` bleibt unangetastet.
 
-**1.3 TTS auf der Vorderseite.** `speechSynthesis` in `lernen-seite.tsx`.
+**1.3 TTS auf der Rückseite.** `speechSynthesis` in `lernen-seite.tsx`.
 Kein Server, keine Kosten. Braucht: Sprachcode aus 0.1, ein
-Lautsprecher-Knopf auf der Kartenvorderseite, `voiceschanged` abfangen
+Lautsprecher-Knopf auf der Kartenrückseite (spricht den Begriff der
+Fremdsprache), `voiceschanged` abfangen
 (Safari lädt Stimmen asynchron — sonst ist der erste Klick stumm),
 Großbuchstaben-Automatik aus, sonst buchstabiert es.
 
 > **Erledigt am 2026-09-28, Commit `ee984f3`.** Die Logik liegt in
 > `lib/sprachausgabe.ts`, nicht in der Seite: Stimmen asynchron, `lang`
 > gesetzt (Chrome buchstabiert ohne), `cancel()` vor jedem neuen Satz.
+>
+> **Richtung gedreht am 2026-09-28 (Commit folgt).** Nutzerwunsch: erst die
+> Muttersprache sehen, dann die Fremdsprache und die aussprechen. Die
+> Vorderseite zeigt jetzt die deutsche Übersetzung, die Rückseite den
+> Begriff, und der Lautsprecher sitzt bei ihm. Das Ende der Aussprache
+> kommt aus `onend` statt aus einem Timer; der Timer bleibt nur als
+> Obergrenze.
 > 45 Fälle gegen eine nachgebaute `speechSynthesis` geprüft. Nicht live am
 > Lautsprecher geprüft — dafür fehlt dem Browser-Werkzeug das TTY.
 
@@ -359,7 +370,8 @@ Leech-Schwelle (etwa 8 Fehler → Ausschluss mit Knopf) und Rückgängig für
 die letzte Antwort.
 
 **Abnahme:** Runde fühlen sich ehrlich an. „Nochmal" zeigt die Karte
-nochmal. Ton kommt auf der Vorderseite. Beispiel steht auf der Rückseite.
+nochmal. Ton kommt auf der Rückseite (der Begriff klingt, die Vorderseite
+bleibt still). Beispiel steht auf der Rückseite.
 Fortschrittsbalken stimmen.
 
 **Stand Phase 1:** 1.1, 1.2 und 1.3 erledigt. Offen sind 1.5, 1.6 und 1.7.
