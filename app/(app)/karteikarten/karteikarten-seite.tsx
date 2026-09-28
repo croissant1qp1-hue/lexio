@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson } from "@/lib/api-client";
+import SetAktionen from "./set-aktionen";
 import styles from "./karteikarten.module.css";
 
 type SetZeile = {
@@ -73,6 +74,20 @@ export default function KarteikartenSeite() {
   const [laden, setLaden] = useState(true);
   const [fehler, setFehler] = useState<string | null>(null);
 
+  /*
+   * Zaehler statt einer zweiten Ladefunktion: nach dem Bearbeiten oder
+   * Loeschen will die Liste denselben Weg erneut gehen, den sie beim
+   * Oeffnen geht – und zwar den, der `null` von `[]` unterscheidet. Ein
+   * blosses Neuzeichnen wuerde den alten Stand zeigen, ein
+   * clientseitiges Wegpatchen der Zeile den Serverstand umgehen.
+   *
+   * `laden` wird hier absichtlich nicht wieder auf true gesetzt. Die Tabelle
+   * ist beim Bearbeiten bereits da; ein Ladeblinken wuerde nur verraten,
+   * dass sich im Hintergrund etwas getan hat.
+   */
+  const [ladeNr, setLadeNr] = useState(0);
+  const neuLaden = useCallback(() => setLadeNr((n) => n + 1), []);
+
   useEffect(() => {
     let abgebrochen = false;
 
@@ -95,7 +110,15 @@ export default function KarteikartenSeite() {
         if (!abgebrochen) setLaden(false);
       });
 
-    // XP haengen an keinem Zustand der Tabelle, deshalb unabhaengig davon.
+    return () => {
+      abgebrochen = true;
+    };
+  }, [ladeNr]);
+
+  // XP haengen an keinem Zustand der Tabelle, deshalb unabhaengig davon.
+  useEffect(() => {
+    let abgebrochen = false;
+
     holeSprachenXp()
       .then((daten) => {
         if (abgebrochen) return;
@@ -232,6 +255,20 @@ export default function KarteikartenSeite() {
                         {set.kartenFaellig > 0 ? ` · ${set.kartenFaellig} fällig` : ""}
                       </span>
                     </span>
+                    {/*
+                     * Nur fuer eigene Sets. Bei den vorgefertigten Sets waere
+                     * der Knopf eine Sackgasse: die Route gibt 403 zurueck,
+                     * und der Nutzer haette vorher raten muessen, warum.
+                     */}
+                    {set.eigen && (
+                      <SetAktionen
+                        slug={set.id}
+                        name={set.name}
+                        sprache={set.sprache}
+                        kartenAnzahl={set.kartenGesamt}
+                        onGeaendert={neuLaden}
+                      />
+                    )}
                   </th>
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGelernt}</td>
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGesamt}</td>
