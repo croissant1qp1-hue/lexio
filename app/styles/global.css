@@ -94,6 +94,20 @@
        auf dunklem Grund – hell genug, kaum sichtbar mit bloßem Auge. */
     --muster-punkt: rgba(243, 240, 231, 0.05);
 
+    /* Halbtransparenter Klebestreifen ("Washi-Tape"), der Kacheln und die
+       Lernkarte wie Zettel an eine Pinnwand heftet. Ein heller, leicht
+       getoenter Streifen liest sich auf jeder Kachelfarbe als Tape. */
+    --papier-tape: rgba(238, 232, 214, 0.55);
+    --papier-tape-schatten: rgba(0, 0, 0, 0.22);
+
+    /* Feine Papierkante auf der Lernkarte: kein harter Rand, sondern der
+       Hauch einer Blattkante, die sich gegen die Kartenflaeche absetzt. */
+    --karte-kante: inset 0 0 0 1px rgba(13, 23, 29, 0.16);
+
+    /* Hintergrund der Begrüssungskarte auf der Startseite. Getrennt nach
+       Designs: dunkel bleibt die satte Tafel, hell wird sie Papier. */
+    --hero-grund: linear-gradient(135deg, #442827 0%, #2a1f22 100%);
+
     /* ------------------------------------------------------------------
        Masse
        ------------------------------------------------------------------ */
@@ -156,6 +170,19 @@
        der Sichtbarkeitsschwelle, damit das Notizbuchgefühl da ist, ohne
        dass sich der Text dagegen anstrengen muss. */
     --muster-punkt: rgba(32, 37, 42, 0.055);
+
+    /* Klebestreifen auf hellem Papier: etwas dunkler als im dunklen Design,
+       damit der Streifen gegen die weisse Pinnwand stehen kann. */
+    --papier-tape: rgba(255, 250, 235, 0.72);
+    --papier-tape-schatten: rgba(80, 66, 40, 0.2);
+
+    /* Papierkante auf der Lernkarte: auf heller Flaeche eine Tinten-Linie,
+       wie der Rand eines frischen Blattes. */
+    --karte-kante: inset 0 0 0 1px rgba(32, 37, 42, 0.1);
+
+    /* Begruessungskarte im hellen Design: warmes Papier statt dunkler
+       Tafel, damit der Text (dunkle Tinte) lesbar bleibt. */
+    --hero-grund: linear-gradient(135deg, #f5ecd9 0%, #e9dcc2 100%);
 
     /* Der Kontrast muss im hellen Design besser sein, nicht schlechter:
        Terrakotta auf Papier ist bei gleicher Farbe zu blass. */

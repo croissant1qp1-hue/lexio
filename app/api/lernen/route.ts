@@ -277,6 +277,10 @@ export async function GET(request: Request) {
       set: { slug: set.slug, name: set.name, sprache },
       karten: [],
       faelligGesamt: 0,
+      // Ein leeres Set hat null Karten – die Lernseite unterscheidet damit
+      // "nichts faellig" von "noch nichts angelegt" und zeigt im ersten Fall
+      // einen "Nochmal lernen"-Knopf, im zweiten nicht.
+      kartenGesamt: alle.length,
     });
   }
 
@@ -310,6 +314,12 @@ export async function GET(request: Request) {
     faelligGesamt: ueben
       ? Math.min(sortiert.length, MAX_WIEDERHOLUNG)
       : sortiert.filter((karte) => karte.faelligAm <= heute).length,
+    /*
+     * Bestand statt Fälligkeit: die Lernseite braucht "hat das Set überhaupt
+     * Karten", um "nichts fällig" von "noch nichts angelegt" zu
+     * unterscheiden und im ersten Fall "Nochmal lernen" anzubieten.
+     */
+    kartenGesamt: alle.length,
     /*
      * Der Client braucht das, um den Endschirm ehrlich zu halten: ohne diesen
      * Hinweis wuerde er bei "7 von 40" nach einer Runde von 7 behaupten, es

@@ -25,7 +25,7 @@
     height: 44px;
     flex: 0 0 44px;
     border-radius: 12px;
-    border: 1px solid #33444c;
+    border: 1px solid var(--line);
     background: var(--bg-elevated);
     color: var(--text-primary);
     cursor: pointer;
@@ -59,6 +59,7 @@
 }
 
 .sprache {
+    position: relative;
     min-height: 56px;
     padding: 0.6rem 0.8rem;
     border-radius: 12px;
@@ -74,13 +75,51 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Das Haekchen der getroffenen Auswahl: rechts in der Kachel, ein eigener
+   Zustand statt einer Farbe allein – fuer Menschen und fuer Screenshot-Tests
+   gleichermassen klar. */
+.spracheAktiv::after {
+    content: "✓";
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--gold);
+}
+
 .sprache:hover {
     transform: translateY(-2px);
 }
 
+/*
+ * Gewaehlte Kachel: deutlicher Rahmen statt --ink.
+ *
+ * --ink war der falsche Token: hinter dem Namen steckt die
+ * Seitenhintergrund-Farbe (dunkel #0d171d, hell #fdfaf3), also von der
+ * Sprachkachel aus gesehen das Gegenteil von sichtbar. Ein Rahmen, der im
+ * hellen Design auf hellem Papier verschwindet, ist keine Auswahl. Hier
+ * nimmt die Auswahl die Umkehrfarbe des Themes – in beiden Designs ein
+ * klares, gefuelltes Feld statt einer Kante, die man suchen muss. Dazu ist
+ * jeder gewaehlte Eintrag noch einmal bedient: gleicher Code, wieder ein
+ * Klick macht ihn rueckgaengig (aria-pressed sagt es dem Vorleser).
+ */
 .spracheAktiv {
-    border-color: var(--ink);
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px var(--gold), var(--shadow-soft);
     transform: translateY(-2px);
+}
+
+/* "Neues Set" hat eine gestrichelte Kante, damit es sich von den Sets
+   unterscheidet. Gewaehlt gelten derselbe goldene Rahmen und dieselbe
+   Bestaetigung – sonst waere die gestrichelte Linie die einzige Kante ohne
+   sichtbare Auswahl, und genau die neue Option wuerde man am wenigsten
+   sehen. */
+.spracheNeu.spracheAktiv {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 2px var(--gold), var(--shadow-soft);
 }
 
 .form {
@@ -89,7 +128,7 @@
     gap: 0.9rem;
     padding: clamp(1rem, 3vw, 1.5rem);
     background: var(--bg-elevated);
-    border: 1px solid #33444c;
+    border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow-soft);
     animation: hoch 240ms ease;
@@ -140,7 +179,7 @@
     min-height: 50px;
     padding: 0.7rem 0.9rem;
     border-radius: 12px;
-    border: 1px solid #33444c;
+    border: 1px solid var(--line);
     background: var(--input-bg);
     color: var(--text-primary);
     font-size: 1rem;

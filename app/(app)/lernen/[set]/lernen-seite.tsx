@@ -39,6 +39,13 @@ type LernAntwort = {
     set: SetInfo;
     karten: Karte[];
     faelligGesamt: number;
+    /**
+     * Bestand des Sets, karten.length ist die Runde. Ohne diese Zahl waere
+     * ein leeres Lernfenster nicht zu unterscheiden von einem, in dem heute
+     * nichts faellig ist – und "Nochmal lernen" wuerde bei einem wirklich
+     * leeren Set als Sackgasse enden.
+     */
+    kartenGesamt: number;
     /** Nur gesetzt, wenn das Set groesser ist als die Lesegrenze der Route. */
     setZuGross?: boolean;
     hinweis?: string;
@@ -120,6 +127,12 @@ export default function LernenSeite({
      * 47, und niemand konnte sehen, dass 27 liegen bleiben.
      */
     const [faelligGesamt, setFaelligGesamt] = useState(0);
+
+    /**
+     * Bestand des Sets, siehe `kartenGesamt` in der LernAntwort. Null heisst:
+     * wirklich nichts angelegt, also kein "Nochmal lernen" anbieten.
+     */
+    const [kartenGesamt, setKartenGesamt] = useState(0);
 
     /**
      * Bilanz dieser Runde. Getrennt vom Gesamt-Fortschritt, weil "XP gesamt"
@@ -208,6 +221,7 @@ export default function LernenSeite({
                 setSet(daten.set);
                 setKarten(daten.karten ?? []);
                 setFaelligGesamt(daten.faelligGesamt ?? 0);
+                setKartenGesamt(daten.kartenGesamt ?? 0);
                 setUebungsmodus(daten.uebungsmodus === true);
                 setIndex(0);
                 setAufgedeckt(false);
@@ -502,7 +516,23 @@ export default function LernenSeite({
                         Für {set?.name} sind heute keine Karten fällig. Komm später wieder – dann wartet
                         der nächste Stapel.
                     </p>
-                    <button type="button" className={styles.knopf} onClick={() => router.push("/")}>
+                    {/*
+                     * Im normalen Modus ist ein leerer Stapel kein Grund, die
+                     * Seite zu verlassen: "Nochmal lernen" holt dieselben Karten
+                     * als Wiederholung (modus=ueben). Nur wenn das Set wirklich
+                     * keine Vokabeln hat (kartenGesamt 0), waere der Knopf eine
+                     * Sackgasse – dann bleibt nur der Weg zurueck.
+                     */}
+                    {kartenGesamt > 0 && (
+                        <button
+                            type="button"
+                            className={styles.knopf}
+                            onClick={() => router.push(`/lernen/${setSlug}?modus=ueben`)}
+                        >
+                            Nochmal lernen
+                        </button>
+                    )}
+                    <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
                         Zur Übersicht
                     </button>
                 </div>

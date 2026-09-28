@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, ApiFehler } from "@/lib/api-client";
@@ -94,10 +94,32 @@ export default function Uebersicht() {
     return () => clearTimeout(t);
   }, [meldung]);
 
+  const [loeschZiel, setLoeschZiel] = useState<SetZeile | null>(null);
+  const loeschRef = useRef<HTMLDivElement>(null);
+
+  // Fokus in den Dialog, damit Escape und Tab dort wirken und die Kacheln
+  // nicht weiter bedienbar sind, waehrend das Fenster offen steht.
+  useEffect(() => {
+    if (!loeschZiel) return;
+
+    loeschRef.current?.focus();
+
+    const aufTaste = (ereignis: KeyboardEvent) => {
+      if (ereignis.key === "Escape" && !loescht) {
+        ereignis.preventDefault();
+        setLoeschZiel(null);
+      }
+    };
+    document.addEventListener("keydown", aufTaste);
+    return () => document.removeEventListener("keydown", aufTaste);
+  }, [loeschZiel, loescht]);
+
   async function setLoeschen(set: SetZeile) {
     /*
-     * confirm() ist hier richtig: das Loeschen ist nicht rueckgaengig zu machen,
-     * und ein eigener Bestaetigungsdialog waere hier mehr Code als Nutzen.
+     * Der Bestaetigungsdialog ist die eigene Frage "Wirklich loeschen?" –
+     * kein window.confirm. Der Browser-Dialog waere von der Seite geloest,
+     * haette die Schrift des Systems statt des Designs und liesse sich nicht
+     * mit der Karte abstimmen, auf die er sich bezieht.
      *
      * Kein Loesch-Knopf fuer fremde oder globale Sets: die Datenbank lehnt es
      * ab, aber ein Knopf, der immer einen Fehler produziert, ist eine
@@ -105,16 +127,14 @@ export default function Uebersicht() {
      */
     if (!set.eigen) return;
 
-    const bestaetigt = window.confirm(
-      `„${set.name}" wirklich loeschen?\n\n` +
-        `Dabei werden auch alle ${set.kartenGesamt} Vokabeln in diesem Set geloescht. ` +
-        `Das laesst sich nicht rueckgaengig machen.`,
-    );
-    if (!bestaetigt) return;
+    setLoeschZiel(set);
+  }
 
+  async function loeschenBestaetigt(set: SetZeile) {
     setLoescht(set.id);
     try {
       await holeJson(`/api/sets/${encodeURIComponent(set.id)}`, null, { method: "DELETE" });
+      setLoeschZiel(null);
       setMeldung({ text: `„${set.name}" geloescht.`, fehler: false });
       await ladeSets();
     } catch (fehler) {
@@ -270,7 +290,6 @@ export default function Uebersicht() {
                       onClick={() => void setLoeschen(set)}
                       disabled={loescht === set.id}
                       aria-label={`Set ${set.name} loeschen`}
-                      title="Set loeschen"
                     >
                       <i
                         className={
@@ -280,6 +299,7 @@ export default function Uebersicht() {
                         }
                         aria-hidden="true"
                       />
+                      Löschen
                     </button>
                   )}
                 </div>
@@ -299,6 +319,52 @@ export default function Uebersicht() {
             aria-hidden="true"
           />
           <span>{meldung.text}</span>
+        </div>
+      )}
+
+      {loeschZiel && (
+        <div className={styles.schleier} onClick={() => !loescht && setLoeschZiel(null)}>
+          <div
+            ref={loeschRef}
+            className={styles.loeschDialog}
+            role="dialog"
+            aria-modal="true"
+            aria-label={`Set ${loeschZiel.name} löschen`}
+            tabIndex={-1}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span className={styles.loeschZeichen} aria-hidden="true">
+              🗑️
+            </span>
+            <h2 className={styles.loeschTitel}>Set wirklich löschen?</h2>
+            <p className={styles.loeschText}>
+              &quot;{loeschZiel.name}&quot;
+              {loeschZiel.kartenGesamt === 0
+                ? " wird gelöscht."
+                : ` wird mit ${loeschZiel.kartenGesamt} ${
+                    loeschZiel.kartenGesamt === 1 ? "Vokabel" : "Vokabeln"
+                  } gelöscht.`}{" "}
+              Das lässt sich nicht rückgängig machen.
+            </p>
+            <div className={styles.loeschKnopfZeile}>
+              <button
+                type="button"
+                className={styles.loeschAbbrechen}
+                onClick={() => setLoeschZiel(null)}
+                disabled={loescht !== null}
+              >
+                Abbrechen
+              </button>
+              <button
+                type="button"
+                className={styles.loeschBestaetigen}
+                onClick={() => void loeschenBestaetigt(loeschZiel)}
+                disabled={loescht === loeschZiel.id}
+              >
+                {loescht === loeschZiel.id ? "Löscht…" : "Wirklich löschen"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

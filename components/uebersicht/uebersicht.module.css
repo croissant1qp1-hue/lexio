@@ -76,11 +76,31 @@
     justify-content: space-between;
     gap: 1.25rem;
     padding: clamp(1.25rem, 3vw, 2rem);
-    background: linear-gradient(135deg, #442827 0%, #2a1f22 100%);
+    /* Der Grund kommt aus dem Design-Token: dunkel ist es die satte Tafel,
+       hell ein warmes Papier. Vorher stand hier ein festes Dunkel, das im
+       hellen Design einen unsichtbaren Text erzeugte. */
+    background: var(--hero-grund);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: var(--shadow-card);
     overflow: hidden;
+}
+
+/* Der Klebestreifen oben links: die Begruessungskarte haengt wie ein
+   Blatt an der Pinnwand. Bewusst nur angedeutet – ein Streifen, kein
+   Deko-Ueberfall. */
+.karte::before {
+    content: "";
+    position: absolute;
+    top: 0.9rem;
+    left: 1.1rem;
+    width: 5.5rem;
+    height: 1.15rem;
+    border-radius: 3px;
+    background: var(--papier-tape);
+    box-shadow: 0 2px 6px var(--papier-tape-schatten);
+    transform: rotate(-4deg);
+    pointer-events: none;
 }
 
 /* Weicher Lichtschein oben rechts, wie im Mockup. */
@@ -208,6 +228,24 @@
     -webkit-tap-highlight-color: transparent;
 }
 
+/* Klebestreifen oben an der Kachel – wie wenn das Set als Zettel an die
+   Pinnwand geheftet ist. Nicht ueberdeckend, nur angedeutet: der Streifen
+   liegt ueber der Kachelfarbe, nicht darueber hinaus ueber den Inhalt. */
+.kachel::before {
+    content: "";
+    position: absolute;
+    top: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(2deg);
+    width: 3.2rem;
+    height: 0.9rem;
+    border-radius: 3px;
+    background: var(--papier-tape);
+    box-shadow: 0 2px 5px var(--papier-tape-schatten);
+    z-index: 2;
+    pointer-events: none;
+}
+
 /* Der Knopf fuellt die Kachel komplett. Er ist ein eigenes Element, weil der
    Loeschen-Knopf daneben liegen muss – zwei Buttons lassen sich nicht
    ineinander verschachteln. */
@@ -296,8 +334,10 @@
     font-weight: 700;
 }
 
-/* Loeschen nur sichtbar, wenn die Maus ueber der Kachel ist – sonst muesste
-   man auf einer 168px-Kachel zielen, ohne die Lern-Aktion zu treffen. */
+/* Loeschen sichtbar (nicht erst bei Hover) – der Knopf ist die einzige
+   Loeschmoeglichkeit einer Kachel, und ein Ziel, das man erst suchen muss,
+   ist kein Ziel. Er bleibt bewusst dezent: die Kachel ist die Lernflaeche,
+   das Loeschen die Ausnahme. */
 .kachelLoeschen {
     position: absolute;
     bottom: 0.6rem;
@@ -305,38 +345,30 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
-    padding: 0;
+    gap: 0.3rem;
+    min-height: 34px;
+    padding: 0 0.6rem;
     border: 1px solid var(--line);
-    border-radius: 50%;
+    border-radius: 999px;
     background: rgba(0, 0, 0, 0.5);
-    color: var(--text-muted);
-    font-size: 0.8rem;
+    color: var(--paper-text-soft);
+    font-size: 0.72rem;
+    font-weight: 700;
     cursor: pointer;
-    opacity: 0;
-    transition: opacity 150ms ease, color 150ms ease, background-color 150ms ease;
-}
-
-.kachel:hover .kachelLoeschen,
-.kachelLoeschen:focus-visible {
-    opacity: 1;
+    transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease,
+        transform 150ms ease;
 }
 
 .kachelLoeschen:hover {
     background: var(--terracotta);
     border-color: var(--terracotta);
     color: #fff;
+    transform: translateY(-1px);
 }
 
-/* Ohne Hover gibt es kein :hover – der Knopf bleibt sichtbar. */
-@media (hover: none) {
-    .kachelLoeschen {
-        opacity: 1;
-    }
-    .kachel:hover {
-        transform: none;
-    }
+.kachelLoeschen:disabled {
+    opacity: 0.5;
+    cursor: wait;
 }
 
 /* ------------------------------------------------------------- Kachel neu */
@@ -483,4 +515,101 @@
     .karte {
         padding: 1.1rem;
     }
+}
+
+/* ---------------------------------------------------------- Loeschen-Dialog */
+
+/* Gleicher Schleier wie in set-aktionen: fixe Blende ueber allem, mit einem
+   Klick auf den Hintergrund schliessen. Bewusst identisch, damit die zwei
+   Loeschendialoge der App nicht zwei verschiedene Gebaerden sprechen. */
+.schleier {
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(5, 10, 14, 0.6);
+    padding: 1.25rem;
+}
+
+.loeschDialog {
+    width: min(440px, 100%);
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+    padding: clamp(1.4rem, 4vw, 2rem);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8rem;
+}
+
+.loeschZeichen {
+    font-size: 2.6rem;
+    line-height: 1;
+}
+
+.loeschTitel {
+    margin: 0;
+    font-family: var(--font-caveat);
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    color: var(--text-primary);
+}
+
+.loeschText {
+    color: var(--text-secondary);
+    font-size: 0.98rem;
+    line-height: 1.5;
+}
+
+.loeschKnopfZeile {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.6rem;
+    width: 100%;
+}
+
+.loeschAbbrechen {
+    min-height: 46px;
+    padding: 0.65rem 1.2rem;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease;
+}
+
+.loeschAbbrechen:hover {
+    background: var(--bg-elevated-2);
+    color: var(--text-primary);
+}
+
+.loeschBestaetigen {
+    min-height: 46px;
+    padding: 0.65rem 1.2rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--terracotta);
+    color: var(--off-white);
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.loeschBestaetigen:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(184, 66, 84, 0.32);
+}
+
+.loeschBestaetigen:disabled {
+    opacity: 0.5;
+    cursor: wait;
+    transform: none;
+    box-shadow: none;
 }

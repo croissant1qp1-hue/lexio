@@ -278,6 +278,30 @@
  * (Russisch #5B8DEF, Tuerkisch #E85D9E) unter die Grenze. Die Hierarchie
  * kommt deshalb aus Groesse und Gewicht, nicht aus hellerer Farbe.
  */
+/*
+ * Klebestreifen oben an der Karte: das Blockblatt haengt wie ein Zettel an
+ * der Pinnwand. Bewusst ein Stueck unter der Oberkante, damit er weder in
+ * den Rand hineinragt noch die abgeknickte Ecke unten rechts beruehrt.
+ *
+ * Achtung Flip: .kartenSeite rotiert mit der Karte. Der Streifen muss also
+ * auf beiden Seiten oben sitzen – das tut er, weil jede Seite ihre eigene
+ * .kartenSeite bekommt und der Streifen zur Ebene gehoert, nicht zur Drehung.
+ */
+.kartenSeite::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 50%;
+    transform: translateX(-50%) rotate(2deg);
+    width: 3.6rem;
+    height: 1rem;
+    border-radius: 3px;
+    background: var(--papier-tape);
+    box-shadow: 0 2px 5px var(--papier-tape-schatten);
+    z-index: 1;
+    pointer-events: none;
+}
+
 .kartenSeite {
     /* BEWUSST fest und nicht `var(--ink)`.
      *
@@ -309,7 +333,10 @@
      */
     background-image: radial-gradient(rgba(13, 23, 29, 0.05) 1px, transparent 1.35px);
     background-size: 16px 16px;
-    box-shadow: var(--shadow-card);
+    /* Papierkante: die feine Tinten-Linie eines frischen Blattes statt des
+       harten Theme-Randes. Der Token hat je Design einen Wert, damit es in
+       beiden der Hauch einer Blattkante bleibt und kein Rahmenstreifen. */
+    box-shadow: var(--shadow-card), var(--karte-kante);
     /* Bewusst `visible` und nicht `hidden`: es gibt keine zweite Ebene mehr,
      * die diese eine verdecken koennte. Siehe Kopfkommentar, Punkt 1. */
     backface-visibility: visible;
