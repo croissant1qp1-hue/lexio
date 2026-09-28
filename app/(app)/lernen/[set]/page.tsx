@@ -20,6 +20,14 @@ export default async function Seite(props: {
     const ueben = modus === "ueben";
 
     /*
+     * `?modus=leech` (Plan 1.7) holt die ausgeschlossenen Problemskarten
+     * gezielt zurück – der Gegenknopf zum Hinweis "N Problemskarten sind
+     * ausgeblendet". Einzig "leech" ist gültig; alles andere ist ein
+     * normaler Lerndurchgang.
+     */
+    const leech = modus === "leech";
+
+    /*
      * `runde` zaehlt die Durchlaeufe im Uebungsmodus.
      *
      * Wofuer: "Weitere Runde" soll dieselben Karten noch einmal bringen. Ohne
@@ -33,5 +41,5 @@ export default async function Seite(props: {
      */
     const rundeNr = Number(runde) || 0;
 
-    return <LernenSeite setSlug={set} ueben={ueben} rundeNr={rundeNr} />;
+    return <LernenSeite setSlug={set} ueben={ueben} leech={leech} rundeNr={rundeNr} />;
 }

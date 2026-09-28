@@ -554,6 +554,30 @@
     background: rgba(13, 23, 29, 0.75);
 }
 
+/* Plan 1.7: Problemschwelle erreicht. Das Etikett steht oben links (die
+   Stufenpunkte rechts) und erklärt, warum diese Karte beim normalen Lernen
+   nicht erscheint – ohne Etikett wirkte die Leech-Runde wie eine Kopie der
+   Übungsrunde. */
+.karteProblemskarte {
+    position: absolute;
+    top: 0.9rem;
+    left: 0.9rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(184, 66, 84, 0.16);
+    border: 1px solid var(--terracotta);
+    color: #ffd9de;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    pointer-events: none;
+}
+
+[data-design="hell"] .karteProblemskarte {
+    color: #6b0f1d;
+}
+
 /* --------------------------------------------------------------- Aktionen */
 
 .aktionen {
@@ -694,6 +718,71 @@
     text-align: center;
     font-size: 0.7rem;
     color: var(--text-muted);
+}
+
+/* ------------------------------------------------------- Rückgängig */
+
+.undoleiste {
+    display: flex;
+    justify-content: center;
+    min-height: 1.5rem;
+}
+
+.undo {
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.75rem;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0.2rem 0.4rem;
+}
+
+.undo:hover:not(:disabled) {
+    color: var(--text-primary);
+}
+
+.undo:disabled {
+    opacity: 0.55;
+    cursor: progress;
+}
+
+/* ------------------------------------------------- Leech-Hinweis */
+
+.leechHinweis {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: rgba(184, 66, 84, 0.06);
+    border: 1px dashed rgba(184, 66, 84, 0.3);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    flex-wrap: wrap;
+}
+
+.leechKnopf {
+    border: 1px solid var(--terracotta);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--terracotta);
+    font-size: 0.8rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.3rem 0.8rem;
+    white-space: nowrap;
+    transition: background-color 140ms ease, color 140ms ease;
+}
+
+.leechKnopf:hover {
+    background: var(--terracotta);
+    color: #17110a;
 }
 
 /*

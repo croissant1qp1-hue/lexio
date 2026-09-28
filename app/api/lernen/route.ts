@@ -3,6 +3,7 @@ import { mitUserOder401 } from "@/lib/supabase/user";
 import { holeSprachen, spracheNachCode } from "@/lib/sprachen-server";
 import { UNBEKANNTE_SPRACHE, type SpracheInfo } from "@/lib/sprachen";
 import { migrationsMeldung } from "@/lib/db-fehler";
+import { LEECH_FEHLER } from "@/lib/lernlogik";
 
 const MAX_KARTEN = 20;
 
@@ -41,6 +42,8 @@ type FortschrittsZeile = {
   stufe: number;
   gelernt: boolean;
   faellig_am: string;
+  /** Seit 003 vorhanden; seit 1.7 für Leech-Erkennung im Einsatz. */
+  fehler?: number;
 };
 
 /** Eine Karte mit ihrem Fortschritt. Leer heisst: noch nie gesehen. */
@@ -98,6 +101,16 @@ export async function GET(request: Request) {
    * Wiederholung mit 40 Karten startet.
    */
   const ueben = suche.get("modus") === "ueben";
+
+  /**
+   * Leech-Modus (Plan 1.7).
+   *
+   * `modus=leech` ist der Gegenweg zum Ausschluss: wer die eingefrorenen
+   * Problemskarten trotzdem sehen will, holt sie sich hier bewusst herüber.
+   * Wie bei `ueben` entscheidet die Adresse, nicht ein Client-Zustand – sonst
+   * ginge der Zugriff nach einem Reload verloren.
+   */
+  const leechModus = suche.get("modus") === "leech";
 
   const heute = new Date().toISOString().slice(0, 10);
 
@@ -181,7 +194,7 @@ export async function GET(request: Request) {
        * `string | null` an – die Seite muss den Fall "kein Satz" auch kennen.
        */
       "id, frage, antwort, beispielsatz, beispiel_uebersetzung, " +
-        "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am)",
+        "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler)",
     )
     .eq("set_id", set.id)
     .eq("fortschritt.user_id", user.id)
@@ -248,6 +261,7 @@ export async function GET(request: Request) {
   const setZuGross = roh.length > MAX_SET_KARTEN;
   const alle = (setZuGross ? roh.slice(0, MAX_SET_KARTEN) : roh).map((karte) => {
     const zeile = Array.isArray(karte.fortschritt) ? karte.fortschritt[0] : karte.fortschritt;
+    const fehler = zeile?.fehler ?? 0;
     return {
       id: karte.id,
       frage: karte.frage,
@@ -258,6 +272,12 @@ export async function GET(request: Request) {
       gelernt: zeile?.gelernt ?? false,
       // Ohne Zeile: heute. Mit Zeile: ihr Datum.
       faelligAm: zeile?.faellig_am ?? heute,
+      /*
+       * Leech (Plan 1.7): eine Karte mit der Fehlerschwelle ist für die
+       * normale Runde zu oft "nochmal" gewesen. Sie wird unten aus der
+       * Rotation genommen und nur noch über den Modus "leech" geübt.
+       */
+      leech: fehler >= LEECH_FEHLER,
     };
   });
 
@@ -293,14 +313,19 @@ export async function GET(request: Request) {
    */
   const sortiert = alle.sort((a, b) => a.stufe - b.stufe);
 
+  const istLeech = (karte: (typeof sortiert)[number]) => karte.leech;
+
   /*
-   * Im Uebungsmodus zaehlt nicht die Faelligkeit, sondern der Bestand. Sonst
-   * waere der Knopf bei einem Set, das man heute schon gemacht hat, genau
-   * dort wirkungslos, wo man ihn braucht.
+   * Leech (Plan 1.7): In der normalen Rotation sind Problemskarten
+   * ausgeschlossen – sie haben genug Fehler und sollen die Runde nicht mehr
+   * blockieren. Im Uebungsmodus zaehlen sie mit (die Runde ist ohnehin eine
+   * bewusste Wiederholung), und der Leech-Modus liefert nur sie aus.
    */
-  const genutzt = ueben
-    ? sortiert.slice(0, MAX_WIEDERHOLUNG)
-    : sortiert.filter((karte) => karte.faelligAm <= heute).slice(0, MAX_KARTEN);
+  const genutzt = leechModus
+    ? sortiert.filter(istLeech).slice(0, MAX_WIEDERHOLUNG)
+    : ueben
+      ? sortiert.slice(0, MAX_WIEDERHOLUNG)
+      : sortiert.filter((karte) => karte.faelligAm <= heute && !istLeech(karte)).slice(0, MAX_KARTEN);
 
   return NextResponse.json({
     set: { slug: set.slug, name: set.name, sprache },
@@ -311,9 +336,11 @@ export async function GET(request: Request) {
      * Obergrenze von 40, damit "12 von 40 geschafft" dasselbe meint wie
      * vorher, nur eben in einem anderen Umfang.
      */
-    faelligGesamt: ueben
-      ? Math.min(sortiert.length, MAX_WIEDERHOLUNG)
-      : sortiert.filter((karte) => karte.faelligAm <= heute).length,
+    faelligGesamt: leechModus
+      ? Math.min(sortiert.filter(istLeech).length, MAX_WIEDERHOLUNG)
+      : ueben
+        ? Math.min(sortiert.length, MAX_WIEDERHOLUNG)
+        : sortiert.filter((karte) => karte.faelligAm <= heute && !istLeech(karte)).length,
     /*
      * Bestand statt Fälligkeit: die Lernseite braucht "hat das Set überhaupt
      * Karten", um "nichts fällig" von "noch nichts angelegt" zu
@@ -321,11 +348,22 @@ export async function GET(request: Request) {
      */
     kartenGesamt: alle.length,
     /*
+     * Anzahl der ausgeschlossenen Problemskarten. Die Lernseite nutzt die
+     * Zahl für den Hinweis "N Problemskarten sind ausgeblendet" im normalen
+     * Modus – dem Gegenstück zum Knopf, der sie trotzdem hereinhält.
+     */
+    leechAnzahl: sortiert.filter(istLeech).length,
+    /*
      * Der Client braucht das, um den Endschirm ehrlich zu halten: ohne diesen
      * Hinweis wuerde er bei "7 von 40" nach einer Runde von 7 behaupten, es
      * sei nichts mehr da, obwohl 33 im Set liegen.
      */
     ...(ueben ? { uebungsmodus: true } : {}),
+    /*
+     * Modus-Flag für den Client: in `modus=leech` ist die Runde eine
+     * bewusste Reparaturrunde, und der Endschirm benennt das auch so.
+     */
+    ...(leechModus ? { leechModus: true } : {}),
     /*
      * Nur gesetzt, wenn es wirklich zu viel ist. Die Oberflaeze kann das
      * anzeigen; wenn sie es nicht tut, ist die Antwort wenigstens ehrlich.

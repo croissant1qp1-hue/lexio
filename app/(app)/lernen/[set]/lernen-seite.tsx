@@ -24,6 +24,13 @@ type Karte = {
     beispielUebersetzung: string | null;
     stufe: number;
     gelernt: boolean;
+    /**
+     * Plan 1.7: erreicht diese Karte die Fehlerschwelle, ist sie eine
+     * Problemskarte. Die Route setzt das Flag; die Seite zeigt damit eine
+     * Markierung und erklärt, warum diese Karte nicht in der normalen
+     * Rotation vorkommt.
+     */
+    leech: boolean;
 };
 
 /**
@@ -57,6 +64,14 @@ type LernAntwort = {
      * geschafft" zu verwechseln.
      */
     uebungsmodus?: boolean;
+    /**
+     * Wie viele Karten des Sets die Fehlerschwelle erreicht haben (1.7). Die
+     * Seite zeigt daraus den Hinweis "N Problemskarten sind ausgeblendet" –
+     * mit dem Knopf, der sie trotzdem hereinhält.
+     */
+    leechAnzahl?: number;
+    /** True, wenn die Runde über `?modus=leech` nur Problemskarten zeigt. */
+    leechModus?: boolean;
 };
 
 /**
@@ -79,6 +94,7 @@ const NULL_PUNKTE: Punkte = { xp: 0, streak: 0 };
 export default function LernenSeite({
     setSlug,
     ueben = false,
+    leech = false,
     rundeNr = 0,
 }: {
     setSlug: string;
@@ -89,6 +105,12 @@ export default function LernenSeite({
      * oder einer Unterbrechung noch einmal braucht.
      */
     ueben?: boolean;
+    /**
+     * Aus `?modus=leech` (Plan 1.7). Die Runde zeigt dann nur die
+     * ausgeschlossenen Problemskarten – der Gegenweg zum Hinweis auf der
+     * normalen Ansicht.
+     */
+    leech?: boolean;
     /**
      * Zaehler der Wiederholungsrunden aus `?runde=`. Er gehoert in die
      * Abhaengigkeit des Ladeeffekts, damit "Weitere Runde" die Karten
@@ -119,6 +141,29 @@ export default function LernenSeite({
      * ein Knopf "Nochmal lernen" eine Sackgasse.
      */
     const [uebungsmodus, setUebungsmodus] = useState(false);
+
+    /**
+     * Plan 1.7. `leechModus` kommt von der Route (nur Problemskarten in
+     * dieser Runde), `leechAnzahl` davon, wie viele Karten im Set die
+     * Fehlerschwelle erreicht haben – Nulle dorthin? Nein: Nulle ist der
+     * normale Alltag, und die Zahl wird nur angezeigt, wenn sie nicht 0 ist.
+     */
+    const [leechModus, setLeechModus] = useState(false);
+    const [leechAnzahl, setLeechAnzahl] = useState(0);
+
+    /**
+     * Rückgängig für die letzte Antwort (Plan 1.7). Gehalten wird der
+     * Zustand VOR der Antwort: karten und index, damit die Karte bei der
+     * Rücknahme wieder an ihren Platz rutscht. Die Bilanz wird über die
+     * bewertung zurückgesetzt, die XP über den Wert, den die Route nach der
+     * Datenbank-Rücknahme meldet.
+     */
+    const [letzteAntwort, setLetzteAntwort] = useState<{
+        kartenId: string;
+        bewertung: Bewertung;
+        karten: Karte[];
+        index: number;
+    } | null>(null);
 
     /**
      * Wie viele Karten heute faellig sind – vor der Grenze von 20.
@@ -223,7 +268,7 @@ export default function LernenSeite({
                 // aufhalten.
                 const [daten, profil] = await Promise.all([
                     holeJson<LernAntwort | null>(
-                        `/api/lernen?set=${encodeURIComponent(setSlug)}${ueben ? "&modus=ueben" : ""}`,
+                        `/api/lernen?set=${encodeURIComponent(setSlug)}${ueben ? "&modus=ueben" : ""}${leech ? "&modus=leech" : ""}`,
                         null,
                     ),
                     // Fehlgeschlagenes /api/profil ist in der Regel kein
@@ -250,8 +295,11 @@ export default function LernenSeite({
                 setFaelligGesamt(daten.faelligGesamt ?? 0);
                 setKartenGesamt(daten.kartenGesamt ?? 0);
                 setUebungsmodus(daten.uebungsmodus === true);
+                setLeechAnzahl(daten.leechAnzahl ?? 0);
+                setLeechModus(daten.leechModus === true);
                 setIndex(0);
                 setAufgedeckt(false);
+                setLetzteAntwort(null);
                 if (profil) setPunkte({ xp: profil.xp, streak: profil.streak });
             } catch (e) {
                 /*
@@ -279,7 +327,7 @@ export default function LernenSeite({
         return () => {
             abgebrochen = true;
         };
-    }, [setSlug, runde, ueben, rundeNr]);
+    }, [setSlug, runde, ueben, leech, rundeNr]);
 
     const karte = karten[index];
     const fertig = !laden && !fehler && karten.length > 0 && index >= karten.length;
@@ -378,6 +426,15 @@ export default function LernenSeite({
             setSpeicherFehler(null);
             tonAnhalten();
 
+            /*
+             * Plan 1.7: Stand VOR der Antwort merken, damit "Rückgängig"
+             * die Karte zurückholen kann. Nicht der Server-Stand, sondern der
+             * der Runde: bei "Nochmal" wandert die Karte ans Ende der
+             * Schlange, und ohne diesen Schnappschuss wüsste die Rücknahme
+             * nicht, wohin die Karte gehört.
+             */
+            const vorher = { karten, index };
+
             const xp = BEWERTUNGEN.find((b) => b.id === bewertung)?.xp ?? 0;
 
             if (xp > 0) {
@@ -425,6 +482,15 @@ export default function LernenSeite({
                 setAufgedeckt(false);
 
                 /*
+                 * Erst jetzt ist die Antwort verbucht – hier beginnt die
+                 * Undo-Kette. `vorher` stammt aus dem Moment VOR der
+                 * Optimistik, und die Karten sind noch unveraendert in der
+                 * Campsite: erst nach dem Erfolg darf das als "letzte
+                 * Antwort" gelten. Ein Fehlschlag relaesst kein Rückgängig.
+                 */
+                setLetzteAntwort({ ...vorher, kartenId: karte.id, bewertung });
+
+                /*
                  * "Nochmal" heisst: dieselbe Karte gleich nochmal. Vorher
                  * stand hier fuer JEDE Bewertung `setIndex(i => i + 1)`,
                  * also wanderte die Karte aus der Runde heraus und kam erst
@@ -469,8 +535,71 @@ export default function LernenSeite({
                 setSenden(false);
             }
         },
-        [karte, senden, index, tonAnhalten],
+        [karte, karten, senden, index, tonAnhalten],
     );
+
+    /*
+     * Rückgängig für die letzte Antwort (Plan 1.7).
+     *
+     * Der Server stellt den Stand der Karte vor der letzten Antwort wieder
+     * her (letzte_antwort-Schnappschuss aus der Datenbank). Der Client holt
+     * mit dem `vorher`-Schnappschuss die Karte an ihren Platz in der Runde
+     * zurueck und nimmt die Bilanz zurueck.
+     */
+    const rueckgaengig = useCallback(async () => {
+        if (!letzteAntwort || senden) return;
+        setSenden(true);
+        setSpeicherFehler(null);
+
+        try {
+            const antwort = await sendeJson<{
+                erledigt?: boolean;
+                xpGesamt?: number;
+                streak?: number | null;
+            }>("/api/lernen/antwort/rueckgaengig", { kartenId: letzteAntwort.kartenId });
+
+            /*
+             * Kein Schnappschuss mehr (z. B. anderer Tab, anderes Geraet
+             * hat inzwischen geantwortet). Dann gibt es nichts, was der
+             * Server zuruecknehmen koennte – also auch keine Abnahme im
+             * Client. Ehrlich mitteilen statt stur die Runde zurueckspulen.
+             */
+            if (antwort.erledigt === false) {
+                setSpeicherFehler(
+                    "Diese Antwort kann nicht mehr zurückgenommen werden – woanders wurde inzwischen geantwortet.",
+                );
+                setLetzteAntwort(null);
+                return;
+            }
+
+            setKarten(letzteAntwort.karten);
+            setIndex(letzteAntwort.index);
+            setAufgedeckt(false);
+            setBilanz((alt) => ({
+                ...alt,
+                [letzteAntwort.bewertung]: Math.max(0, alt[letzteAntwort.bewertung] - 1),
+            }));
+            /*
+             * XP aus der Server-Nachricht: die Ruecknahme kann einen Tag
+             * auf 0 XP zaehlen, und dann faellt auch der Streak. Der
+             * aufkuemmernde Wert ist ohne Abfrage des Profils nicht
+             * ratbar – die Antwort bringt ihn mit.
+             */
+            setPunkte((p) => ({
+                xp: typeof antwort.xpGesamt === "number" ? antwort.xpGesamt : p.xp,
+                streak: typeof antwort.streak === "number" ? antwort.streak : p.streak,
+            }));
+            setLetzteAntwort(null);
+        } catch (antwortFehler) {
+            setSpeicherFehler(
+                antwortFehler instanceof ApiFehler
+                    ? antwortFehler.message
+                    : "Die Antwort konnte nicht zurückgenommen werden. Versuch es noch einmal.",
+            );
+        } finally {
+            setSenden(false);
+        }
+    }, [letzteAntwort, senden]);
 
     // Tastaturbedienung: Leertaste deckt auf, 1-4 bewerten.
     useEffect(() => {
@@ -553,9 +682,24 @@ export default function LernenSeite({
                         ☕
                     </span>
                     <h2 className={styles.endeTitel}>Alles gelernt</h2>
+                    {/* Leerer Stapel. Im normalen Modus kann er lügen: fällig ist nichts,
+                 aber die ausgeblendeten Problemskarten existieren trotzdem –
+                 dann erklärt der Text sie und der Knopf darüber holt sie
+                 herein. */}
                     <p className={styles.endeText}>
-                        Für {set?.name} sind heute keine Karten fällig. Komm später wieder – dann wartet
-                        der nächste Stapel.
+                        {leechAnzahl > 0 && !leechModus ? (
+                            <>
+                                Für {set?.name} sind heute keine neuen Karten fällig.{" "}
+                                {leechAnzahl}{" "}
+                                {leechAnzahl === 1 ? "Problemskarte wartet" : "Problemskarten warten"}{" "}
+                                allerdings darauf, geübt zu werden.
+                            </>
+                        ) : (
+                            <>
+                                Für {set?.name} sind heute keine Karten fällig. Komm später wieder – dann
+                                wartet der nächste Stapel.
+                            </>
+                        )}
                     </p>
                     {/*
                      * Im normalen Modus ist ein leerer Stapel kein Grund, die
@@ -571,6 +715,22 @@ export default function LernenSeite({
                             onClick={() => router.push(`/lernen/${setSlug}?modus=ueben`)}
                         >
                             Nochmal lernen
+                        </button>
+                    )}
+                    {/*
+                     * Alle fälligen Karten sind ausgeblendete
+                     * Problemskarten: "Alles gelernt" stimmt dann nicht –
+                     * es gibt nichts zum Lernen, wohl aber zum Üben. Der
+                     * Weg dorthin darf nicht fehlen, sonst stünde die
+                     * Knopfkette hinter einer leeren Seite.
+                     */}
+                    {leechAnzahl > 0 && !leechModus && (
+                        <button
+                            type="button"
+                            className={styles.knopfLeise}
+                            onClick={() => router.push(`/lernen/${setSlug}?modus=leech`)}
+                        >
+                            Problemskarten üben
                         </button>
                     )}
                     <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
@@ -600,16 +760,26 @@ export default function LernenSeite({
                             ? "Runde geschafft"
                             : uebungsmodus
                               ? "Wiederholt"
-                              : "Alles geschafft"}
+                              : leechModus
+                                ? "Probleme geübt"
+                                : "Alles geschafft"}
                     </h2>
                     <p className={styles.endeText}>
                         {uebrig > 0 ? (
                             <>
                                 {karten.length} von {faelligGesamt} geschafft – {uebrig}{" "}
                                 {uebrig === 1 ? "bleibt" : "bleiben"} noch.
-                                {uebungsmodus
-                                    ? " Der Rest folgt beim nächsten Mal."
-                                    : " Morgen geht es weiter."}
+                                {leechModus
+                                    ? " Der Rest folgt im nächsten Problemschub."
+                                    : uebungsmodus
+                                      ? " Der Rest folgt beim nächsten Mal."
+                                      : " Morgen geht es weiter."}
+                            </>
+                        ) : leechModus ? (
+                            <>
+                                {karten.length} {karten.length === 1 ? "Problemskarte" : "Problemskarten"}{" "}
+                                aus {set?.name} durchgehalten. Morgen rücken sie wieder mit dem normalen
+                                Stapel an – die Schwelle zählt weiter.
                             </>
                         ) : uebungsmodus ? (
                             <>
@@ -647,12 +817,18 @@ export default function LernenSeite({
                      * `neuStarten` laedt dieselben 40 Karten noch einmal, was
                      * sich anfuehlt wie ein Fehler.
                      */}
-                    {uebungsmodus ? (
+                    {/* Leech-Runden haben dieselbe Kartenbegrenzung wie Übungsrunden:
+                     also auch hier eine echte neue Runde statt neuStarten. */}
+                    {uebungsmodus || leechModus ? (
                         <button
                             type="button"
                             className={styles.knopf}
                             onClick={() =>
-                                router.push(`/lernen/${setSlug}?modus=ueben&runde=${rundeNr + 1}`)
+                                router.push(
+                                    `/lernen/${setSlug}?modus=${uebungsmodus ? "ueben" : "leech"}&runde=${
+                                        rundeNr + 1
+                                    }`,
+                                )
                             }
                         >
                             Weitere Runde
@@ -660,6 +836,31 @@ export default function LernenSeite({
                     ) : (
                         <button type="button" className={styles.knopf} onClick={neuStarten}>
                             Noch eine Runde
+                        </button>
+                    )}
+                    {letzteAntwort && (
+                        <button
+                            type="button"
+                            className={styles.knopfLeise}
+                            onClick={() => void rueckgaengig()}
+                            disabled={senden}
+                        >
+                            Letzte Antwort zurücknehmen
+                        </button>
+                    )}
+                    {/*
+                     * Normale Runde zu Ende, aber es liegen noch versteckte
+                     * Problemskarten. "Alles geschafft" stimmt für den
+                     * Stapel, nicht fürs Set – der Weg zu den Problemen darf
+                     * nicht fehlen, sonst verschwinden sie hinter dem Feiern.
+                     */}
+                    {leechAnzahl > 0 && !leechModus && (
+                        <button
+                            type="button"
+                            className={styles.knopfLeise}
+                            onClick={() => router.push(`/lernen/${setSlug}?modus=leech`)}
+                        >
+                            Problemskarten üben
                         </button>
                     )}
                     <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
@@ -863,6 +1064,12 @@ export default function LernenSeite({
                                         )}
                                         <span className={styles.karteTipp}>Tippen zum Aufdecken</span>
 
+                                        {karte.leech && (
+                                            <span className={styles.karteProblemskarte}>
+                                                Problemskarte
+                                            </span>
+                                        )}
+
                                         {karte.stufe > 0 && (
                                             <span
                                                 className={styles.stufePunkte}
@@ -911,6 +1118,25 @@ export default function LernenSeite({
                 )}
             </div>
 
+            {/*
+             * Rückgängig (Plan 1.7): die letzte Antwort zurücknehmen. Der
+             * Knopf erscheint nur, wenn es eine gibt – und die Antwort auf
+             * einer Karte löst nicht sofort die nächste aus, also führt
+             * "Rückgängig" die Runde an den vorherigen Stand zurück.
+             */}
+            {letzteAntwort && (
+                <div className={styles.undoleiste}>
+                    <button
+                        type="button"
+                        className={styles.undo}
+                        onClick={() => void rueckgaengig()}
+                        disabled={senden}
+                    >
+                        Letzte Antwort zurücknehmen
+                    </button>
+                </div>
+            )}
+
             {speicherFehler && (
                 <p className={styles.speicherFehler} role="alert">
                     {speicherFehler}
@@ -927,6 +1153,33 @@ export default function LernenSeite({
                 <p className={styles.hinweis} role="status">
                     {hinweis}
                 </p>
+            )}
+
+            {/*
+             * Plan 1.7: normale Runde, aber es gibt ausgeblendete
+             * Problemskarten. Sie stehen NICHT faellig, also kauft sich der
+             * Hinweis nicht mit dem Fortschritt – er erklärt nur, warum
+             * nicht alles dabei ist, und zeigt den Weg, sie trotzdem zu
+             * üben. Im leechModus selbst hat er nichts zu suchen, und im
+             * Übungsmodus zählen die Problemskarten ja mit – dann ist
+             * nichts ausgeblendet.
+             */}
+            {leechAnzahl > 0 && !leechModus && !uebungsmodus && (
+                <div className={styles.leechHinweis} role="status">
+                    <span>
+                        {leechAnzahl}{" "}
+                        {leechAnzahl === 1
+                            ? "Problemskarte ist ausgeblendet."
+                            : "Problemskarten sind ausgeblendet."}
+                    </span>
+                    <button
+                        type="button"
+                        className={styles.leechKnopf}
+                        onClick={() => router.push(`/lernen/${setSlug}?modus=leech`)}
+                    >
+                        Trotzdem üben
+                    </button>
+                </div>
             )}
 
             <p className={styles.tastaturTipp}>

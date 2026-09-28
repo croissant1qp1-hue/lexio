@@ -13,6 +13,17 @@ export const BEWERTUNGEN: {
 ];
 
 /**
+ * Schwelle für "Problemskarten" (Plan 1.7).
+ *
+ * Eine Karte mit so vielen Fehlern ("nochmal") taucht nicht mehr von selbst
+ * in der Runde auf – sie ist leech. Die View
+ * karteikarten_sets_uebersicht kennt dieselbe Schwelle (fehler < 8), damit
+ * die Kacheln oben und die Lernroute nicht auseinanderlaufen. Die Zahl
+ * gehört deshalb an beide Stellen.
+ */
+export const LEECH_FEHLER = 8;
+
+/**
  * Abstand in Tagen, bis eine Karte mit der aktuellen Stufe wieder faellig wird.
  * Bewusst flach: eine Karte, die auf Stufe 6 sitzt, wartet 60 Tage. Wer eine
  * Karte 60 Tage nicht sieht, hat sie entweder vergessen oder braucht sie nicht

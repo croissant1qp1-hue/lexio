@@ -377,14 +377,26 @@ Braucht Migration plus Anpassung aller drei Views.
 Leech-Schwelle (etwa 8 Fehler → Ausschluss mit Knopf) und Rückgängig für
 die letzte Antwort.
 
+> **Erledigt.** Migration 009: Spalte `letzte_antwort` (Snapshot vor der
+> Antwort), `antwort_verbuchen` schreibt den Snapshot, neue Funktion
+> `antwort_rueckgaengig` stellt die Zeile wieder her (XP-Tageswert abziehen,
+> nie unter 0), View `karteikarten_sets_uebersicht` zählt Leech-Karten
+> nicht mehr als fällig. Die Schwelle `LEECH_FEHLER = 8` steht in
+> `lib/lernlogik.ts`; die Route filtert Leech-Karten aus der normalen
+> Rotation, `modus=leech` holt sie gezielt zurück (leechModus-Flag). Die
+> Lernseite zeigt das Badge „Problemskarte", den Hinweis „N
+> Problemskarten sind ausgeblendet" mit „Trotzdem üben" und einen Endschirm
+> für die Reparaturrunde; „Rückgängig" nimmt die letzte Antwort per
+> Snapshot zurück (Route `app/api/lernen/antwort/rueckgaengig`).
+
 **Abnahme:** Runde fühlen sich ehrlich an. „Nochmal" zeigt die Karte
 nochmal. Ton kommt auf der Rückseite (der Begriff klingt, die Vorderseite
 bleibt still). Beispiel steht auf der Rückseite.
 Fortschrittsbalken stimmen.
 
-**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5 und 1.6 erledigt. Offen ist 1.7.
-1.4 ist inhaltlich in 0.2 erledigt, die automatische Fuellung folgt mit 2.2
-und 2.3.
+**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5, 1.6 und 1.7 erledigt. Phase 1 ist
+damit abgeschlossen. 1.4 ist inhaltlich in 0.2 erledigt, die automatische
+Fuellung folgt mit 2.2 und 2.3.
 
 ### Phase 2 — Inhalt und Import
 
