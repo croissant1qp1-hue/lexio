@@ -8,6 +8,7 @@ import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprache
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import { spreche, stimmen, stoppe, tonVerfuegbar } from "@/lib/sprachausgabe";
+import { LAUTSTÄRKE_VOLUMEN, liesTon, TON_SPEICHER } from "@/lib/ton";
 import styles from "./lernen.module.css";
 
 type Karte = {
@@ -163,6 +164,32 @@ export default function LernenSeite({
     const [tonDa, setTonDa] = useState(false);
     const [spricht, setSpricht] = useState(false);
 
+    /*
+     * Geräte-Einstellung aus lib/ton.ts: ob und wie laut vorgelesen wird.
+     * Hört auch auf `storage`, damit zwei Tabs sich nicht widersprechen –
+     * die Einstellungen-Seite ändert den Stand im localStorage, und wenn
+     * der Lern-Tab offen ist, soll die Wahl dort sofort gelten.
+     */
+    const [tonStand, setTonStand] = useState(() => liesTon());
+
+    useEffect(() => {
+        const beiAenderung = (e: StorageEvent) => {
+            const istTon = e.storageArea === window.localStorage && (e.key === null || e.key === TON_SPEICHER);
+            if (!istTon) return;
+            const frisch = liesTon();
+            if (!frisch.an) {
+                // Töne aus: das laufende Sprechen stoppen. Ein laufender
+                // Obergrenzen-Timer aus `vorlesen` stört nicht – er setzt
+                // nur `setSpricht(false)`, was hier schon gilt.
+                setSpricht(false);
+                stoppe();
+            }
+            setTonStand(frisch);
+        };
+        window.addEventListener("storage", beiAenderung);
+        return () => window.removeEventListener("storage", beiAenderung);
+    }, []);
+
     useEffect(() => {
         let weg = false;
         if (!tonVerfuegbar()) return;
@@ -279,13 +306,22 @@ export default function LernenSeite({
 
     const vorlesen = useCallback(() => {
         if (!karte) return;
+        if (!tonStand.an) return;
         if (spricht) {
             stoppe();
             setSpricht(false);
             return;
         }
         const teile = [karte.frage, karte.beispielsatz ?? ""];
-        if (!spreche(teile, set?.sprache.code ?? null, () => setSpricht(false))) return;
+        if (
+            !spreche(
+                teile,
+                set?.sprache.code ?? null,
+                () => setSpricht(false),
+                LAUTSTÄRKE_VOLUMEN[tonStand.lautstaerke],
+            )
+        )
+            return;
         setSpricht(true);
         /*
          * `onend` meldet das echte Ende in den meisten Browsern; die
@@ -297,7 +333,7 @@ export default function LernenSeite({
          */
         tonTimerRaumen();
         tonZeitueber.current = window.setTimeout(() => setSpricht(false), 30000);
-    }, [karte, set, spricht]);
+    }, [karte, set, spricht, tonStand.an, tonStand.lautstaerke]);
 
     /*
      * Das Abbrechen haengt an den EREIGNISSEN, nicht an den Werten: Karte
@@ -745,7 +781,7 @@ export default function LernenSeite({
                                          * man hoert den Begriff, waehrend
                                          * vor einem die Uebersetzung steht.
                                          */}
-                                        {tonDa && (
+                                        {tonDa && tonStand.an && (
                                             <span
                                                 role="button"
                                                 tabIndex={0}

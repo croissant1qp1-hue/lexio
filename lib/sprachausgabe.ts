@@ -126,11 +126,17 @@ export function stimmeFuer(
  * im Satz abzubrechen oder Minuten nachzuwackeln. Manche Browser schicken
  * `onend` nicht; deshalb bleibt der Aufrufer dafuer zustaendig, eine
  * Obergrenze vorzuhalten (siehe lernen-seite, `vorlesen`).
+ *
+ * `lautstaerke` skaliert die Ausgabelautstärke (0 bis 1). Wer leise lernt,
+ * weil im Raum jemand schläft, bekommt hier seine Wahl; Standard ist 1.
+ * SpeechSynthesis nimmt jeden Wert zwischen 0 und 1 an; deshalb kommt kein
+ * Wert darüber (*Mischpegel-Abregelung wäre reine Oberfläche*).
  */
 export function spreche(
   teile: (string | null | undefined)[],
   code: string | null,
   onGeendet?: () => void,
+  lautstaerke = 1,
 ): boolean {
   if (!tonVerfuegbar()) return false;
   /*
@@ -186,6 +192,7 @@ export function spreche(
     if (stimme) u.voice = stimme;
     u.rate = 0.92; /* Lernende brauchen den Ansatz, nicht das Tempus. */
     u.pitch = 1;
+    u.volume = Math.min(1, Math.max(0, lautstaerke));
     /*
      * Das echte Ende statt des Ablauftimers (siehe Kopf dieser Funktion).
      * Ohne das wachsen die Schallwellen noch nach dem letzten Sprechen oder

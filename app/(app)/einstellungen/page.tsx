@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useDesign } from "@/components/design/design-anbieter";
 import { liesStand, setzeMerken, vergissAnmeldung } from "@/lib/geraet";
+import { liesTon, setzeTon, type TonStand } from "@/lib/ton";
 import { setzeSessionDauer } from "@/lib/supabase/session-dauer";
 import "./einstellung.css";
 import { MIN_PASSWORT, PASSWORT_FEHLER } from "@/lib/passwort";
@@ -25,10 +26,12 @@ import { MIN_PASSWORT, PASSWORT_FEHLER } from "@/lib/passwort";
  * niemand getestet hat. Jetzt sind es zwei funktionierende Dinge: das
  * Passwort aendern und entscheiden, ob dieses Geraet angemeldet bleibt.
  *
- * Die restlichen Regler (Sprache, Land, Toene, Erinnerung) bleiben
- * abgeschaltet. Sie zu verdrahten waere Arbeit ohne Ende, und ein Schalter,
- * der beim Klick eine Einstellung verspricht und nichts speichert, ist
- * schlimmer als kein Schalter: Man glaubt ihm.
+ * Die restlichen Regler (Sprache, Land) bleiben abgeschaltet: sie wollen
+ * eine Speicherung, die es noch nicht gibt – eine Auswahl, die beim Klick
+ * eine Einstellung verspricht und nichts speichert, ist schlimmer als kein
+ * Schalter: Man glaubt ihm. Die Töne und die Tages-Erinnerung sind dagegen
+ * echt: Töne laufen über lib/ton.ts (Geräte-Einstellung), die Erinnerung
+ * über Web-Push (Plan 3.1).
  */
 
 export default function Einstellungen() {
@@ -37,6 +40,7 @@ export default function Einstellungen() {
     const [abmeldenLaeuft, setAbmeldenLaeuft] = useState(false);
 
     const [merken, setMerken] = useState(() => liesStand().merken);
+    const [ton, setTon] = useState(() => liesTon());
     const [passwort, setPasswort] = useState("");
     const [wiederholung, setWiederholung] = useState("");
     const [passwortLaeuft, setPasswortLaeuft] = useState(false);
@@ -69,6 +73,22 @@ export default function Einstellungen() {
         // Wirkt sofort, nicht erst beim naechsten Anmelden: das Cookie
         // bekommt seine Lebensdauer jetzt.
         setzeSessionDauer(neu);
+    }
+
+    function toeneUmschalten(an: boolean) {
+        setTon((alt) => {
+            const neu = { ...alt, an };
+            setzeTon(neu);
+            return neu;
+        });
+    }
+
+    function lautstaerkeWaehlen(lautstaerke: TonStand["lautstaerke"]) {
+        setTon((alt) => {
+            const neu = { ...alt, lautstaerke };
+            setzeTon(neu);
+            return neu;
+        });
     }
 
     async function passwortSpeichern(event: React.FormEvent) {
@@ -130,6 +150,44 @@ export default function Einstellungen() {
                         Gilt sofort und bleibt auch nach dem Neuladen erhalten.
                     </p>
 
+                    <p className="überschrift-töne">Töne</p>
+                    <div className="töne">
+                        <div>
+                            <p className="unterüberschrift-töne">
+                                Das Vorlesen der Karten im Lernmodus spricht und ist laut.
+                            </p>
+                        </div>
+                        <label className="switch2">
+                            <input
+                                id="tonAn"
+                                type="checkbox"
+                                checked={ton.an}
+                                onChange={(e) => toeneUmschalten(e.target.checked)}
+                            />
+                            <span className="slider" />
+                        </label>
+                    </div>
+
+                    <label className="überschrift-tonstärke" htmlFor="tonstärke">
+                        Ton Lautstärke
+                    </label>
+                    <select
+                        id="tonstärke"
+                        className="input-field"
+                        name="tonstärke"
+                        value={ton.lautstaerke}
+                        onChange={(e) =>
+                            lautstaerkeWaehlen(e.target.value as TonStand["lautstaerke"])
+                        }
+                    >
+                        <option value="leise">Leise</option>
+                        <option value="normal">Normal</option>
+                        <option value="laut">Laut</option>
+                    </select>
+                    <p className="unterüberschrift-töne">
+                        Gilt sofort im Lernmodus und bleibt auf diesem Gerät erhalten.
+                    </p>
+
                     <fieldset className="todo-gruppe" disabled>
                         <legend className="text-prog">Noch nicht umgesetzt</legend>
                         <p className="todo-hinweis">
@@ -149,24 +207,6 @@ export default function Einstellungen() {
                             <option value="deutschland">🇩🇪 Deutschland</option>
                             <option value="österreich">🇦🇹 Österreich</option>
                             <option value="schweiz">🇨🇭 Schweiz</option>
-                        </select>
-
-                        <div className="töne">
-                            <div>
-                                <p className="überschrift-töne">Töne aktivieren</p>
-                                <p className="unterüberschrift-töne">Aktiviere Töne für besseres Lernen</p>
-                            </div>
-                            <label className="switch2">
-                                <input id="tonAn" type="checkbox" />
-                                <span className="slider" />
-                            </label>
-                        </div>
-
-                        <p className="überschrift-tonstärke">Ton Lautstärke</p>
-                        <select id="tonstärke" className="input-field" name="tonstärke" defaultValue="normal">
-                            <option value="leise">Leise</option>
-                            <option value="normal">Normal</option>
-                            <option value="laut">Laut</option>
                         </select>
                     </fieldset>
                 </div>
