@@ -389,14 +389,35 @@ die letzte Antwort.
 > für die Reparaturrunde; „Rückgängig" nimmt die letzte Antwort per
 > Snapshot zurück (Route `app/api/lernen/antwort/rueckgaengig`).
 
-**Abnahme:** Runde fühlen sich ehrlich an. „Nochmal" zeigt die Karte
-nochmal. Ton kommt auf der Rückseite (der Begriff klingt, die Vorderseite
-bleibt still). Beispiel steht auf der Rückseite.
+**Abnahme (Phase 1 bisher):** Runde fühlen sich ehrlich an. „Nochmal" zeigt
+die Karte nochmal. Ton kommt auf der Rückseite (der Begriff klingt, die
+Vorderseite bleibt still). Beispiel steht auf der Rückseite.
 Fortschrittsbalken stimmen.
 
-**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5, 1.6 und 1.7 erledigt. Phase 1 ist
-damit abgeschlossen. 1.4 ist inhaltlich in 0.2 erledigt, die automatische
-Fuellung folgt mit 2.2 und 2.3.
+**1.8 Schlaue Reihenfolge.** Die Runde soll die Karten nicht mehr stur nach
+`stufe`, sondern nach den Antworten des Accounts zwischen „schwer" und
+„einfach" ordnen. Dazu ein kleines Modell pro Account (logistische
+Regression), trainiert aus den Zaehler je Bewertung, das vorhersagt, wie
+schwer eine Karte dem Nutzer faellt. Zusaetzlich kommt die Karte nach der
+Runde wieder rein, je nach Bewertung.
+
+> Der Nutzer wuenscht sich dabei: „nochmal" kommt in der Runde wieder und,
+> wenn er dann erneut falsch liegt, wird es staerker gewichtet (haelt also
+> mit, aber man merkt die Eskalation). „schwer" kommt mit etwa 50 % Chance
+> wieder — bei zweimal „schwer" steigt die Chance. „gut" und „einfach"
+> kommen nicht wieder (aber fließen trotzdem unterschiedlich in die
+> Gewichtung). Genau diese Ereignisse eingelegt in die Statistik, damit das
+> Modell aus dem Verlauf lernt.
+
+**Abnahme (1.8):** Zwei gleich erstellte Karten mit unterschiedlicher
+Antwort-Historie (einmal haeufig „schwer", einmal haeufig „einfach") sortiert
+der Server unterschiedlich. „Nochmal" landet spuerbar wieder in der Runde,
+„schwer" mit spuerbarer Wahrscheinlichkeit, „gut"/„einfach" nicht.
+Statistikwerte zaehlen pro Bewertung korrekt hoch. Build und Lint sauber.
+
+**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5, 1.6 und 1.7 erledigt. 1.8 ist offen.
+Phase 1 ist damit bis auf 1.8 abgeschlossen. 1.4 ist inhaltlich in 0.2
+erledigt, die automatische Fuellung folgt mit 2.2 und 2.3.
 
 ### Phase 2 — Inhalt und Import
 
@@ -416,6 +437,12 @@ dann speichern. Englischarteig nach links, deutsche Übersetzung nach rechts.
 **2.4 „Wortschatz" einlösen.** `/wortschatz` ist heute ein Redirect. Eine
 echte Wortliste aller Vokabeln mit Suche wäre das, was der Menüeintrag
 verspricht — und der Import macht sie erst wertvoll.
+
+> **Merknote für „fixx lexio":** Beim Vokabeln-Adden müssen später auf jeden
+> Fall noch ein paar **angenehmere Eingabe-Varianten** dazu kommen (es bleibt
+> nicht beim einfachen Textblock/Feld). Welche genau, wird beim „fixx lexio"
+> noch erarbeitet — hier steht nur der Auftrag, dass es mehr als eine
+> unbequeme Weg-Variante gibt.
 
 ### Phase 3 — Reichweite und Öffentlichkeit
 
