@@ -107,6 +107,7 @@ gegenfrags erweitert werden.
 | Wortquelle | Mix aus vorhandener Liste und KI — Quellen siehe unten |
 | Karte | Begriff + deutsche Übersetzung + **Beispielsatz** + TTS |
 | TTS | **Rückseite** hört das Wort (Aussprache der Fremdsprache) |
+| Aussehen | **Papier-Notizbuch-Charme**: Lernkarte als Blockblatt mit Punktraster und abgeknickter Ecke, Handschrift-Marke, Punktraster im Hintergrund. Dezente Dosis, gesetzt am 2026-09-28 |
 | Sprachfeld | **Feste Liste mit Code** (`en`, `es`, …), kein Freitext |
 | Import | Textblock einfügen, mit **Vorschau und Korrektur vor dem Speichern** |
 | Lernrunde | 20er-Grenze bleibt; „20 von 47 geschafft"; **„Nochmal" reiht in derselben Runde wieder ein** |

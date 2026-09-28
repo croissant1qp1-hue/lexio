@@ -299,7 +299,16 @@
     border-radius: 22px;
     /* Die eine Ebene traegt jetzt selbst Farbe, Schatten und Radius – das
      * uebernimmt von .flaeche. */
-    background: var(--kartenFarbe, var(--bg-elevated-2));
+    background-color: var(--kartenFarbe, var(--bg-elevated-2));
+    /*
+     * Punktraster wie ein Notizblockblatt. Gleiche Begruendung wie
+     * --karten-tinte: die Kartenflaeche ist in beiden Designs dieselbe
+     * mittelhelle Sprachfarbe, also nimmt der Raster die gleiche dunkle
+     * Konstante. 5 % sind gerade noch da, aber unter dem Text; der ist gross
+     * und fett und steht auf dem Raster, nicht gegen ihn.
+     */
+    background-image: radial-gradient(rgba(13, 23, 29, 0.05) 1px, transparent 1.35px);
+    background-size: 16px 16px;
     box-shadow: var(--shadow-card);
     /* Bewusst `visible` und nicht `hidden`: es gibt keine zweite Ebene mehr,
      * die diese eine verdecken koennte. Siehe Kopfkommentar, Punkt 1. */
@@ -314,6 +323,33 @@
     text-align: center;
     color: var(--karten-tinte);
     overflow: hidden;
+}
+
+/*
+ * Abgeknickte Ecke unten rechts – die laestige kleine Faeltung eines
+ * Blockblattes. `clip-path` schneidet das Deckblatt, der Verlauf tut die
+ * Faeltung: dunkler, wo das Blatt umschlaegt, weicher am Rand. Mit 5 bis
+ * 18 % bleibt es eine dezente Papierluege und kein Deko-Ueberfall; die
+ * Ecke reicht nicht in den Text (der hat 3.8rem Bodenabstand).
+ *
+ * Die Ecke gehoert zur Papier-Ebene (`.kartenSeite`), liegt der Karte also
+ * auch dann unten rechts an, wenn die Karte gedreht ist – der Drehtrick
+ * dreht die ganze Ebene, die Ecke mit ihr.
+ */
+.kartenSeite::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 20px;
+    height: 20px;
+    background: linear-gradient(
+        315deg,
+        rgba(13, 23, 29, 0.18) 45%,
+        rgba(13, 23, 29, 0.05) 55%
+    );
+    clip-path: polygon(100% 100%, 100% 0, 0 100%);
+    pointer-events: none;
 }
 
 /* Die Rueckseite ist um 180 Grad VORGEDREHT. Die Drehung des Containers und
@@ -375,8 +411,15 @@
     transform: translateX(-50%);
     /* 0.74rem waren 11.8px, also unter der 14px-Grenze aus Phase 5, und
      * `opacity: 0.55` ergab 2.77:1. Beides ist hier angefasst, weil dieser
-     * Text auf der Sprachflaeche steht und damit unter beiden Regeln litt. */
-    font-size: 0.875rem;
+     * Text auf der Sprachflaeche steht und damit unter beiden Regeln litt.
+     *
+     * Zusatzlich seit dem Papier-Umbau: eine Randnotiz in Handschrift. Ein
+     * 1rem Caveat ist wesentlich groesser gesetzt als die 0.875rem von
+     * vorher, weil Caveat bei gleicher Hohe schlanker wirkt – gemessen am
+     * schlimmsten Fall (langer Text, kleine Karte) bleibt es bei 16px. */
+    font-family: var(--font-caveat);
+    font-size: 1rem;
+    font-weight: 600;
     color: var(--karten-tinte-soft);
     white-space: nowrap;
 }

@@ -90,6 +90,10 @@
     --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.28);
     --shadow-dark: rgba(0, 0, 0, 0.34);
 
+    /* Punktraster für den Notizbuch-Grund, siehe body. Dezenter Papier-Punkt
+       auf dunklem Grund – hell genug, kaum sichtbar mit bloßem Auge. */
+    --muster-punkt: rgba(243, 240, 231, 0.05);
+
     /* ------------------------------------------------------------------
        Masse
        ------------------------------------------------------------------ */
@@ -148,6 +152,11 @@
     --shadow-card: 0 12px 32px rgba(80, 66, 40, 0.16);
     --shadow-dark: rgba(80, 66, 40, 0.18);
 
+    /* Punktraster im hellen Design: Tinten-Punkt auf Papier. Knapp ueber
+       der Sichtbarkeitsschwelle, damit das Notizbuchgefühl da ist, ohne
+       dass sich der Text dagegen anstrengen muss. */
+    --muster-punkt: rgba(32, 37, 42, 0.055);
+
     /* Der Kontrast muss im hellen Design besser sein, nicht schlechter:
        Terrakotta auf Papier ist bei gleicher Farbe zu blass. */
     --terracotta: #a53448;
@@ -173,6 +182,13 @@ body {
        Scrollleiste den Platz frisst. 100% ist die korrekte Angabe. */
     width: 100%;
     background-color: var(--background);
+    /* Punktraster: die Notizbuch-Basis, auf der alles liegt. Eigene sichtbare
+       Farbe hat es bewusst nicht – es ist der Hauch von Linierung unter
+       Kacheln, Karten und Text. `--muster-punkt` gibt es in beiden Designs
+       mit eigenen Werten, damit der dunkle und der helle Grund gleich
+       ruhig bleiben. */
+    background-image: radial-gradient(var(--muster-punkt) 1px, transparent 1.4px);
+    background-size: 22px 22px;
     color: var(--text-primary);
     overscroll-behavior-y: none;
     /* Wechsel zwischen den Designs soll nicht blitzen. */
