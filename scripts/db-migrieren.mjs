@@ -49,8 +49,8 @@ const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const API = "https://api.supabase.com/v1";
 
 /** Reihenfolge ist Absicht: 003 legt user_id an, 004 indiziert darauf,
- *  005 braucht 003, 006 braucht 005. */
-const STAND = ["003-auth-und-user-daten.sql", "004-leistung.sql", "005-sprachen-und-beisatz.sql", "006-views-auf-sprachcode.sql"];
+ *  005 braucht 003, 006 braucht 005, 007 braucht 006. */
+const STAND = ["003-auth-und-user-daten.sql", "004-leistung.sql", "005-sprachen-und-beisatz.sql", "006-views-auf-sprachcode.sql", "007-gelernt-und-gesehen.sql"];
 
 /** Liest .env ohne Bibliothek: keine Abhaengigkeit, keine Auswertung von Code. */
 function liesEnv() {

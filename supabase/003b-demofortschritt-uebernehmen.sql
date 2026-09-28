@@ -70,12 +70,15 @@ begin
    * Versuch abweist.
    */
   insert into public.karten_fortschritt
-    (karte_id, user_id, stufe, gelernt, faellig_am, treffer, fehler, letzte_wiederholung)
+    (karte_id, user_id, stufe, gelernt, gesehen, faellig_am, treffer, fehler, letzte_wiederholung)
   select
     k.id,
     eigene,
     k.stufe,
-    k.gelernt,
+    -- gelernt ist seit 007 ehrlich: erst ab Stufe 2 zaehlt eine Karte.
+    k.stufe >= 2,
+    -- Eine uebernommene Zeile existiert, weil die Karte beantwortet wurde.
+    true,
     k.faellig_am,
     k.treffer,
     k.fehler,
@@ -84,7 +87,7 @@ begin
      * Sonst stuende in der Wortschatz-Tabelle "heute" fuer jede Karte, die
      * jemand einmal angesehen und dann falsch beantwortet hat.
      */
-    case when k.gelernt then now() - interval '21 days' else null end
+    case when k.stufe >= 2 then now() - interval '21 days' else null end
   from public.karten k
   join public.karteikarten_sets s on s.id = k.set_id
   where s.user_id is null
@@ -94,8 +97,9 @@ begin
   raise notice 'Fortschrittszeilen geschrieben: %', uebernommen;
 
   /*
-   * Kontrolle. Erwartbar sind etwa 65 % / 32 % / 48 % aus seed.sql.
-   * Steht hier ueberall 0, ist beim Einsetzen etwas schiefgegangen.
+   * Kontrolle. Seit 007 zaehlt gelernt erst ab Stufe 2, die Werte liegen
+   * damit unter den alten 65 % / 32 % / 48 %. Steht hier ueberall 0, ist beim
+   * Einsetzen etwas schiefgegangen.
    */
   for zeile in
     select

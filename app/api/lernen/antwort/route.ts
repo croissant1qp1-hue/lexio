@@ -81,7 +81,16 @@ export async function POST(request: Request) {
 
   const aktuelleStufe = eigener?.stufe ?? 0;
   const neueStufe = stufeNachAntwort(aktuelleStufe, bewertung);
-  const gelernt = bewertung !== "nochmal";
+
+  /*
+   * gelernt ist seit Migration 007 ehrlich: erst ab Stufe 2 zaehlt eine
+   * Karte. Vorher war `gelernt = bewertung !== "nochmal"`, und eine mit
+   * "schwer" beantwortete Karte stand auf Stufe 0, war heute noch faellig
+   * und fuellte trotzdem den Balken. gesehen ist eine eigene Sache: die
+   * Karte wurde beantwortet, ob sie sitzt, weiss die Stufe.
+   */
+  const gelernt = neueStufe >= 2;
+  const gesehen = true;
   const xp = xpFuerBewertung(bewertung);
 
   const { data: ergebnis, error: rpcFehler } = await supabase.rpc("antwort_verbuchen", {
@@ -92,6 +101,7 @@ export async function POST(request: Request) {
     p_gelernt: gelernt,
     p_faellig_am: faelligAb(neueStufe),
     p_xp: xp,
+    p_gesehen: gesehen,
   });
 
   if (rpcFehler) {
