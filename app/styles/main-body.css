@@ -12,7 +12,11 @@
  */
 
 .main-body {
-    background-color: var(--background-dunkel-blau);
+    /* War `var(--background-dunkel-blau)` – ein Token, den global.css nie
+       definiert hat. Der Inhalt fele still auf den Browser-Transparent zurueck,
+       was nur dadurch auffiel, dass body darunter dieselbe Farbe trug. Jetzt
+       greift er den echten Hintergrund-Token. */
+    background-color: var(--background);
     color: var(--text-primary);
     flex: 1;
     min-width: 0;

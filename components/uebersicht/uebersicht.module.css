@@ -75,35 +75,31 @@
     align-items: center;
     justify-content: space-between;
     gap: 1.25rem;
-    padding: clamp(1.25rem, 3vw, 2rem);
-    /* Der Grund kommt aus dem Design-Token: dunkel ist es die satte Tafel,
-       hell ein warmes Papier. Vorher stand hier ein festes Dunkel, das im
-       hellen Design einen unsichtbaren Text erzeugte. */
+    padding: clamp(1.4rem, 3vw, 2.2rem);
+    /* Der Grund kommt aus dem Design-Token: dunkel eine warme Lederkarte,
+       hell ein edles Blatt Papier. */
     background: var(--hero-grund);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 22px;
     box-shadow: var(--shadow-card);
     overflow: hidden;
 }
 
-/* Der Klebestreifen oben links: die Begruessungskarte haengt wie ein
-   Blatt an der Pinnwand. Bewusst nur angedeutet – ein Streifen, kein
-   Deko-Ueberfall. */
+/* Goldene Haarlinie oben: die edle Kante einer Lederkarte – ein Hauch
+   statt des Tape-Streifens von vorher. */
 .karte::before {
     content: "";
     position: absolute;
-    top: 0.9rem;
-    left: 1.1rem;
-    width: 5.5rem;
-    height: 1.15rem;
-    border-radius: 3px;
-    background: var(--papier-tape);
-    box-shadow: 0 2px 6px var(--papier-tape-schatten);
-    transform: rotate(-4deg);
+    top: 0;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+    background: var(--gold-haarlinie);
+    border-radius: 2px;
     pointer-events: none;
 }
 
-/* Weicher Lichtschein oben rechts, wie im Mockup. */
+/* Weicher Champagner-Lichtschein oben rechts, wie im Mockup. */
 .karte::after {
     content: "";
     position: absolute;
@@ -111,7 +107,7 @@
     right: -10%;
     width: 55%;
     height: 160%;
-    background: radial-gradient(circle, rgba(246, 202, 140, 0.13), transparent 65%);
+    background: radial-gradient(circle, var(--champagner-schein), transparent 65%);
     pointer-events: none;
 }
 
@@ -149,8 +145,10 @@
     min-height: 50px;
     padding: 0.85rem 1.6rem;
     border: none;
-    border-radius: var(--radius);
-    background: var(--gold);
+    border-radius: 999px;
+    /* Edler Gold-Verlauf: Champagner in der Mitte, dunkleres Gold am Rand –
+       leicht erhaben statt flach. */
+    background: linear-gradient(135deg, #eec878 0%, var(--gold) 55%, var(--gold-dark) 100%);
     color: #17110a;
     font-family: inherit;
     font-size: 1rem;
@@ -158,13 +156,14 @@
     text-decoration: none;
     cursor: pointer;
     white-space: nowrap;
-    transition: transform 160ms ease, box-shadow 160ms ease, background-color 160ms ease;
+    box-shadow: 0 10px 24px rgba(231, 177, 74, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+    transition: transform 160ms ease, box-shadow 160ms ease, filter 160ms ease;
 }
 
 .knopf:hover {
     transform: translateY(-2px);
-    background: #ffdb9f;
-    box-shadow: 0 14px 30px rgba(246, 202, 140, 0.24);
+    filter: brightness(1.05);
+    box-shadow: 0 16px 34px rgba(231, 177, 74, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 .knopf:active {
@@ -222,27 +221,26 @@
     flex-direction: column;
     aspect-ratio: 1 / 1;
     border: 1px solid var(--line);
-    border-radius: var(--radius);
+    border-radius: 20px;
     overflow: hidden;
+    /* Erhabene Karte: weicher Schatten nach unten, ein Hauch innerer
+       Helligkeit nach oben – wie eine leicht gewoelbte Pappe, kein flacher
+       Zettel. */
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.08),
+        0 8px 22px rgba(0, 0, 0, 0.18);
     transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
     -webkit-tap-highlight-color: transparent;
 }
 
-/* Klebestreifen oben an der Kachel – wie wenn das Set als Zettel an die
-   Pinnwand geheftet ist. Nicht ueberdeckend, nur angedeutet: der Streifen
-   liegt ueber der Kachelfarbe, nicht darueber hinaus ueber den Inhalt. */
+/* Champagner-Schein von innen: die Kachel glimmt wie ein edles Blatt,
+   statt mit Tape an der Pinnwand zu kleben. */
 .kachel::before {
     content: "";
     position: absolute;
-    top: 0.6rem;
-    left: 50%;
-    transform: translateX(-50%) rotate(2deg);
-    width: 3.2rem;
-    height: 0.9rem;
-    border-radius: 3px;
-    background: var(--papier-tape);
-    box-shadow: 0 2px 5px var(--papier-tape-schatten);
-    z-index: 2;
+    inset: 0;
+    background: radial-gradient(120% 80% at 50% 0%, var(--champagner-schein), transparent 60%);
+    z-index: 1;
     pointer-events: none;
 }
 
@@ -262,6 +260,8 @@
     text-align: left;
     font-family: inherit;
     cursor: pointer;
+    position: relative;
+    z-index: 1;
     -webkit-tap-highlight-color: transparent;
 }
 
@@ -332,11 +332,12 @@
        denselben hellen Wert – `var(--gold)` ist im hellen Design ein
        dunkles Gold (#b57f1c) und fiel dort auf dem dunklen Chip ins
        Unlesbare zurueck. Gleiche Begruendung wie --karten-tinte. */
-    background: rgba(13, 23, 29, 0.85);
+    background: rgba(14, 12, 9, 0.82);
     color: #eec76b;
     font-family: var(--mono);
     font-size: 0.66rem;
     font-weight: 700;
+    z-index: 2;
 }
 
 /* Loeschen sichtbar (nicht erst bei Hover) – der Knopf ist die einzige
@@ -355,13 +356,14 @@
     padding: 0 0.6rem;
     border: 1px solid var(--line);
     border-radius: 999px;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(14, 12, 9, 0.72);
     color: var(--paper-text-soft);
     font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease,
         transform 150ms ease;
+    z-index: 2;
 }
 
 .kachelLoeschen:hover {

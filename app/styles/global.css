@@ -61,52 +61,51 @@
        Dunkles Design (Vorgabe)
        ------------------------------------------------------------------ */
 
-    --background: #0d171d;
-    --bg-elevated: #17232b;
-    --bg-elevated-2: #202e37;
+    --background: #0e0c09;
+    --bg-elevated: #17130e;
+    --bg-elevated-2: #201b14;
     /* Frueher --input-dark: "dark" stand im Namen, nicht im Wert. Der Wert
        war in hellem Design ebenfalls ein dunkles Feld, nur eben helleres
        Dunkel. */
-    --input-bg: #202e37;
-    --card-bg: #17232b;
-    --line: #33444c;
-    --ink: #0d171d;
+    --input-bg: #201b14;
+    --card-bg: #17130e;
+    --line: #332b20;
+    --ink: #0e0c09;
 
-    --title-color: #f3f0e7;
-    --text-primary: #f3f0e7;
-    --text-light: #f3f0e7;
-    --text-secondary: #a7b0ae;
-    --text-muted: #738084;
-    --placeholder-color: #7c898c;
+    --title-color: #f3efe3;
+    --text-primary: #f3efe3;
+    --text-light: #f3efe3;
+    --text-secondary: #b6a88f;
+    --text-muted: #7d7361;
+    --placeholder-color: #8a7f6b;
 
     --off-white: #f7f1e4;
-    --muted: #718083;
+    --muted: #7d7361;
     --dark-brown-text: #20252a;
 
-    --skeleton-base: #17232b;
-    --skeleton-highlight: #2a3b44;
+    --skeleton-base: #16110c;
+    --skeleton-highlight: #262018;
 
-    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.22);
-    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.28);
-    --shadow-dark: rgba(0, 0, 0, 0.34);
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.28);
+    --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.34);
+    --shadow-dark: rgba(0, 0, 0, 0.4);
 
-    /* Punktraster für den Notizbuch-Grund, siehe body. Dezenter Papier-Punkt
-       auf dunklem Grund – hell genug, kaum sichtbar mit bloßem Auge. */
-    --muster-punkt: rgba(243, 240, 231, 0.05);
-
-    /* Halbtransparenter Klebestreifen ("Washi-Tape"), der Kacheln und die
-       Lernkarte wie Zettel an eine Pinnwand heftet. Ein heller, leicht
-       getoenter Streifen liest sich auf jeder Kachelfarbe als Tape. */
-    --papier-tape: rgba(238, 232, 214, 0.55);
-    --papier-tape-schatten: rgba(0, 0, 0, 0.22);
+    /* Champagner-Schein fuer edle Flaechen */
+    --champagner-schein: rgba(231, 177, 74, 0.14);
+    --gold-haarlinie: linear-gradient(
+        90deg,
+        transparent,
+        rgba(231, 177, 74, 0.55),
+        transparent
+    );
 
     /* Feine Papierkante auf der Lernkarte: kein harter Rand, sondern der
        Hauch einer Blattkante, die sich gegen die Kartenflaeche absetzt. */
     --karte-kante: inset 0 0 0 1px rgba(13, 23, 29, 0.16);
 
-    /* Hintergrund der Begrüssungskarte auf der Startseite. Getrennt nach
-       Designs: dunkel bleibt die satte Tafel, hell wird sie Papier. */
-    --hero-grund: linear-gradient(135deg, #442827 0%, #2a1f22 100%);
+    /* Hintergrund der Begrüssungskarte auf der Startseite. Dunkel ist es
+       eine warme Lederkarte, hell wird es ein edles Blatt Papier. */
+    --hero-grund: linear-gradient(135deg, #2b2116 0%, #15100b 65%, #0e0b08 100%);
 
     /* ------------------------------------------------------------------
        Masse
@@ -140,12 +139,12 @@
    eigene Palette auf Basis des Papiers der Sidebar.
 */
 [data-design="hell"] {
-    --background: #efe7d8;
-    --bg-elevated: #fbf7ee;
-    --bg-elevated-2: #f4eee1;
+    --background: #f4ecdc;
+    --bg-elevated: #fcf7ec;
+    --bg-elevated-2: #f2e9d7;
     --input-bg: #fdfaf3;
-    --card-bg: #fbf7ee;
-    --line: #d7cbb2;
+    --card-bg: #fcf7ec;
+    --line: #e0d2b8;
     --ink: #fdfaf3;
 
     --title-color: #20252a;
@@ -159,30 +158,31 @@
     --muted: #8a8070;
     --dark-brown-text: #20252a;
 
-    --skeleton-base: #e6ddca;
-    --skeleton-highlight: #f4eee1;
+    --skeleton-base: #e8ddca;
+    --skeleton-highlight: #f2e9d7;
 
     --shadow-soft: 0 8px 24px rgba(80, 66, 40, 0.12);
     --shadow-card: 0 12px 32px rgba(80, 66, 40, 0.16);
     --shadow-dark: rgba(80, 66, 40, 0.18);
 
-    /* Punktraster im hellen Design: Tinten-Punkt auf Papier. Knapp ueber
-       der Sichtbarkeitsschwelle, damit das Notizbuchgefühl da ist, ohne
-       dass sich der Text dagegen anstrengen muss. */
-    --muster-punkt: rgba(32, 37, 42, 0.055);
+    /* Champagner-Schein im hellen Design: dezent, aber vorhanden. */
+    --champagner-schein: rgba(181, 127, 28, 0.1);
 
-    /* Klebestreifen auf hellem Papier: etwas dunkler als im dunklen Design,
-       damit der Streifen gegen die weisse Pinnwand stehen kann. */
-    --papier-tape: rgba(255, 250, 235, 0.72);
-    --papier-tape-schatten: rgba(80, 66, 40, 0.2);
+    /* Goldhaarlinie im hellen Design: dunkleres Gold fuer den Papiergrund. */
+    --gold-haarlinie: linear-gradient(
+        90deg,
+        transparent,
+        rgba(181, 127, 28, 0.5),
+        transparent
+    );
 
     /* Papierkante auf der Lernkarte: auf heller Flaeche eine Tinten-Linie,
        wie der Rand eines frischen Blattes. */
     --karte-kante: inset 0 0 0 1px rgba(32, 37, 42, 0.1);
 
     /* Begruessungskarte im hellen Design: warmes Papier statt dunkler
-       Tafel, damit der Text (dunkle Tinte) lesbar bleibt. */
-    --hero-grund: linear-gradient(135deg, #f5ecd9 0%, #e9dcc2 100%);
+       Lederkarte, damit der Text (dunkle Tinte) lesbar bleibt. */
+    --hero-grund: linear-gradient(135deg, #f7efdd 0%, #ecdfc2 70%, #e6d5b0 100%);
 
     /* Der Kontrast muss im hellen Design besser sein, nicht schlechter:
        Terrakotta auf Papier ist bei gleicher Farbe zu blass. */
@@ -209,13 +209,10 @@ body {
        Scrollleiste den Platz frisst. 100% ist die korrekte Angabe. */
     width: 100%;
     background-color: var(--background);
-    /* Punktraster: die Notizbuch-Basis, auf der alles liegt. Eigene sichtbare
-       Farbe hat es bewusst nicht – es ist der Hauch von Linierung unter
-       Kacheln, Karten und Text. `--muster-punkt` gibt es in beiden Designs
-       mit eigenen Werten, damit der dunkle und der helle Grund gleich
-       ruhig bleiben. */
-    background-image: radial-gradient(var(--muster-punkt) 1px, transparent 1.4px);
-    background-size: 22px 22px;
+    /* Statt des Notizbuch-Rasters: ein warmer, sehr dezenter Schein von
+       oben – er gibt der ruhigen Flaeche Tiefe, ohne abzulenken. Der
+       Gold-Ton ist absichtlich kaum sichtbar. */
+    background-image: radial-gradient(1200px 500px at 50% -140px, var(--champagner-schein), transparent 70%);
     color: var(--text-primary);
     overscroll-behavior-y: none;
     /* Wechsel zwischen den Designs soll nicht blitzen. */

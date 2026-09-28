@@ -279,29 +279,10 @@
  * kommt deshalb aus Groesse und Gewicht, nicht aus hellerer Farbe.
  */
 /*
- * Klebestreifen oben an der Karte: das Blockblatt haengt wie ein Zettel an
- * der Pinnwand. Bewusst ein Stueck unter der Oberkante, damit er weder in
- * den Rand hineinragt noch die abgeknickte Ecke unten rechts beruehrt.
- *
- * Achtung Flip: .kartenSeite rotiert mit der Karte. Der Streifen muss also
- * auf beiden Seiten oben sitzen – das tut er, weil jede Seite ihre eigene
- * .kartenSeite bekommt und der Streifen zur Ebene gehoert, nicht zur Drehung.
+ * Die Lernkarte braucht keinen zusaetzlichen Zierrat: Punktgraede und Ecke
+ * sind schon da, und ein weiterer Streifen wuerde den edlen Eindruck
+ * stueren. Frueher sass hier ein Washi-Tape – ist im Premium-Umbau weg.
  */
-.kartenSeite::before {
-    content: "";
-    position: absolute;
-    top: 0.55rem;
-    left: 50%;
-    transform: translateX(-50%) rotate(2deg);
-    width: 3.6rem;
-    height: 1rem;
-    border-radius: 3px;
-    background: var(--papier-tape);
-    box-shadow: 0 2px 5px var(--papier-tape-schatten);
-    z-index: 1;
-    pointer-events: none;
-}
-
 .kartenSeite {
     /* BEWUSST fest und nicht `var(--ink)`.
      *
