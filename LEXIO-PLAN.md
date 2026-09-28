@@ -195,7 +195,7 @@ die Phasen.
 | A1 | 300 Karten mit Inhalt `Frage 1` / `Antwort 1`. **Live bestätigt.** Jeder neue Nutzer sieht zuerst drei Kacheln mit 65 % / 32 % / 48 % Fortschritt und kann 20 Karten beantworten, 100 XP sammeln und Level steigen — auf Nonsense. Der Leerzustand „Noch keine Vokabel-Sets" ist toter Code. | `supabase/seed.sql:19-62` |
 | A2 | Kein Importweg. Nur manuelles Tippen, ein Wort pro Zeile. Kein Datei-, CSV-, Anki-Import, kein `<textarea>`, keine KI-Erzeugung. | `app/(app)/karteikarten-hinzufuegen/` |
 | A3 | Der Menüeintrag „Wortschatz" führt zu den Sets, nicht zu einem Wortschatz. Keine Wortliste, keine Wortsuche. | `app/(app)/wortschatz/page.tsx` |
-| A4 | Keine Erinnerung, keine Offline-Fähigkeit. Der Regler „Tägliche Erinnerung" steht in einem `<fieldset disabled>` mit dem Hinweis „Diese Regler sind im aktuellen Stand Attrappen." | `einstellungen/page.tsx:175-191` |
+| A4 | Keine Erinnerung, keine Offline-Fähigkeit. Der Regler „Tägliche Erinnerung" war ein `<fieldset disabled>` mit dem Hinweis „Diese Regler sind im aktuellen Stand Attrappen." | `einstellungen/page.tsx` (behoben mit 3.1) |
 
 ### Warum Leute wenig lernen, obwohl sie kommen
 
@@ -410,7 +410,17 @@ verspricht — und der Import macht sie erst wertvoll.
 **3.1 Web-Push.** Service Worker + VAPID-Schlüssel + Permission-Dialog. Der
 tote Regler in `einstellungen/page.tsx:175-191` wird dadurch zum echten
 Schalter. **iOS bleibt eine Lücke** — das gehört in die Ankündigung, nicht
-unter den Tisch.
+unter den Tisch. Der Versand läuft über ein lokales Skript
+(`npm run push:senden`, täglich per crontab) — ehrlich für eine App, die
+bisher nur auf dem eigenen Rechner läuft. Abos liegen in
+`public.push_abonnements` (Migration 008).
+
+> Erledigt. Der Schalter fragt die Permission an, registriert den Service
+> Worker (`public/sw.js`), meldet das Abo an `app/api/push/abonnement` und
+> erzeugt beim Versand eine System-Benachrichtigung. VAPID-Schlüssel in
+> `.env` (`npm run push:schluessel`). Der lokale Cron ist eingerichtet
+> (18:30, Log in `/tmp/lexio-push.log`). iOS: Web-Push bleibt unzuverlässig —
+> der Browser meldet das selbst, der Schalter zeigt einen Hinweis.
 
 **3.2 Level-Kurve.** `lib/profil.ts:14` — Kurve statt 1500 flach, mit
 Lücken-Balken bei 50 % / 80 % / 100 %.

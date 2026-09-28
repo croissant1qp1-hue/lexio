@@ -1,48 +1,63 @@
 # Was jetzt zu tun ist
 
-Kurzfassung: **ein Klick-Punkt, dann bist du durch.** Die App ist fertig
-programmiert. Es fehlt nur noch die Datenbank.
+Kurzfassung: **die Datenbank steht. Die App läuft.** Am 27.09.2026 wurde
+Migration 003 im Supabase SQL Editor ausgeführt und danach Ende-zu-Ende geprüft:
+Registrierung, Profil, Wortschatz, Lernsitzung, XP, Streak und Statistiken
+funktionieren. Was noch offen ist, steht unten — nichts davon blockiert den Betrieb.
 
-> **Hinweis zur Reihenfolge:** 002 wurde nie ausgeführt, 003 schon. 003 legt
-> die Spalte `eigenes_set` inzwischen selbst an, du musst 002 also **nicht**
-> vorher nachholen. 002 ist nur für die Insert-/Delete-Policies zuständig, und
-> die überschreibt 003 ohnehin mit eigenen.
+> **Zur Reihenfolge:** 002 wurde nie ausgeführt, 003 schon. 003 legt die Spalte
+> `eigenes_set` inzwischen selbst an, 002 musste also **nicht** nachgeholt werden.
 
 ---
 
-## 1. Migration 003 ausführen — das ist der einzige Blocker
+## Was noch offen ist
 
-Ohne das funktioniert **nichts**: kein Login, keine Sets, keine Karten. Alle
-Fehlermeldungen, die du siehst (`Could not find the 'eigenes_set' column`),
-kommen von hier.
+### 1. `.env`: zwei falsche oder fehlende Werte
 
-Die Datei liegt **jetzt in deiner Zwischenablage** (26.964 Bytes, gerade
-geprüft). Falls nicht: in VSCodium öffnen, `Strg+A`, `Strg+C`.
+Beides steht auf der Anmeldeseite unter „Die App ist noch nicht einsatzbereit“:
 
-**Supabase Dashboard → SQL Editor → neues Query → `Strg+V` → Run**
+* `SUPABASE_DB_PASSWORD` enthält einen **Service-Role-Schlüssel** statt des
+  Passworts. Wird nur für `psql` gebraucht, die App läuft auch so.
+* `SUPABASE_SERVICE_ROLE_KEY` fehlt. Braucht die App nicht, nur automatisierte Migrationen.
 
-Dauert ein paar Sekunden. Am Ende erscheint *Success. No rows returned* —
-das ist richtig, die Datei legt nur Tabellen an.
+Dashboard → **Settings → Database** bzw. **Settings → API** → Wert eintragen, `.env`
+neu laden. Details stehen in `SUPABASE-SETUP.md`.
 
-**Falls der Lauf mit `column ... does not exist` abbricht:** die
-Zwischenablage enthielt eine ältere Fassung. Datei neu kopieren:
+### 2. Optional: Migration 004 (nur Geschwindigkeit)
 
-```bash
-cd /home/theo/Coding/projekte/lexio
-xclip -selection clipboard -i supabase/003-auth-und-user-daten.sql
-```
-
-**Danach dasselbe mit der zweiten Datei:**
+Legt Indizes an, damit die Lernsitzung schneller lädt. Ohne sie wird nichts kaputt.
 
 ```bash
 cd /home/theo/Coding/projekte/lexio
 xclip -selection clipboard -i supabase/004-leistung.sql
 ```
 
-Wieder `Strg+V` → Run. Das sind nur Indizes für die Geschwindigkeit,
-nichts Kaputt-geht, wenn du sie überspringst.
+Dann Dashboard → **SQL Editor** → `Strg+V` → **Run**.
 
-**Prüfen, ob es geklappt hat:**
+### 3. Optional: Migration 003b (Fortschritt übernehmen)
+
+Übernimmt Lernfortschritt aus der Demo auf ein echtes Konto. Setzt eine konkrete
+User-UUID voraus, deshalb nur wenn du wirklich ein Altkonto übernehmen willst.
+
+### 4. Optional: Anmeldeanbieter einschalten
+
+Alle sieben (Google, GitHub, Discord, Spotify, Facebook, X, Twitch) sind im
+Dashboard aus. Die Anmeldeseite zeigt einen Knopf **von selbst** an, sobald einer
+aktiv ist. Anleitung: `OAUTH-ANLEITUNG.md`.
+
+---
+
+## Prüfen, ob alles klappt
+
+```bash
+cd /home/theo/Coding/projekte/lexio
+node scripts/db-status.mjs
+```
+
+Meldet der Lauf „Datenbank ist bereit“, stimmt die Datenbank. Für den vollen Durchstich
+mit Anmeldung: `node scripts/lexio-browser.mjs start`, dann `lesen`, dann
+`url http://localhost:3211/anmelden`.
+
 
 ```bash
 cd /home/theo/Coding/projekte/lexio
@@ -53,38 +68,24 @@ Wenn dort **„Datenbank ist bereit"** steht, war es erfolgreich.
 
 ---
 
-## 2. Einloggen und einmal durchklicken
+## Durchklicken mit deinem eigenen Konto
 
-`npm run dev` → http://localhost:3000
+Der automatische Test lief mit `kiro-funktionstest@lexio.invalid`. Der Weg
+durch die App ist damit klar — prüf ihn noch einmal mit deinem Konto:
 
-Dann einmal:
+`npm run dev` → die Adresse zeigt das Terminal an (derzeit **http://localhost:3211**;
+der Port hängt davon ab, wie oft der Dev-Server schon lief).
 
 - [ ] Übersicht lädt ohne Fehlermeldung
-- [ ] Dein Name und Level stehen links in der Seitenleiste
-- [ ] Klick aufs Profil → neue Seite `/profil` mit Level, XP, Streak
+- [ ] Dein Name und Level stehen in der Seitenleiste
+- [ ] Klick aufs Profil → `/profil` mit Level, XP, Streak
 - [ ] Auf dem Handy: Profil-Tab unten in der Tableiste
-- [ ] „Hinzufügen" → ein Wortpaar anlegen
+- [ ] „Hinzufügen“ → ein Wortpaar anlegen
 - [ ] Lernen → Karte beantworten, XP-Zahl hochzählen sehen
 - [ ] Abmelden und wieder anmelden
 
-Wenn dabei irgendwo eine Fehlermeldung auftaucht: **nicht weiterklicken**,
-sondern die Meldung mir geben. Genauer Text, nicht zusammengefasst.
-
----
-
-## 3. Optional: ein Anmeldeanbieter
-
-Die App läuft vollständig mit E-Mail und Passwort. Für Google oder GitHub
-musst du nichts an Code anfassen, nur einmalig im Dashboard:
-
-**Supabase Dashboard → Authentication → Sign In / Providers → Google → Enable**
-
-Client-ID und Client Secret bekommst du von Google (Anleitung:
-`OAUTH-ANLEITUNG.md`). Alle sieben Anbieter sind vorbereitet, sie erscheinen
-automatisch, sobald du sie einträgst.
-
-**Wichtig:** Diese drei Reihenfolgen nicht verwechseln — Migration zuerst,
-Anbieter sind nur Kosmetik danach.
+Taucht eine Fehlermeldung auf: **nicht weiterklicken**, sondern den genauen Text
+mir geben. Nicht zusammengefasst.
 
 ---
 
@@ -98,5 +99,44 @@ Allesamt dokumentiert in `OFFENE-PUNKTE.md`, nichts davon blockiert dich:
 | Tests für `lernlogik.ts` | Die XP-Formel existiert in TypeScript **und** in SQL — genau diese Doppelung hat schon einmal Fehler gemacht |
 | Versions-Tracking für Migrationen | Migrationen laufen per Hand im SQL Editor; mit 7 Dateien irgendwann Chaos |
 
-Sag mir nach Schritt 1 kurz Bescheid, dann mache ich mit dem nächsten
-Punkt weiter.
+## Das Testkonto wieder loswerden
+
+Dashboard → **Authentication → Users** → `kiro-funktionstest@lexio.invalid`
+→ löschen. Die zugehörige Zeile in `profil` und `mein_fortschritt` nimmt der
+Löschvorgang mit, weil beides am Konto hängt.
+
+---
+
+## Tägliche Erinnerung (Web-Push, Plan 3.1)
+
+Der Schalter in den Einstellungen ist echt: er fragt die
+Browser-Berechtigung ab, registriert den Service Worker (`public/sw.js`)
+und meldet das Abo an die Datenbank.
+
+Manuell verschicken, um die komplette Kette zu prüfen:
+
+```bash
+cd /home/theo/Coding/projekte/lexio
+npm run push:senden
+```
+
+Die Nachricht kommt auch an, wenn Lexio zu ist — das ist der Zweck. Im
+Trockenlauf (ohne zu senden): `npm run push:senden -- --trocken`.
+
+**Täglich automatisch:** eine crontab-Zeile ruft das Skript um 18:30 auf
+(das gehört zu diesem Rechner, nicht in dieses Repository):
+
+```
+30 18 * * * node /home/theo/Coding/projekte/lexio/scripts/erinnerung-senden.mjs >> /tmp/lexio-push.log 2>&1
+```
+
+Das funktioniert genau solange, wie dieser Rechner zu der Zeit läuft und
+angemeldet ist — eine ehrliche Grenze für eine App, die noch nicht
+öffentlich deployt ist. Beim ersten Lauf enthält `/tmp/lexio-push.log` die
+Auskunft, ob Abos gefunden und Zustellungen erfolgreich waren.
+
+Abgelaufene Abos (Browser hat die Berechtigung verloren) räumt das Skript
+beim Senden selbst auf.
+
+**iOS bleibt eine Lücke.** Web-Push ist dort unzuverlässig. Wer auf dem
+iPhone eine Erinnerung will, braucht so lange einen anderen Weg.
