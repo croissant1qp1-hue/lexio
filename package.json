@@ -10,7 +10,9 @@
     "db:status": "node scripts/db-status.mjs",
     "db:migrieren": "node scripts/db-migrieren.mjs",
     "push:schluessel": "node scripts/push-schluessel.mjs",
-    "push:senden": "node scripts/erinnerung-senden.mjs"
+    "push:senden": "node scripts/erinnerung-senden.mjs",
+    "wortlisten:erzeugen": "node scripts/wortlisten-erzeugen.mjs",
+    "wortlisten:importieren": "node scripts/wortlisten-importieren.mjs"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^7.3.1",

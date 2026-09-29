@@ -33,6 +33,10 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# roh-quellen des wortlisten-generators (kaikki ~500 MB, tatoeba ~300 MB)
+# nie ins repo – der generator legt sie beim ersten lauf selbst an.
+/scripts/quellen/
+
 # vercel
 .vercel
 

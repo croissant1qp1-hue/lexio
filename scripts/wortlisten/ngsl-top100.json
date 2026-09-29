@@ -1,0 +1,602 @@
+[
+  {
+    "frage": "der",
+    "antwort": "the",
+    "beispielsatz": "I was in the mountains.",
+    "beispiel_uebersetzung": "Ich war in den Bergen."
+  },
+  {
+    "frage": "sein",
+    "antwort": "be",
+    "beispielsatz": "I will be back soon.",
+    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+  },
+  {
+    "frage": "und",
+    "antwort": "and",
+    "beispielsatz": "Everyone has strengths and weaknesses.",
+    "beispiel_uebersetzung": "Jeder hat seine Stärken und Schwächen."
+  },
+  {
+    "frage": "von",
+    "antwort": "of",
+    "beispielsatz": "You had plenty of time.",
+    "beispiel_uebersetzung": "Du hattest eine Menge Zeit."
+  },
+  {
+    "frage": "zu",
+    "antwort": "to",
+    "beispielsatz": "It seems interesting to me.",
+    "beispiel_uebersetzung": "Das scheint mir interessant!"
+  },
+  {
+    "frage": "ein, eine",
+    "antwort": "a",
+    "beispielsatz": "Is it a recent picture?",
+    "beispiel_uebersetzung": "Ist das ein aktuelles Foto?"
+  },
+  {
+    "frage": "in",
+    "antwort": "in",
+    "beispielsatz": "I was in the mountains.",
+    "beispiel_uebersetzung": "Ich war in den Bergen."
+  },
+  {
+    "frage": "haben",
+    "antwort": "have",
+    "beispielsatz": "I shouldn't have logged off.",
+    "beispiel_uebersetzung": "Es war eine schlechte Idee, sich abzumelden."
+  },
+  {
+    "frage": "es",
+    "antwort": "it",
+    "beispielsatz": "Is it a recent picture?",
+    "beispiel_uebersetzung": "Ist das ein aktuelles Foto?"
+  },
+  {
+    "frage": "du, Sie",
+    "antwort": "you",
+    "beispielsatz": "You are in my way.",
+    "beispiel_uebersetzung": "Du bist mir im Weg."
+  },
+  {
+    "frage": "er",
+    "antwort": "he",
+    "beispielsatz": "Do whatever he tells you.",
+    "beispiel_uebersetzung": "Tu, was auch immer er dir befiehlt."
+  },
+  {
+    "frage": "für",
+    "antwort": "for",
+    "beispielsatz": "She's asking for the impossible.",
+    "beispiel_uebersetzung": "Sie fordert das Unmögliche."
+  },
+  {
+    "frage": "sie",
+    "antwort": "they",
+    "beispielsatz": "Are they all the same?",
+    "beispiel_uebersetzung": "Sind sie alle gleich?"
+  },
+  {
+    "frage": "nicht",
+    "antwort": "not",
+    "beispielsatz": "No I'm not; you are!",
+    "beispiel_uebersetzung": "Nein, ich bin es nicht, du bist es!"
+  },
+  {
+    "frage": "das, dass",
+    "antwort": "that",
+    "beispielsatz": "That was an evil bunny.",
+    "beispiel_uebersetzung": "Das war ein böses Kaninchen."
+  },
+  {
+    "frage": "wir",
+    "antwort": "we",
+    "beispielsatz": "Why don't we go home?",
+    "beispiel_uebersetzung": "Wieso gehen wir nicht heim?"
+  },
+  {
+    "frage": "an, auf",
+    "antwort": "on",
+    "beispielsatz": "It depends on the context.",
+    "beispiel_uebersetzung": "Das kommt auf den Zusammenhang an."
+  },
+  {
+    "frage": "mit",
+    "antwort": "with",
+    "beispielsatz": "You're so impatient with me.",
+    "beispiel_uebersetzung": "Du bist so ungeduldig mit mir."
+  },
+  {
+    "frage": "dieser, diese, dieses",
+    "antwort": "this",
+    "beispielsatz": "Who doesn't know this problem?!",
+    "beispiel_uebersetzung": "Wer kennt dieses Problem nicht?!"
+  },
+  {
+    "frage": "ich",
+    "antwort": "I",
+    "beispielsatz": "I will be back soon.",
+    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+  },
+  {
+    "frage": "machen, tun",
+    "antwort": "do",
+    "beispielsatz": "How do you spell \"pretty\"?",
+    "beispiel_uebersetzung": "Wie schreibt man \"pretty\"?"
+  },
+  {
+    "frage": "als",
+    "antwort": "as",
+    "beispielsatz": "The list is as follows.",
+    "beispiel_uebersetzung": "Die Liste ist wie folgt."
+  },
+  {
+    "frage": "bei, an",
+    "antwort": "at",
+    "beispielsatz": "I'm not convinced at all.",
+    "beispiel_uebersetzung": "Ich bin überhaupt nicht überzeugt."
+  },
+  {
+    "frage": "sie",
+    "antwort": "she",
+    "beispielsatz": "She's really smart, isn't she?",
+    "beispiel_uebersetzung": "Sie ist wirklich intelligent, oder?"
+  },
+  {
+    "frage": "aber",
+    "antwort": "but",
+    "beispielsatz": "But the possibility seems unlikely.",
+    "beispiel_uebersetzung": "Aber die Möglichkeit scheint unwahrscheinlich."
+  },
+  {
+    "frage": "von",
+    "antwort": "from",
+    "beispielsatz": "People from Madrid are weird.",
+    "beispiel_uebersetzung": "Leute aus Madrid sind merkwürdig."
+  },
+  {
+    "frage": "bei",
+    "antwort": "by",
+    "beispielsatz": "You'd better go by bus.",
+    "beispiel_uebersetzung": "Du solltest besser mit dem Bus fahren."
+  },
+  {
+    "frage": "werden",
+    "antwort": "will",
+    "beispielsatz": "I will be back soon.",
+    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+  },
+  {
+    "frage": "oder",
+    "antwort": "or",
+    "beispielsatz": "Is it sweet or sour?",
+    "beispiel_uebersetzung": "Schmeckt es süß oder sauer?"
+  },
+  {
+    "frage": "sagen",
+    "antwort": "say",
+    "beispielsatz": "They say love is blind.",
+    "beispiel_uebersetzung": "Man sagt, Liebe mache blind."
+  },
+  {
+    "frage": "gehen",
+    "antwort": "go",
+    "beispielsatz": "Why don't we go home?",
+    "beispiel_uebersetzung": "Wieso gehen wir nicht heim?"
+  },
+  {
+    "frage": "so, also",
+    "antwort": "so",
+    "beispielsatz": "You're so impatient with me.",
+    "beispiel_uebersetzung": "Du bist so ungeduldig mit mir."
+  },
+  {
+    "frage": "all",
+    "antwort": "all",
+    "beispielsatz": "Are they all the same?",
+    "beispiel_uebersetzung": "Sind sie alle gleich?"
+  },
+  {
+    "frage": "wenn",
+    "antwort": "if",
+    "beispielsatz": "Telephone me if it rains.",
+    "beispiel_uebersetzung": "Rufen Sie mich bitte an, falls es regnet."
+  },
+  {
+    "frage": "eins",
+    "antwort": "one",
+    "beispielsatz": "One can always find time.",
+    "beispiel_uebersetzung": "Man kann immer Zeit finden."
+  },
+  {
+    "frage": "würde",
+    "antwort": "would",
+    "beispielsatz": "Would you like to come?",
+    "beispiel_uebersetzung": "Würdest du gerne kommen?"
+  },
+  {
+    "frage": "über",
+    "antwort": "about",
+    "beispielsatz": "You'll forget about me someday.",
+    "beispiel_uebersetzung": "Du wirst mich eines Tages vergessen."
+  },
+  {
+    "frage": "können",
+    "antwort": "can",
+    "beispielsatz": "One can always find time.",
+    "beispiel_uebersetzung": "Man kann immer Zeit finden."
+  },
+  {
+    "frage": "welcher",
+    "antwort": "which",
+    "beispielsatz": "Which one do you take?",
+    "beispiel_uebersetzung": "Welches nimmst du?"
+  },
+  {
+    "frage": "dort",
+    "antwort": "there",
+    "beispielsatz": "Then there is a problem...",
+    "beispiel_uebersetzung": "Dann haben wir ein Problem..."
+  },
+  {
+    "frage": "wissen",
+    "antwort": "know",
+    "beispielsatz": "Who doesn't know this problem?!",
+    "beispiel_uebersetzung": "Wer kennt dieses Problem nicht?!"
+  },
+  {
+    "frage": "mehr",
+    "antwort": "more",
+    "beispielsatz": "You should act more calmly.",
+    "beispiel_uebersetzung": "Du solltest besonnener handeln."
+  },
+  {
+    "frage": "bekommen",
+    "antwort": "get",
+    "beispielsatz": "I managed to get in.",
+    "beispiel_uebersetzung": "Es gelang mir hineinzukommen."
+  },
+  {
+    "frage": "wer",
+    "antwort": "who",
+    "beispielsatz": "Who doesn't know this problem?!",
+    "beispiel_uebersetzung": "Wer kennt dieses Problem nicht?!"
+  },
+  {
+    "frage": "mögen",
+    "antwort": "like",
+    "beispielsatz": "I don't like you anymore.",
+    "beispiel_uebersetzung": "Ich mag dich nicht mehr."
+  },
+  {
+    "frage": "wann, als",
+    "antwort": "when",
+    "beispielsatz": "When did you finish it?",
+    "beispiel_uebersetzung": "Wann warst du damit fertig?"
+  },
+  {
+    "frage": "nachdenken",
+    "antwort": "think",
+    "beispielsatz": "Most people think I'm crazy.",
+    "beispiel_uebersetzung": "Die meisten Leute denken, ich sei verrückt."
+  },
+  {
+    "frage": "machen",
+    "antwort": "make",
+    "beispielsatz": "I make €100 a day.",
+    "beispiel_uebersetzung": "Ich verdiene 100 Euro pro Tag."
+  },
+  {
+    "frage": "Zeit",
+    "antwort": "time",
+    "beispielsatz": "One can always find time.",
+    "beispiel_uebersetzung": "Man kann immer Zeit finden."
+  },
+  {
+    "frage": "verstehen",
+    "antwort": "see",
+    "beispielsatz": "I'm anxious to see you.",
+    "beispiel_uebersetzung": "Ich bin gespannt dich zu sehen."
+  },
+  {
+    "frage": "was",
+    "antwort": "what",
+    "beispielsatz": "What are you talking about?",
+    "beispiel_uebersetzung": "Von was redest du?"
+  },
+  {
+    "frage": "nach oben",
+    "antwort": "up",
+    "beispielsatz": "You should give up drinking.",
+    "beispiel_uebersetzung": "Du solltest mit dem Trinken aufhören."
+  },
+  {
+    "frage": "einige",
+    "antwort": "some",
+    "beispielsatz": "Who wants some hot chocolate?",
+    "beispiel_uebersetzung": "Wer will heiße Schokolade?"
+  },
+  {
+    "frage": "andere",
+    "antwort": "other",
+    "beispielsatz": "Write on every other line.",
+    "beispiel_uebersetzung": "Schreibt auf jede zweite Zeile."
+  },
+  {
+    "frage": "heraus",
+    "antwort": "out",
+    "beispielsatz": "I'm running out of ideas.",
+    "beispiel_uebersetzung": "Ich habe keine Ideen mehr."
+  },
+  {
+    "frage": "gut",
+    "antwort": "good",
+    "beispielsatz": "Take good care of yourself.",
+    "beispiel_uebersetzung": "Pass gut auf dich auf."
+  },
+  {
+    "frage": "Leute",
+    "antwort": "people",
+    "beispielsatz": "Most people think I'm crazy.",
+    "beispiel_uebersetzung": "Die meisten Leute denken, ich sei verrückt."
+  },
+  {
+    "frage": "Jahr",
+    "antwort": "year",
+    "beispielsatz": "Everybody had a good year.",
+    "beispiel_uebersetzung": "Jeder hatte ein gutes Jahr."
+  },
+  {
+    "frage": "einnehmen",
+    "antwort": "take",
+    "beispielsatz": "Take good care of yourself.",
+    "beispiel_uebersetzung": "Pass gut auf dich auf."
+  },
+  {
+    "frage": "kein",
+    "antwort": "no",
+    "beispielsatz": "No I'm not; you are!",
+    "beispiel_uebersetzung": "Nein, ich bin es nicht, du bist es!"
+  },
+  {
+    "frage": "gut",
+    "antwort": "well",
+    "beispielsatz": "You have done very well.",
+    "beispiel_uebersetzung": "Das hast du sehr gut gemacht."
+  },
+  {
+    "frage": "weil",
+    "antwort": "because",
+    "beispielsatz": "That's because you're a girl.",
+    "beispiel_uebersetzung": "Das liegt daran, dass du ein Mädchen bist."
+  },
+  {
+    "frage": "sehr",
+    "antwort": "very",
+    "beispielsatz": "The Germans are very crafty.",
+    "beispiel_uebersetzung": "Die Deutschen sind sehr listig."
+  },
+  {
+    "frage": "gerade, nur",
+    "antwort": "just",
+    "beispielsatz": "It was just polite applause.",
+    "beispiel_uebersetzung": "Es wurde nur aus Höflichkeit geklatscht."
+  },
+  {
+    "frage": "kommen",
+    "antwort": "come",
+    "beispielsatz": "Would you like to come?",
+    "beispiel_uebersetzung": "Würdest du gerne kommen?"
+  },
+  {
+    "frage": "könnte",
+    "antwort": "could",
+    "beispielsatz": "Could you please repeat that?",
+    "beispiel_uebersetzung": "Könnten Sie das bitte wiederholen?"
+  },
+  {
+    "frage": "Arbeit",
+    "antwort": "work",
+    "beispielsatz": "I work even on Sunday.",
+    "beispiel_uebersetzung": "Ich arbeite sogar sonntags."
+  },
+  {
+    "frage": "Benutzung",
+    "antwort": "use",
+    "beispielsatz": "You can use this car.",
+    "beispiel_uebersetzung": "Du kannst diesen Wagen benutzen."
+  },
+  {
+    "frage": "als",
+    "antwort": "than",
+    "beispielsatz": "Are you younger than him?",
+    "beispiel_uebersetzung": "Bist du jünger als er?"
+  },
+  {
+    "frage": "jetzt",
+    "antwort": "now",
+    "beispielsatz": "Uh, now it's really weird...",
+    "beispiel_uebersetzung": "Oh, jetzt ist es wirklich verwirrend..."
+  },
+  {
+    "frage": "dann",
+    "antwort": "then",
+    "beispielsatz": "Then there is a problem...",
+    "beispiel_uebersetzung": "Dann haben wir ein Problem..."
+  },
+  {
+    "frage": "auch",
+    "antwort": "also",
+    "beispielsatz": "Do you also like jazz?",
+    "beispiel_uebersetzung": "Magst du auch Jazz?"
+  },
+  {
+    "frage": "in",
+    "antwort": "into",
+    "beispielsatz": "Pull into shape after washing.",
+    "beispiel_uebersetzung": "Nach der Wäsche in Form bringen."
+  },
+  {
+    "frage": "nur",
+    "antwort": "only",
+    "beispielsatz": "Only you answered the question.",
+    "beispiel_uebersetzung": "Nur du hast die Frage beantwortet."
+  },
+  {
+    "frage": "scheinen",
+    "antwort": "look",
+    "beispielsatz": "Hey, look, a three-headed monkey!",
+    "beispiel_uebersetzung": "Hey, schau' mal, ein Affe mit drei Köpfen!"
+  },
+  {
+    "frage": "wollen",
+    "antwort": "want",
+    "beispielsatz": "I want an MP3 player!",
+    "beispiel_uebersetzung": "Ich will einen MP3-Player!"
+  },
+  {
+    "frage": "geben",
+    "antwort": "give",
+    "beispielsatz": "I give you my word.",
+    "beispiel_uebersetzung": "Ich gebe dir mein Wort."
+  },
+  {
+    "frage": "erster",
+    "antwort": "first",
+    "beispielsatz": "We are getting on first-rate.",
+    "beispiel_uebersetzung": "Wir verstehen uns sehr gut."
+  },
+  {
+    "frage": "neu",
+    "antwort": "new",
+    "beispielsatz": "New York is worth visiting.",
+    "beispiel_uebersetzung": "New York ist einen Besuch wert."
+  },
+  {
+    "frage": "Weg",
+    "antwort": "way",
+    "beispielsatz": "You are in my way.",
+    "beispiel_uebersetzung": "Du bist mir im Weg."
+  },
+  {
+    "frage": "finden",
+    "antwort": "find",
+    "beispielsatz": "One can always find time.",
+    "beispiel_uebersetzung": "Man kann immer Zeit finden."
+  },
+  {
+    "frage": "über",
+    "antwort": "over",
+    "beispielsatz": "The vacation is over now.",
+    "beispiel_uebersetzung": "Die Ferien sind jetzt vorbei."
+  },
+  {
+    "frage": "irgendein",
+    "antwort": "any",
+    "beispielsatz": "Do you have any pencils?",
+    "beispiel_uebersetzung": "Haben Sie Bleistifte?"
+  },
+  {
+    "frage": "nach, nachdem",
+    "antwort": "after",
+    "beispielsatz": "Pull into shape after washing.",
+    "beispiel_uebersetzung": "Nach der Wäsche in Form bringen."
+  },
+  {
+    "frage": "Tag",
+    "antwort": "day",
+    "beispielsatz": "I make €100 a day.",
+    "beispiel_uebersetzung": "Ich verdiene 100 Euro pro Tag."
+  },
+  {
+    "frage": "wo",
+    "antwort": "where",
+    "beispielsatz": "Where are the eggs, please?",
+    "beispiel_uebersetzung": "Wo sind bitte die Eier?"
+  },
+  {
+    "frage": "Ding",
+    "antwort": "thing",
+    "beispielsatz": "Innocence is a beautiful thing.",
+    "beispiel_uebersetzung": "Unschuld ist eine schöne Sache."
+  },
+  {
+    "frage": "die meisten",
+    "antwort": "most",
+    "beispielsatz": "Most people think I'm crazy.",
+    "beispiel_uebersetzung": "Die meisten Leute denken, ich sei verrückt."
+  },
+  {
+    "frage": "dürfen",
+    "antwort": "should",
+    "beispielsatz": "You should give up drinking.",
+    "beispiel_uebersetzung": "Du solltest mit dem Trinken aufhören."
+  },
+  {
+    "frage": "Notwendigkeit",
+    "antwort": "need",
+    "beispielsatz": "You need not telephone me.",
+    "beispiel_uebersetzung": "Du brauchst mich nicht anzurufen."
+  },
+  {
+    "frage": "viel",
+    "antwort": "much",
+    "beispielsatz": "I like it very much.",
+    "beispiel_uebersetzung": "Es gefällt mir sehr gut."
+  },
+  {
+    "frage": "recht",
+    "antwort": "right",
+    "beispielsatz": "Turn right at the crossroad.",
+    "beispiel_uebersetzung": "Biegen Sie an der Kreuzung rechts ab."
+  },
+  {
+    "frage": "wie",
+    "antwort": "how",
+    "beispielsatz": "How long did you stay?",
+    "beispiel_uebersetzung": "Wie lange bist du geblieben?"
+  },
+  {
+    "frage": "hinterer",
+    "antwort": "back",
+    "beispielsatz": "I will be back soon.",
+    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+  },
+  {
+    "frage": "bedeuten",
+    "antwort": "mean",
+    "beispielsatz": "I know what you mean.",
+    "beispiel_uebersetzung": "Ich weiß, was du meinst."
+  },
+  {
+    "frage": "sogar",
+    "antwort": "even",
+    "beispielsatz": "They don't even know why.",
+    "beispiel_uebersetzung": "Sie wissen nicht einmal, wieso."
+  },
+  {
+    "frage": "dürfen",
+    "antwort": "may",
+    "beispielsatz": "It may freeze next week.",
+    "beispiel_uebersetzung": "Nächste Woche wird es vielleicht Frost geben."
+  },
+  {
+    "frage": "hier",
+    "antwort": "here",
+    "beispielsatz": "Is it far from here?",
+    "beispiel_uebersetzung": "Ist es weit von hier?"
+  },
+  {
+    "frage": "viele",
+    "antwort": "many",
+    "beispielsatz": "You have many caring friends.",
+    "beispiel_uebersetzung": "Du hast viele Freunde, die sich kümmern."
+  },
+  {
+    "frage": "solch",
+    "antwort": "such",
+    "beispielsatz": "Don't say such a thing.",
+    "beispiel_uebersetzung": "Sag nicht so etwas."
+  }
+]

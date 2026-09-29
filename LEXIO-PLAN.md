@@ -449,6 +449,25 @@ Kaikki + Tatoeba zu Lexio-Karten zusammensetzt. Ausgabe als JSON/CSV, Import
 über die bestehende `POST /api/karten`-Route. **Läuft einmalig, nicht zur
 Laufzeit** — das ist Absicht, es hält die App schlank und kostenlos.
 
+> **Erledigt.** `scripts/wortlisten-erzeugen.mjs` setzt NGSL (Frequenzrang) +
+> Kelly (CEFR) + Kaikki (deutsche Übersetzung) + Tatoeba (Beispielsatz mit
+> Übersetzung) zu Karten zusammen (Vorderseite Deutsch, Rückseite Englisch,
+> Beispielsatz EN + DE-Fassung). Ein Filter verwirft Kaikki-Fragmente
+> (Sätze, Dialektvarianten, Buchstabensense); eine kuratierte Sonderfall-Liste
+> deckt die ~26 häufigsten Funktionswörter ab, deren erste Kaikki-Bedeutung
+> irreführend ist. Ergebnis: **100/100** der NGSL-Top-100 als vollständige
+> Karten. Ausgabe als JSON + CSV unter `scripts/wortlisten/`.
+>
+> Der Import läuft NICHT über `POST /api/karten`: die Route blockt das
+> Schreiben in fremde (öffentliche) Sets absichtlich, und das Starter-Set
+> soll für alle sichtbar sein (Nutzer-Entscheidung). Stattdessen legt
+> `scripts/wortlisten-importieren.mjs` das Set als globales Set an
+> (`user_id = NULL`, `eigenes_set = false`) über die Management-API
+> (Access Token) in einer SQL-Anweisung. Live eingespielt: Set
+> `englisch-grundlagen` „Englisch Grundlagen", 100 Karten, für alle sichtbar.
+> Roh-Quellen liegen bewusst außerhalb des Repos (`/scripts/quellen/` ist
+> gitignored); der Generator erwartet sie dort oder unter `--quellen`.
+
 **2.3 Textblock-Import.** Neuer Schritt im Wizard: ein `<textarea>`,
 Trennzeichen-Erkennung, dann **Vorschau mit Editierfeld je Zeile**, erst
 dann speichern. Englischarteig nach links, deutsche Übersetzung nach rechts.
