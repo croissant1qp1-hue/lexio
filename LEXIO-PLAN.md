@@ -436,6 +436,14 @@ automatische Fuellung folgt mit 2.2 und 2.3.
 Produktivdatenbank. Ersetzen durch ein echtes Starter-Set (NGSL Top 100)
 oder ganz entfernen, damit der Leerzustand endlich wieder arbeitet.
 
+> **Erledigt.** Migration 011 löscht die drei globalen Demo-Sets
+> (englisch-grundlagen, italienisch-urlaub, spanisch-alltag); Karten und
+> der Lernstand darauf gehen per ON DELETE CASCADE mit. Die fünf
+> Testreste (`__conntest__`, `probe-a`, `probe-b`, `ciao`, `bella`) lagen
+> in diesen Sets und sind damit ebenfalls entfernt. Live geprüft: keine
+> Sets, keine Karten, kein Fortschritt, keine XP-Events mehr; die Übersicht
+> zeigt wieder den echten Leerzustand. Das Starter-Set folgt in 2.2.
+
 **2.2 Wortlisten-Generator.** Ein Skript in `scripts/`, das NGSL + Kelly +
 Kaikki + Tatoeba zu Lexio-Karten zusammensetzt. Ausgabe als JSON/CSV, Import
 über die bestehende `POST /api/karten`-Route. **Läuft einmalig, nicht zur
