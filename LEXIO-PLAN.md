@@ -472,6 +472,16 @@ Laufzeit** — das ist Absicht, es hält die App schlank und kostenlos.
 Trennzeichen-Erkennung, dann **Vorschau mit Editierfeld je Zeile**, erst
 dann speichern. Englischarteig nach links, deutsche Übersetzung nach rechts.
 
+> **Erledigt.** Schritt 2 des Vokabel-Wizards hat jetzt einen Umschalter
+> „Zeile für Zeile" / „Textblock einfügen". Der Textblock wird mit
+> `lib/textblock-import.ts` geparst (Trennzeichen: Tabulator, `;`, `|`,
+> `->`, `=`, `:`, Strich; bevorzugt das häufigste je Block, optional
+> Beispielsatz als dritte und Übersetzung als vierte Spalte). Die Zeilen
+> landen als normale, editierbare Wortpaare in derselben Liste — erst
+> Schritt 3 speichert. Parsen ohne Trennzeichen oder leere Einträge werden
+> gemeldet, nicht still geschluckt. Die Parser-Logik ist als reine Funktion
+> testbar (21 Tests grün); Build und Lint sauber.
+
 **2.4 „Wortschatz" einlösen.** `/wortschatz` ist heute ein Redirect. Eine
 echte Wortliste aller Vokabeln mit Suche wäre das, was der Menüeintrag
 verspricht — und der Import macht sie erst wertvoll.

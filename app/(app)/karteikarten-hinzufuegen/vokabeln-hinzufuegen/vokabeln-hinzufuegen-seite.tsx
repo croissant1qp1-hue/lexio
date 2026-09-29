@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { farbeVonSprache, type Sprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, sendeJson, ApiFehler } from "@/lib/api-client";
+import { textblockZuPaaren } from "@/lib/textblock-import";
 import styles from "./vokabeln-hinzufuegen.module.css";
 import SprachAuswahl from "./sprach-auswahl";
 
@@ -81,6 +82,18 @@ export default function VokabelnHinzufuegenSeite() {
     /** null = nichts gewaehlt, NEUES_SET = neues Set, sonst der Slug. */
     const [auswahl, setAuswahl] = useState<string | null>(null);
     const [paare, setPaare] = useState<Paar[]>([{ ...LEER }]);
+    /**
+     * Eingabemodus in Schritt 2: Zeile fuer Zeile tippen oder einen
+     * Textblock einfuegen (Plan 2.3). Der Textblock wird geparst und in
+     * `paare` uebernommen; ab dann ist es eine Suche und Korrektur wie bei
+     * jedem anderen Wortpaar. Erst wenn das Uebernehmen geglueckt ist,
+     * wird weitergeschaltet – gespeichert wird weiterhin erst in Schritt 3.
+     */
+    const [eingabeArt, setEingabeArt] = useState<"zeilen" | "textblock">("zeilen");
+    const [textblock, setTextblock] = useState("");
+    /** Gruene Rueckmeldung nach dem Uebernehmen eines Textblocks. */
+    const [textblockMeldung, setTextblockMeldung] = useState<string | null>(null);
+    const textblockRef = useRef<HTMLTextAreaElement>(null);
     const [setName, setSetName] = useState("");
     /** Die Sprache als Code aus public.sprachen. null = noch keine gewaehlt. */
     const [spracheCode, setSpracheCode] = useState<string | null>(null);
@@ -265,6 +278,45 @@ export default function VokabelnHinzufuegenSeite() {
             );
             felder[0]?.focus();
         }, 0);
+    }
+
+    /*
+     * Textblock (Plan 2.3): den eingefuegten Text parsen und die Zeilen als
+     * eigene Wortpaare uebernehmen. Nicht sofort speichern – die Zeilen
+     * landen in der bekannten Eingabeliste, wo jede einzelne noch korrigiert
+     * werden kann, bevor sie in Schritt 3 gespeichert wird.
+     */
+    function textblockUebernehmen() {
+        setFehler({});
+
+        const ergebnis = textblockZuPaaren(textblock);
+        if (!ergebnis.trenner) {
+            setFehler({
+                textblock:
+                    "Kein Trennzeichen gefunden. Erwartet wird eine Zeile je Vokabel, etwa\n" +
+                    "Begriff ; Übersetzung (auch Tabulator, Doppelpunkt, Gleich- oder Pfeilzeichen).",
+            });
+            return;
+        }
+        if (ergebnis.paare.length === 0) {
+            setFehler({ textblock: "Trage zuerst mindestens eine Vokabel ein." });
+            return;
+        }
+
+        // Erste, noch leere Zeile ersetzen, sonst staendest du vor einer
+        // leeren Zeile und weisst nicht, wohin sie gehoert.
+        setPaare((alt) => {
+            const nurLeereStartzeile =
+                alt.length === 1 && !alt[0].frage.trim() && !alt[0].antwort.trim();
+            return nurLeereStartzeile ? ergebnis.paare : [...alt, ...ergebnis.paare];
+        });
+        setTextblock("");
+        setTextblockMeldung(
+            `${ergebnis.paare.length} Vokabel${ergebnis.paare.length === 1 ? "" : "n"} ` +
+                "übernommen. Prüfe die Zeilen und speichere dann.",
+        );
+        setEingabeArt("zeilen");
+        window.setTimeout(() => textblockRef.current?.scrollIntoView({ block: "center" }), 30);
     }
 
     function zurueck() {
@@ -623,6 +675,85 @@ export default function VokabelnHinzufuegenSeite() {
                 </header>
 
                 <div className={styles.form}>
+                    {/* Zwei Wege, Woerter einzutragen (Plan 2.3): Zeile fuer
+                        Zeile tippen oder einen ganzen Textblock einfuegen.
+                        Beide munden in derselben Liste, die erst in Schritt 3
+                        gespeichert wird. */}
+                    <div className={styles.eingabeModus} role="tablist" aria-label="Eingabeweise">
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={eingabeArt === "zeilen"}
+                            className={`${styles.modus} ${
+                                eingabeArt === "zeilen" ? styles.modusAktiv : ""
+                            }`}
+                            onClick={() => {
+                                setEingabeArt("zeilen");
+                                setFehler({});
+                            }}
+                        >
+                            Zeile für Zeile
+                        </button>
+                        <button
+                            type="button"
+                            role="tab"
+                            aria-selected={eingabeArt === "textblock"}
+                            className={`${styles.modus} ${
+                                eingabeArt === "textblock" ? styles.modusAktiv : ""
+                            }`}
+                            onClick={() => {
+                                setEingabeArt("textblock");
+                                setFehler({});
+                            }}
+                        >
+                            Textblock einfügen
+                        </button>
+                    </div>
+
+                    {eingabeArt === "textblock" ? (
+                        <div className={styles.textblock}>
+                            <label className={styles.feld}>
+                                <span className={styles.label}>Mehrere Wörter auf einmal</span>
+                                <textarea
+                                    ref={textblockRef}
+                                    className={styles.textblockFeld}
+                                    value={textblock}
+                                    onChange={(e) => {
+                                        setTextblock(e.target.value);
+                                        if (fehler.textblock) setFehler({});
+                                    }}
+                                    rows={8}
+                                    autoComplete="off"
+                                    autoCapitalize="none"
+                                    spellCheck={false}
+                                    aria-invalid={Boolean(fehler.textblock)}
+                                    aria-describedby={
+                                        fehler.textblock ? "fehler-textblock" : undefined
+                                    }
+                                    placeholder={
+                                        'Eine Vokabel je Zeile, z. B.:\n\napple\tApfel\ncat ; Katze\nto learn -> lernen\nbook = Buch'
+                                    }
+                                />
+                            </label>
+                            <p className={styles.textblockHinweis}>
+                                Trennzeichen: Tabulator, ; | -&gt; = : oder ein Strich. Optional auch
+                                Beispielsatz als dritte Spalte.
+                            </p>
+                            {fehler.textblock && (
+                                <p className={styles.fehler} id="fehler-textblock" role="alert">
+                                    {fehler.textblock}
+                                </p>
+                            )}
+                            <button
+                                type="button"
+                                className={styles.speichern}
+                                onClick={textblockUebernehmen}
+                            >
+                                Wörter übernehmen
+                            </button>
+                        </div>
+                    ) : (
+                        <>
                     {paare.map((paar, index) => {
                         /*
                          * Serverindex != Anzeigeindex.
@@ -780,19 +911,26 @@ export default function VokabelnHinzufuegenSeite() {
                         );
                     })}
 
-                    {fehler.paare && (
-                        <p className={styles.fehler} role="alert">
-                            {fehler.paare}
+                        {fehler.paare && (
+                            <p className={styles.fehler} role="alert">
+                                {fehler.paare}
+                            </p>
+                        )}
+
+                        <button type="button" className={styles.weiter} onClick={paarHinzufuegen}>
+                            ＋ Wort hinzufügen
+                        </button>
+
+                        <button type="button" className={styles.speichern} onClick={weiter}>
+                            Fertig
+                        </button>
+                    </>
+                    )}
+                    {textblockMeldung && eingabeArt === "zeilen" && (
+                        <p className={styles.textblockOk} role="status">
+                            {textblockMeldung}
                         </p>
                     )}
-
-                    <button type="button" className={styles.weiter} onClick={paarHinzufuegen}>
-                        ＋ Wort hinzufügen
-                    </button>
-
-                    <button type="button" className={styles.speichern} onClick={weiter}>
-                        Fertig
-                    </button>
                 </div>
             </div>
         );
