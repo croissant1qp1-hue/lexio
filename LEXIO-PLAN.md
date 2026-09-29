@@ -415,9 +415,20 @@ der Server unterschiedlich. „Nochmal" landet spuerbar wieder in der Runde,
 „schwer" mit spuerbarer Wahrscheinlichkeit, „gut"/„einfach" nicht.
 Statistikwerte zaehlen pro Bewertung korrekt hoch. Build und Lint sauber.
 
-**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5, 1.6 und 1.7 erledigt. 1.8 ist offen.
-Phase 1 ist damit bis auf 1.8 abgeschlossen. 1.4 ist inhaltlich in 0.2
-erledigt, die automatische Fuellung folgt mit 2.2 und 2.3.
+> **Erledigt.** Migration 010: Spalten `z_nochmal`, `z_schwer`, `z_gut`,
+> `z_einfach` in `karten_fortschritt`, `antwort_verbuchen` zaehlt je
+> Bewertung mit, `antwort_rueckgaengig` nimmt die Zaehler zurueck. Das
+> Modell steht in `lib/reihenfolge.ts` (logistische Regression, pro Anfrage
+> aus allen Karten des Accounts trainiert, Fallback auf stufe unterhalb der
+> Stichprobengrenze). Die Route sortiert nach gelernten Schwierigkeit und
+> liefert `schwierigkeit` je Karte; der Client wuerfelt bei „schwer" mit
+> 50 % Basis, modellgefärbt, mit Eskalation beim zweiten „schwer" in der
+> Runde (`lib/reihenfolge.ts:schwerChance`). „nochmal" bleibt in der Runde
+> wie bisher.
+
+**Stand Phase 1:** 1.1, 1.2, 1.3, 1.5, 1.6, 1.7 und 1.8 erledigt. Phase 1
+ist damit abgeschlossen. 1.4 ist inhaltlich in 0.2 erledigt, die
+automatische Fuellung folgt mit 2.2 und 2.3.
 
 ### Phase 2 — Inhalt und Import
 

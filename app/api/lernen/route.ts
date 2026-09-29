@@ -4,6 +4,7 @@ import { holeSprachen, spracheNachCode } from "@/lib/sprachen-server";
 import { UNBEKANNTE_SPRACHE, type SpracheInfo } from "@/lib/sprachen";
 import { migrationsMeldung } from "@/lib/db-fehler";
 import { LEECH_FEHLER } from "@/lib/lernlogik";
+import { trainiereModell, schwierigkeit } from "@/lib/reihenfolge";
 
 const MAX_KARTEN = 20;
 
@@ -44,6 +45,12 @@ type FortschrittsZeile = {
   faellig_am: string;
   /** Seit 003 vorhanden; seit 1.7 für Leech-Erkennung im Einsatz. */
   fehler?: number;
+  treffer?: number;
+  /** Seit 010: Bewertungs-Zaehler für die schlaue Reihenfolge (1.8). */
+  z_nochmal?: number;
+  z_schwer?: number;
+  z_gut?: number;
+  z_einfach?: number;
 };
 
 /** Eine Karte mit ihrem Fortschritt. Leer heisst: noch nie gesehen. */
@@ -194,7 +201,7 @@ export async function GET(request: Request) {
        * `string | null` an – die Seite muss den Fall "kein Satz" auch kennen.
        */
       "id, frage, antwort, beispielsatz, beispiel_uebersetzung, " +
-        "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler)",
+        "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler, treffer, z_nochmal, z_schwer, z_gut, z_einfach)",
     )
     .eq("set_id", set.id)
     .eq("fortschritt.user_id", user.id)
@@ -253,6 +260,44 @@ export async function GET(request: Request) {
   const roh = (data ?? []) as unknown as RohKarte[];
 
   /*
+   * Plan 1.8 – Modell pro Account trainieren.
+   *
+   * Die Gewichte kommen aus ALLEN Karten des Accounts, nicht nur aus diesem
+   * Set: das Modell soll den Nutzer verstehen, nicht ein einzelnes Set.
+   * Die Rechnung mit den Zaehlern einzelner Antworten, also muss hier die
+   * komplette Historie gelesen werden. Schlägt die Abfrage fehl (z. B.
+   * Migration 010 noch nicht gelaufen), ist die Runde wichtiger als die
+   * Sortierung: dann fallen die Gewichte auf null zurück und es ordnet
+   * weiterhin nach stufe – kein 500, weil eine Verschönerung fehlt.
+   */
+  const { data: trainingsdaten, error: trainingsFehler } = await supabase
+    .from("karten_fortschritt")
+    .select("stufe, treffer, fehler, z_nochmal, z_schwer, z_gut, z_einfach")
+    .eq("user_id", user.id);
+
+  const gewichte = trainingsFehler
+    ? null
+    : trainiereModell(
+        ((trainingsdaten ?? []) as {
+          stufe: number;
+          treffer: number;
+          fehler: number;
+          z_nochmal: number;
+          z_schwer: number;
+          z_gut: number;
+          z_einfach: number;
+        }[]).map((z) => ({
+          stufe: z.stufe,
+          treffer: z.treffer,
+          fehler: z.fehler,
+          zNochmal: z.z_nochmal,
+          zSchwer: z.z_schwer,
+          zGut: z.z_gut,
+          zEinfach: z.z_einfach,
+        })),
+      );
+
+  /*
    * Eine Karte mehr geholt als erlaubt, um zu erkennen, dass das Set die
    * Grenze ueberschreitet. Was dann zurueckkommt, wird nicht als
    * Lernrunde ausgegeben: lieber eine klare Meldung als ein Set, in dem
@@ -262,6 +307,22 @@ export async function GET(request: Request) {
   const alle = (setZuGross ? roh.slice(0, MAX_SET_KARTEN) : roh).map((karte) => {
     const zeile = Array.isArray(karte.fortschritt) ? karte.fortschritt[0] : karte.fortschritt;
     const fehler = zeile?.fehler ?? 0;
+    /*
+     * Schwierigkeit laut Modell (1.8). Ist keine gelaufen (wenig Daten,
+     * Abfragefehler), sagt der Client nichts – der Endschirm und die
+     * Bewertungsknöpfe funktionieren auch ohne den Wert.
+     */
+    const schwierigkeitWert = gewichte
+      ? schwierigkeit(gewichte, {
+          stufe: zeile?.stufe ?? 0,
+          treffer: zeile?.treffer ?? 0,
+          fehler,
+          zNochmal: zeile?.z_nochmal ?? 0,
+          zSchwer: zeile?.z_schwer ?? 0,
+          zGut: zeile?.z_gut ?? 0,
+          zEinfach: zeile?.z_einfach ?? 0,
+        })
+      : null;
     return {
       id: karte.id,
       frage: karte.frage,
@@ -278,6 +339,7 @@ export async function GET(request: Request) {
        * Rotation genommen und nur noch über den Modus "leech" geübt.
        */
       leech: fehler >= LEECH_FEHLER,
+      ...(schwierigkeitWert !== null ? { schwierigkeit: schwierigkeitWert } : {}),
     };
   });
 
@@ -310,8 +372,15 @@ export async function GET(request: Request) {
    * weitesten weg sind. Ein Stapel, der mit dem Schwierigsten beginnt, faengt
    * an zu lernen; einer, der mit dem Leichtesten beginnt, endet bei den
    * mittleren, weil die letzten vier den ganzen Rest der Sitzung kosten.
+   *
+   * Plan 1.8: Statt stur nach `stufe` ordnet das Modell den Stapel nach der
+   * gelernten Schwierigkeit dieses Accounts (schwierigste zuerst). Ohne
+   * Modell – zu wenig beantwortete Karten, Abfragefehler – gilt weiterhin
+   * die stufe-Reihenfolge, die vor 1.8 der Aufhänger war.
    */
-  const sortiert = alle.sort((a, b) => a.stufe - b.stufe);
+  const sortiert = gewichte
+    ? alle.sort((a, b) => (b.schwierigkeit ?? 0) - (a.schwierigkeit ?? 0))
+    : alle.sort((a, b) => a.stufe - b.stufe);
 
   const istLeech = (karte: (typeof sortiert)[number]) => karte.leech;
 

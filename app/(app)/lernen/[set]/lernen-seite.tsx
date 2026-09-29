@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
+import { schwerChance } from "@/lib/reihenfolge";
 import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
@@ -31,6 +32,13 @@ type Karte = {
      * Rotation vorkommt.
      */
     leech: boolean;
+    /**
+     * Plan 1.8: wie schwer diese Karte laut dem Modell des Accounts ist
+     * (0 = ganz leicht, 1 = ganz schwer). Kommt nur, wenn die Route ein
+     * Modell trainieren konnte – der Wert ist optional, und ohne ihn faellt
+     * die schwer-Chance auf ihre Basis zurueck.
+     */
+    schwierigkeit?: number;
 };
 
 /**
@@ -150,6 +158,15 @@ export default function LernenSeite({
      */
     const [leechModus, setLeechModus] = useState(false);
     const [leechAnzahl, setLeechAnzahl] = useState(0);
+
+    /**
+     * Plan 1.8 – „zweimal schwer". Merkt sich, wie oft eine Karte in DIESER
+     * Runde schon mit „schwer" beantwortet wurde (Schluessel: kartenId).
+     * Die Eskalation rechnet damit: Wer dieselbe Karte zum zweiten Mal
+     * „schwer" nennt, bekommt eine hoehere Chance, dass sie noch einmal
+     * kommt. Beim Neustart der Runde wird der Zaehler geleert.
+     */
+    const schwerInRunde = useRef<Record<string, number>>({});
 
     /**
      * Rückgängig für die letzte Antwort (Plan 1.7). Gehalten wird der
@@ -300,6 +317,8 @@ export default function LernenSeite({
                 setIndex(0);
                 setAufgedeckt(false);
                 setLetzteAntwort(null);
+                // Neue Runde, neue Würfe: die schwer-Eskalation (1.8) startet frisch.
+                schwerInRunde.current = {};
                 if (profil) setPunkte({ xp: profil.xp, streak: profil.streak });
             } catch (e) {
                 /*
@@ -491,23 +510,35 @@ export default function LernenSeite({
                 setLetzteAntwort({ ...vorher, kartenId: karte.id, bewertung });
 
                 /*
-                 * "Nochmal" heisst: dieselbe Karte gleich nochmal. Vorher
-                 * stand hier fuer JEDE Bewertung `setIndex(i => i + 1)`,
-                 * also wanderte die Karte aus der Runde heraus und kam erst
-                 * wieder, wenn jemand die Seite neu lud. `INTERVALLE[0] = 0`
-                 * sagt dem Server "heute noch faellig" – die Karte war also
-                 * nicht weg, nur aus der Warteschlange. Der meistgeklickte
-                 * Knopf wirkte damit kaputt.
+                 * Was mit der Karte in der Runde passiert (Plan 1.8):
                  *
-                 * Die Karte wandert jetzt ans Ende der Schlange und `index`
-                 * bleibt stehen: die naechste rueckt in dieselbe Position, und
-                 * der Fortschrittsbalken zaehlt nur Karten, die wirklich
-                 * weiterkommen. Nach hinten gehaengt wird sie erst, wenn alle
-                 * anderen durch sind – sonst wuerde sie sofort wieder
-                 * erscheinen und die Runde nie enden.
+                 * - „nochmal": bleibt in der Runde. Die Karte wandert ans
+                 *   Ende der Schlange, `index` bleibt stehen: sie kommt
+                 *   wieder, sooft sie nochmal mit „nochmal" beantwortet
+                 *   wird – und jeder weitere Fehler erhoeht ihren Zaehler,
+                 *   das Modell laesst sie kuenftig frueher ranken.
+                 * - „schwer": nicht so oft wie „nochmal". Basis ist eine
+                 *   Chance von 50 %, das Modell faerbt sie (schwere Karten
+                 *   eher, leichte seltener), und eine zweite „schwer"- 
+                 *   Bewertung derselben Karte in dieser Runde eskaliert.
+                 * - „gut"/„einfach": die Karte ist durch, sie wandert mit
+                 *   `index` weiter.
+                 *
+                 * Der Wuerfel faellt hier im Client, aber die WAHRSCHIN-
+                 * LICHKEIT kommt aus lib/reihenfolge.ts – dort ist sie
+                 * testbar und dort steht, warum sie so ist.
                  */
                 if (bewertung === "nochmal") {
                     setKarten((liste) => [...liste.slice(index + 1), karte]);
+                } else if (bewertung === "schwer") {
+                    const vorherSchwer = schwerInRunde.current[karte.id] ?? 0;
+                    schwerInRunde.current[karte.id] = vorherSchwer + 1;
+                    const bleibt = Math.random() < schwerChance(karte.schwierigkeit, vorherSchwer);
+                    if (bleibt) {
+                        setKarten((liste) => [...liste.slice(index + 1), karte]);
+                    } else {
+                        setIndex((i) => i + 1);
+                    }
                 } else {
                     setIndex((i) => i + 1);
                 }
@@ -575,6 +606,12 @@ export default function LernenSeite({
             setKarten(letzteAntwort.karten);
             setIndex(letzteAntwort.index);
             setAufgedeckt(false);
+            // Plan 1.8: zurueckgenommene schwer-Wuerfe aus der Eskalation loeschen.
+            if (letzteAntwort.bewertung === "schwer") {
+                const vorher = schwerInRunde.current[letzteAntwort.kartenId] ?? 0;
+                if (vorher <= 1) delete schwerInRunde.current[letzteAntwort.kartenId];
+                else schwerInRunde.current[letzteAntwort.kartenId] = vorher - 1;
+            }
             setBilanz((alt) => ({
                 ...alt,
                 [letzteAntwort.bewertung]: Math.max(0, alt[letzteAntwort.bewertung] - 1),
