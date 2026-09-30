@@ -80,6 +80,20 @@ export function levelInfo(xp: number): LevelInfo {
     };
 }
 
+/**
+ * Tagesziel in XP (Phase 3.3).
+ *
+ * Frueher fest 20 – absurd wenig neben einer Runde, die mit 20 Karten
+ * und "gut" 100 XP bringt: der Balken war nach einer halben Runde voll.
+ * Das ehrliche Ziel ist eine Lernrunde pro Tag, also 5 XP je Karte mal
+ * 20 Karten. Als einzige Konstante hier steht es, statt in SQL-RPC,
+ * API-Fallback und Statistik je einmal zu stecken – drei Stellen fuer
+ * dieselbe Zahl waren genau das Problem, das 3.3 behebt. Die Datenbank
+ * kennt 100 ebenfalls (Migration 013), der Fallback hier deckt den Zeitraum
+ * ab, in dem die eigene Bindung noch nachzieht.
+ */
+export const TAGESZIEL_XP = 100;
+
 /** "1.234 XP" – Punkt als Tausendertrenner, ohne Nicht-umbrechende Leerzeichen. */
 export function xpFormatieren(xp: number): string {
     const sicher = Number.isFinite(xp) && xp > 0 ? Math.floor(xp) : 0;

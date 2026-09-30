@@ -1,9 +1,7 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
+import { TAGESZIEL_XP } from "@/lib/profil";
 import type { TagesXpTyp } from "@/lib/types";
-
-/** Tagesziel, wenn fuer heute noch keine Zeile existiert. */
-const STANDARD_ZIEL = 20;
 
 export async function GET() {
   const { supabase, antwort: nichtAngemeldet } = await mitUserOder401();
@@ -27,11 +25,14 @@ export async function GET() {
    * Das ziel war `data?.ziel ?? 0`. Damit stand vor dem ersten Klick "0 von
    * 0" da, und ein Balken, dessen Fuellung 0/0 ist, ist in jedem Browser
    * entweder voll oder leer – meistens voll. Der Nutzer sieht eine fertige
-   * Tagesleistung, die er nicht gebracht hat. Deshalb der Standardwert.
+   * Tagesleistung, die er nicht gebracht hat. Deshalb der Standardwert –
+   * und der ist seit Phase 3.3 der ehrliche Wert einer Lernrunde (Migration
+   * 013 schreibt ab jetzt 100 in die Datenbank, der Fallback hier uebernimmt
+   * fuer alle Tage, an denen die eigene Zeile noch fehlte).
    */
   const tagesXp: TagesXpTyp = {
     erreicht: data?.xp ?? 0,
-    ziel: data?.ziel || STANDARD_ZIEL,
+    ziel: data?.ziel || TAGESZIEL_XP,
     updatedAt: new Date().toISOString(),
   };
 

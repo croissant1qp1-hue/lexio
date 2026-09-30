@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
  * uebergibt einfach seinen Ersatzwert als Fallback.
  */
 import { holeJson } from "@/lib/api-client";
+import { TAGESZIEL_XP } from "@/lib/profil";
 import type { SprachStat, TagesXpTyp, WochenXpTyp } from "@/lib/types";
 import styles from "./statistiken.module.css";
 
@@ -82,7 +83,7 @@ export default function StatistikenSeite() {
     };
   }, [sprachen, woche]);
 
-  const tagesZiel = tages.ziel > 0 ? tages.ziel : 20;
+  const tagesZiel = tages.ziel > 0 ? tages.ziel : TAGESZIEL_XP;
   const tagesProzent = Math.min(100, Math.round(((tages.erreicht ?? 0) / tagesZiel) * 100));
 
   return (
