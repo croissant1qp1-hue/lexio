@@ -103,6 +103,25 @@ export default function VokabelnHinzufuegenSeite() {
     const [zaehler, setZaehler] = useState(0);
     const [fertig, setFertig] = useState<{ name: string; slug: string; anzahl: number } | null>(null);
 
+    /** Laufender Beispielsatz-Fuellvorgang (Plan: s. unter der Tabelle). */
+    const [beispielStatus, setBeispielStatus] = useState<
+        | { ziele: number; fertig: number; sätze: number }
+        | null
+    >(null);
+    /** Zusammenfassung nach einem abgeschlossenen Lauf. */
+    const [beispielMeldung, setBeispielMeldung] = useState<string | null>(null);
+
+    /*
+     * Spiegel der Paare fuer die Auto-Ergaenzung, damit die parallelen
+     * Anfragen nicht auf einem veralteten Stand arbeiten. Ohne dieses Ref
+     * laege in jeder Antwort eine Einzelbeobachtung, und zwei gleichzeitig
+     * laufende Treffer ueberschrieben sich gegenseitig.
+     */
+    const paareRef = useRef(paare);
+    useEffect(() => {
+        paareRef.current = paare;
+    }, [paare]);
+
     const ersteFrageRef = useRef<HTMLInputElement>(null);
 
     /*
@@ -232,6 +251,13 @@ export default function VokabelnHinzufuegenSeite() {
         else if (wert === NEUES_SET && eigeneSets.length > 0) {
             setSpracheCode(eigeneSets[0].sprache.code);
         }
+        // Ein ganz neues Set ohne jedes eigene Set: die Zielsprache ist noch
+        // unbekannt, und dann wuerde auch die Beispielsatz-Ergaenzung (Korpus
+        // nur fuer Englisch) leerlaufen. Belegt wird sichtbar Englisch – erste
+        // Sprache der App, im Namensschritt aenderbar, nicht in Stein gemeisselt.
+        else if (wert === NEUES_SET && eigeneSets.length === 0) {
+            setSpracheCode("en");
+        }
     }
 
     function demoKopieren(set: SetZeile) {
@@ -317,6 +343,120 @@ export default function VokabelnHinzufuegenSeite() {
         );
         setEingabeArt("zeilen");
         window.setTimeout(() => textblockRef.current?.scrollIntoView({ block: "center" }), 30);
+
+        /*
+         * Automatisch fuellen, was nebenbei mitgekommen ist. Der Nutzer war
+         * so freundlich, einen ganzen Block abzugeben – da soll er nicht fuer
+         * jede Zeile einzeln einen Beispielsatz tippen. Gutsein ist unser
+         * einziger Job, wenn wir nicht stoeren. Ohne Abbruch-Flag, nur bis
+         * zur Schritt-Grenze.
+         */
+        void beispielSaetzeErgaenzen();
+    }
+
+    /*
+     * Beispielsaetze fuer alle ausgefuellten Zeilen holen, die noch keinen
+     * haben (Plan 2.x, Nutzerwunsch). Die Route `/api/beispielsatz` nimmt
+     * erst den Tatoeba-Korpus, dann den Cache, dann – wenn ein Groq-Schluessel
+     * konfiguriert ist – die kostenlose KI. Die Sprache des gewaehlten Sets
+     * geht mit, damit der Korpus nur fuer Englisch greift.
+     *
+     * Wichtig: Nicht den ganzen Stapel auf einmal mit `Promise.all` abfeuern.
+     * Die KI-Quote ist kostenlos und damit begrenzt; 40 parallele Aufrufe
+     * ruinierten die Wartezeit und das Paket. Hier sind es hoechstens
+     * MAX_PARALLEL gleichzeitige Anfragen, der Rest wartet in einer Queue.
+     */
+    async function beispielSaetzeErgaenzen() {
+        const ziele = paareRef.current
+            .map((p, index) => ({ p, index }))
+            .filter(
+                ({ p }) =>
+                    (p.frage.trim() !== "" || p.antwort.trim() !== "") &&
+                    !p.beispiel.trim(),
+            );
+        if (ziele.length === 0) return;
+
+        setBeispielStatus({ ziele: ziele.length, fertig: 0, sätze: 0 });
+
+        /*
+         * MAX_PARALLEL Worker, jeder nimmt sich per Zaehler EINE Zeile,
+         * wartet auf die Antwort und nimmt sich die naechste. So laufen nie
+         * mehr als MAX_PARALLEL Anfragen gleichzeitig – wichtig, weil die
+         * KI-Quote kostenlos und damit begrenzt ist, und weil 40 parallele
+         * Aufrufe die Wartezeit und das Ratelimit sprengen wuerden.
+         */
+        const MAX_PARALLEL = 4;
+        let naechster = 0;
+        let gefundeneSätze = 0;
+
+        const verarbeite = async (): Promise<void> => {
+            for (;;) {
+                const meine = naechster++;
+                if (meine >= ziele.length) return;
+                const { p, index } = ziele[meine];
+
+                let gefunden = false;
+                try {
+                    const daten = await sendeJson<{
+                        satz: string | null;
+                        uebersetzung: string | null;
+                    }>("/api/beispielsatz", {
+                        frage: p.frage.trim(),
+                        antwort: p.antwort.trim(),
+                        sprache: spracheCode ?? null,
+                    });
+                    if (daten.satz && daten.uebersetzung) {
+                        gefunden = true;
+                        setPaare((alt) =>
+                            alt.map((zeile, i) =>
+                                i === index
+                                    ? {
+                                          ...zeile,
+                                          beispiel: String(daten.satz),
+                                          beispielUebersetzung: String(daten.uebersetzung),
+                                      }
+                                    : zeile,
+                            ),
+                        );
+                    }
+                } catch {
+                    /* Einzelne Fehler (z. B. Netz) koennen wir nicht reparieren;
+                       die Zeile bleibt leer, das ist kein Grund, den Rest wegzuwerfen. */
+                } finally {
+                    if (gefunden) gefundeneSätze += 1;
+                    setBeispielStatus((alt) =>
+                        alt
+                            ? {
+                                  ...alt,
+                                  fertig: alt.fertig + 1,
+                                  sätze: gefundeneSätze,
+                              }
+                            : alt,
+                    );
+                }
+            }
+        };
+
+        const parallel = Math.min(MAX_PARALLEL, ziele.length);
+        await Promise.all(Array.from({ length: parallel }, () => verarbeite()));
+
+        /*
+         * Nach dem Lauf die Zwischenanzeige abbauen und eine feste
+         * Zusammenfassung zeigen. `beispielStatus` bleibt nicht stehen,
+         * sonst wuerde der Ergänzen-Knopf ausblendet, obwohl noch Zeilen
+         * ohne Satz da sein koennen.
+         */
+        setBeispielStatus(null);
+        if (gefundeneSätze > 0) {
+            setBeispielMeldung(
+                `${gefundeneSätze} ${
+                    gefundeneSätze === 1 ? "Beispielsatz" : "Beispielsätze"
+                } automatisch ergänzt.`,
+            );
+        } else {
+            setBeispielMeldung(null);
+        }
+        setFehler({});
     }
 
     function zurueck() {
@@ -920,6 +1060,41 @@ export default function VokabelnHinzufuegenSeite() {
                         <button type="button" className={styles.weiter} onClick={paarHinzufuegen}>
                             ＋ Wort hinzufügen
                         </button>
+
+                        {beispielStatus && (
+                            <p className={styles.textblockOk} role="status">
+                                {beispielStatus.fertig < beispielStatus.ziele
+                                    ? `Beispielsätze werden gesucht… ${beispielStatus.fertig} von ${beispielStatus.ziele}`
+                                    : `${beispielStatus.sätze} von ${beispielStatus.ziele} ${
+                                          beispielStatus.sätze === 1 ? "Satz" : "Sätzen"
+                                      } ergänzt.`}
+                            </p>
+                        )}
+
+                        {beispielMeldung && (
+                            <p className={styles.textblockOk} role="status">
+                                {beispielMeldung}
+                            </p>
+                        )}
+
+                        {!beispielStatus &&
+                            paare.some(
+                                (p) =>
+                                    (p.frage.trim() !== "" || p.antwort.trim() !== "") &&
+                                    !p.beispiel.trim(),
+                            ) && (
+                                <button
+                                    type="button"
+                                    className={styles.weiter}
+                                    onClick={() => {
+                                        setBeispielMeldung(null);
+                                        void beispielSaetzeErgaenzen();
+                                    }}
+                                >
+                                    <i className="fa-solid fa-wand-magic-sparkles" aria-hidden="true" />
+                                    &nbsp; Beispielsätze ergänzen
+                                </button>
+                            )}
 
                         <button type="button" className={styles.speichern} onClick={weiter}>
                             Fertig
