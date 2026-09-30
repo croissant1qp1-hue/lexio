@@ -164,7 +164,10 @@ async function liesAnmeldeMoeglichkeiten(): Promise<{
   }
 }
 
-export async function pruefeGesundheit(): Promise<Gesundheit> {
+export async function pruefeGesundheit(optionen: {
+  /** Server-Env-Diagnosen ausgeben (Service-Role-Key, DB-Passwort). */
+  inklusiveServerKonfiguration: boolean;
+} = { inklusiveServerKonfiguration: false }): Promise<Gesundheit> {
   const [setUserId, viewSpalten, profil, fortschritt, fortschrittKarten, anmeldung] =
     await Promise.all([
       sonde("karteikarten_sets", "user_id"),
@@ -192,15 +195,6 @@ export async function pruefeGesundheit(): Promise<Gesundheit> {
     setUserId !== 0 && !fehlend.some((f) => f !== "Die Datenbank antwortet gar nicht.");
 
   const rolle = rolleDesKeys(SUPABASE_ANON_KEY);
-  const rolleAdmin = rolleDesKeys(process.env.SUPABASE_SERVICE_ROLE_KEY);
-  /*
-   * Beide Fehlstände sind in dieser .env passiert und beide kosten Zeit:
-   * Der Service-Role-Schlüssel stand im Feld für das Datenbankpasswort, und
-   * im Feld für den Service-Role-Schlüssel stand noch der Platzhaltertext aus
-   * der Beispieldatei.
-   */
-  const pwIstKey = rolleDesKeys(process.env.SUPABASE_DB_PASSWORD) === "service_role";
-  const adminFehlt = rolleAdmin === "fehlt" || rolleAdmin === "unbekannt";
 
   // Ueber die Liste statt ueber zwei fest benannte Felder: ein Anbieter, der
   // im Dashboard freigeschaltet ist, macht die App benutzbar – unabhaengig
@@ -217,6 +211,67 @@ export async function pruefeGesundheit(): Promise<Gesundheit> {
 
   const aufgaben: Aufgabe[] = [];
 
+  // Env-Diagnosen: nur fuer den Entwickler, nicht fuer jeden Besucher.
+  // Der oeffentliche Endpunkt verraet mit diesen drei Pruefungen, ob auf
+  // diesem Server SUPABASE_SERVICE_ROLE_KEY und SUPABASE_DB_PASSWORD richtig
+  // gesetzt sind – nichts, was ein Besucher wissen muss. Der anon-Key ist
+  // zwar im Client-Bundle, die Rollenpruefung ist dort also harmlos; aber
+  // die beiden anderen betreffen reine Server-Geheimnisse und bleiben
+  // deshalb im Entwicklungsbetrieb. Siehe OFFENE-PUNKTE.md Punkt 8.
+  if (optionen.inklusiveServerKonfiguration) {
+    const rolleAdmin = rolleDesKeys(process.env.SUPABASE_SERVICE_ROLE_KEY);
+    /*
+     * Beide Fehlstände sind in dieser .env passiert und beide kosten Zeit:
+     * Der Service-Role-Schlüssel stand im Feld für das Datenbankpasswort, und
+     * im Feld für den Service-Role-Schlüssel stand noch der Platzhaltertext aus
+     * der Beispieldatei.
+     */
+    const pwIstKey = rolleDesKeys(process.env.SUPABASE_DB_PASSWORD) === "service_role";
+    const adminFehlt = rolleAdmin === "fehlt" || rolleAdmin === "unbekannt";
+
+    if (rolle !== "anon") {
+      aufgaben.push({
+        id: "anon-key",
+        kuerzel: "!",
+        titel: `Der anon-Key hat die Rolle "${rolle}"`,
+        warum:
+          "Damit umgeht jeder Aufruf die Datenbankregeln. Für den Browser gehört " +
+          "der Schlüssel mit der Rolle anon in NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+        ort: ".env → Schlüssel aus Dashboard → Settings → API → anon public",
+        schwerwiegend: true,
+      });
+    }
+
+    if (pwIstKey) {
+      aufgaben.push({
+        id: "db-passwort",
+        kuerzel: "!",
+        titel: "In SUPABASE_DB_PASSWORD steht ein Schlüssel, kein Passwort",
+        warum:
+          "Dort gehört das Passwort des Datenbanknutzers postgres hinein. " +
+          "Der eingetragene Wert ist ein Service-Role-Schlüssel – damit lassen " +
+          "sich die Migrationen nicht ausführen, weil psql damit keine " +
+          "Anmeldung bekommt.",
+        ort: ".env → Passwort aus Dashboard → Settings → Database, dort lässt es sich auch neu erzeugen",
+        schwerwiegend: false,
+      });
+    }
+
+    if (adminFehlt) {
+      aufgaben.push({
+        id: "service-key",
+        kuerzel: "i",
+        titel: "SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt",
+        warum:
+          "Die App braucht ihn nicht – sie läuft mit dem anon-Key und den " +
+          "Datenbankregeln. Er wird nur gebraucht, um die Migrationen " +
+          "automatisch auszuführen statt über den SQL Editor.",
+        ort: ".env → service_role aus Dashboard → Settings → API",
+        schwerwiegend: false,
+      });
+    }
+  }
+
   if (!datenbankBereit) {
     aufgaben.push({
       id: "migration",
@@ -227,48 +282,6 @@ export async function pruefeGesundheit(): Promise<Gesundheit> {
         "Jedes Set gehört dann niemandem, und jede Lernantwort scheitert.",
       ort: "SQL Editor → Inhalt von supabase/003-auth-und-user-daten.sql einfügen → Run",
       schwerwiegend: true,
-    });
-  }
-
-  if (rolle !== "anon") {
-    aufgaben.push({
-      id: "anon-key",
-      kuerzel: "!",
-      titel: `Der anon-Key hat die Rolle "${rolle}"`,
-      warum:
-        "Damit umgeht jeder Aufruf die Datenbankregeln. Für den Browser gehört " +
-        "der Schlüssel mit der Rolle anon in NEXT_PUBLIC_SUPABASE_ANON_KEY.",
-      ort: ".env → Schlüssel aus Dashboard → Settings → API → anon public",
-      schwerwiegend: true,
-    });
-  }
-
-  if (pwIstKey) {
-    aufgaben.push({
-      id: "db-passwort",
-      kuerzel: "!",
-      titel: "In SUPABASE_DB_PASSWORD steht ein Schlüssel, kein Passwort",
-      warum:
-        "Dort gehört das Passwort des Datenbanknutzers postgres hinein. " +
-        "Der eingetragene Wert ist ein Service-Role-Schlüssel – damit lassen " +
-        "sich die Migrationen nicht ausführen, weil psql damit keine " +
-        "Anmeldung bekommt.",
-      ort: ".env → Passwort aus Dashboard → Settings → Database, dort lässt es sich auch neu erzeugen",
-      schwerwiegend: false,
-    });
-  }
-
-  if (adminFehlt) {
-    aufgaben.push({
-      id: "service-key",
-      kuerzel: "i",
-      titel: "SUPABASE_SERVICE_ROLE_KEY ist nicht gesetzt",
-      warum:
-        "Die App braucht ihn nicht – sie läuft mit dem anon-Key und den " +
-        "Datenbankregeln. Er wird nur gebraucht, um die Migrationen " +
-        "automatisch auszuführen statt über den SQL Editor.",
-      ort: ".env → service_role aus Dashboard → Settings → API",
-      schwerwiegend: false,
     });
   }
 

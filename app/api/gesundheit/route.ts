@@ -11,11 +11,20 @@ import { pruefeGesundheit } from "@/lib/gesundheit";
  * wüsste: ob die Datenbank erreichbar ist, ob die Migration fehlt, ob
  * Registrierung offen ist.
  *
+ * Die Diagnosen zur Server-Konfiguration (SUPABASE_SERVICE_ROLE_KEY,
+ * SUPABASE_DB_PASSWORD, anon-Key-Rolle) sind nur im Entwicklungsbetrieb Teil
+ * der Antwort: Dort helfen sie der Person, die die App einrichtet. Vor einer
+ * oeffentlichen Instanz verraten sie Besuchern, was auf diesem Server in der
+ * .env steht – nichts, was ein Besucher wissen muss (OFFENE-PUNKTE.md
+ * Punkt 8, Phase 3.8).
+ *
  * Ohne Session-Refresh im Proxy nötig: die Antwort ist für alle gleich.
  */
 export async function GET() {
   try {
-    const bericht = await pruefeGesundheit();
+    const bericht = await pruefeGesundheit({
+      inklusiveServerKonfiguration: process.env.NODE_ENV !== "production",
+    });
     return NextResponse.json(bericht, {
       // Kurz cachen. Nicht "no-store": auf jeder Seite ein neuer Aufruf
       // bedeutet auf dem Handy ein zweiter Roundtrip, bevor irgendetwas

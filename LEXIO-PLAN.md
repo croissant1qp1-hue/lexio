@@ -571,6 +571,14 @@ kein HSTS. `app/layout.tsx:138` injiziert das Theme-Skript per
 **3.8 `/api/gesundheit` absichern.** Der Endpunkt ist öffentlich und verrät,
 ob der Service-Role-Key gesetzt ist (`OFFENE-PUNKTE.md:229-236`).
 
+> **Erledigt.** Die Env-Diagnosen (Service-Role-Key, DB-Passwort, anon-Rolle)
+> verrät der Endpunkt nur noch im Entwicklungsbetrieb
+> (`inklusiveServerKonfiguration` in `pruefeGesundheit`, aktiv wenn
+> `NODE_ENV !== "production"`). Vor einer öffentlichen Instanz bleibt stehen,
+> was ein Besucher auch durch Raten erfährt (Datenbank erreichbar, Migration,
+> Dashboard-Schalter). Live geprüft: dev zeigt `service-key`, der
+> Produktions-Build zeigt nur noch `oauth`. Commit folgt.
+
 **3.9 Deployment-Check.** E-Mail-Bestätigung **an** (aktuell aus, siehe
 Betriebszustand), nur konfigurierte OAuth-Anbieter, Produktions-Build, und
 **ein Handtest der Schreib-Policies im Dashboard** — ein Versuch, ein fremdes
