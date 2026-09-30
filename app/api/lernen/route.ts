@@ -56,11 +56,6 @@ type FortschrittsZeile = {
 /** Eine Karte mit ihrem Fortschritt. Leer heisst: noch nie gesehen. */
 type RohKarte = {
   id: string;
-  frage: string;
-  antwort: string;
-  /** Seit 005. Null, wenn die Karte ohne Satz angelegt wurde. */
-  beispielsatz?: string | null;
-  beispiel_uebersetzung?: string | null;
   fortschritt: FortschrittsZeile[] | FortschrittsZeile | null;
 };
 
@@ -167,40 +162,26 @@ export async function GET(request: Request) {
     : { ...UNBEKANNTE_SPRACHE, name: set.sprache || UNBEKANNTE_SPRACHE.name };
 
   /*
-   * Eine Anfrage statt zwei.
+   * Plan 3.10 – Session-Leistung.
    *
-   * `fortschritt:` holt die Zeile aus karten_fortschritt dazu und filtert sie
-   * auf diese Person. Der FK-Name steht ausdruecklich dabei: PostgREST rät
-   * ihn sich sonst aus einer Mehrdeutigkeit und faellt dann auf eine Fehlermeldung
-   * zurueck, die nichts mit dem eigentlichen Problem zu tun hat.
+   * Hier landete vorher der komplette Kartentext in der Abfrage
+   * (frage, antwort, beide Beispielsaetze) fuer bis zu 1001 Karten – rund
+   * 120 KB pro Sessionstart, nur damit daraus 20–40 Karten serviert werden.
+   * Die Textfelder sind der dicke Teil der Antwort, aber fuer Sortierung,
+   * Faelligkeit und Statistik wird nur die id plus die Fortschrittszeile
+   * gebraucht. Die Texte kommen deshalb erst im zweiten Schritt fuer die
+   * wenigen Karten, die die Runde wirklich ausliefert – siehe Kartentext.
    *
-   * Karten ohne Fortschrittszeile kommen trotzdem zurueck – mit einer leeren
-   * Liste statt mit null. Das ist der Punkt, an dem diese Abfrage besser
-   * ist als ein JOIN mit inner join: Eine neue Karte hat keine
-   * Fortschrittszeile, und genau die ist fuer jemanden mit einem neuen Set
-   * die einzige, die es zu lernen gibt. Ein inner join haette sie stillschweigend
-   * wegsortiert, und die App haette bei einem frischen Set behauptet, es
-   * gebe nichts zu lernen.
-   */
-  /*
-   * supabase-js leitet den Typ einer Zeile aus der Select-Zeichenkette ab –
-   * und die eingebettete Schreibweise mit Doppelpunkt und Ausrufezeichen
-   * versteht sein simpler Parser nicht. Er liefert dann nicht "any", sondern
-   * ein Platzhalter-Typ, der jeden Zugriff als Fehler markiert. Die Form wird
-   * deshalb hier von Hand festgehalten; wie PostgREST sie tatsaechlich
-   * beantwortet, wurde an der gleichartigen Beziehung xp_events.set_id gegen
-   * die echte Datenbank geprueft: Elternzeilen kommen zurueck, das Kind ist
-   * eine leere Liste, wenn der Filter nichts findet.
+   * Die fruehere Warnung in diesem Kommentar ("bei 200 Karten ist die URL zu
+   * lang") betraf die `.in("karte_id", [...])`-Form mit ALLEN Karten eines
+   * grossen Sets in der Adresse. Im zweiten Schritt unten stehen nur die 20
+   * bis 40 servierten ids in der URL (jede 36 Zeichen) – das bleibt klar
+   * unter jeder Grenze.
    */
   const { data, error: kartenFehler } = await supabase
     .from("karten")
     .select(
-      /*
-       * beispielsatz und beispiel_uebersetzung kommen mit, weil die Lernseite
-       * den Satz zeigen soll. Sie sind nullable, also kommen sie als
-       * `string | null` an – die Seite muss den Fall "kein Satz" auch kennen.
-       */
-      "id, frage, antwort, beispielsatz, beispiel_uebersetzung, " +
+      "id, " +
         "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler, treffer, z_nochmal, z_schwer, z_gut, z_einfach)",
     )
     .eq("set_id", set.id)
@@ -260,6 +241,23 @@ export async function GET(request: Request) {
   const roh = (data ?? []) as unknown as RohKarte[];
 
   /*
+   * Plan 3.10 – Texte der servierten Karten nachladen.
+   *
+   * Die erste Abfrage (oben) liefert nur id und Fortschrittszeile, damit die
+   * Antwort nicht fuer jedes set 120 KB Kartentext schleppt. Jetzt sind –
+   * nach Sortierung und Filter – die Karten bekannt, die die Runde wirklich
+   * ausliefert; deren Texte werden hier mit einer kleinen `.in`-Abfrage
+   * geholt. Hoechstens MAX_WIEDERHOLUNG (40) ids, jede 36 Zeichen: das bleibt
+   * komfortabel unter der URL-Grenze, an der die fruehere Variante mit allen
+   * Karten eines grossen Sets scheiterte.
+   *
+   * Wenn die Textabfrage fehlschlaegt, waere die Runde ohne Inhalt sinnlos –
+   * der Fehler wird deshalb gemeldet statt die Runde stillschweigend leer zu
+   * lassen. Der Fall ist aber nur konstruierbar: dieselbe Tabelle, die gerade
+   * die ids geliefert hat, versagt die Texte nur zusammen mit der ganzen DB.
+   */
+
+  /*
    * Plan 1.8 – Modell pro Account trainieren.
    *
    * Die Gewichte kommen aus ALLEN Karten des Accounts, nicht nur aus diesem
@@ -304,6 +302,13 @@ export async function GET(request: Request) {
    * woertlich nichts mehr vorkommt, ohne dass man weiss warum.
    */
   const setZuGross = roh.length > MAX_SET_KARTEN;
+  /*
+   * Plan 3.10: Hier werden bewusst NUR id und Fortschritt aus dem ersten
+   * Durchlauf uebernommen. Die Textfelder (frage, antwort, Beispielsaetze)
+   * folgen weiter unten fuer die paar Karten, die die Runde wirklich ausgibt –
+   * umgekehrt kosteten sie fuer alle Karten des Sets die 120 KB pro
+   * Sessionstart.
+   */
   const alle = (setZuGross ? roh.slice(0, MAX_SET_KARTEN) : roh).map((karte) => {
     const zeile = Array.isArray(karte.fortschritt) ? karte.fortschritt[0] : karte.fortschritt;
     const fehler = zeile?.fehler ?? 0;
@@ -325,10 +330,6 @@ export async function GET(request: Request) {
       : null;
     return {
       id: karte.id,
-      frage: karte.frage,
-      antwort: karte.antwort,
-      beispielsatz: karte.beispielsatz ?? null,
-      beispielUebersetzung: karte.beispiel_uebersetzung ?? null,
       stufe: zeile?.stufe ?? 0,
       gelernt: zeile?.gelernt ?? false,
       // Ohne Zeile: heute. Mit Zeile: ihr Datum.
@@ -396,9 +397,76 @@ export async function GET(request: Request) {
       ? sortiert.slice(0, MAX_WIEDERHOLUNG)
       : sortiert.filter((karte) => karte.faelligAm <= heute && !istLeech(karte)).slice(0, MAX_KARTEN);
 
+  /*
+   * Plan 3.10 – die Texte der servierten Karten.
+   *
+   * Erst jetzt, wo feststeht, welche Karten die Runde ausgibt, wird ihr Text
+   * geladen: hoechstens MAX_WIEDERHOLUNG (40) Karten statt des ganzen Sets.
+   * Die `.in`-Liste hat damit nie mehr als 40 Eintraege (je 36 Zeichen) und
+   * bleibt weit unter der URL-Grenze, an der die alte Ein-Schritt-Variante
+   * bei grossen Sets scheiterte.
+   *
+   * Fehlgeschlagen ist die Abfrage praktisch nur, wenn die Datenbank selbst
+   * weg ist – dann waere eine Runde ohne Kartentext sinnlos, also wird der
+   * Fehler gemeldet, statt eine Meldung ohne Worte auszuliefern.
+   */
+  /**
+   * Typ der Karten, die die Runde ausgibt: Fortschritt plus Text, der erst
+   * nach der Auswahl geladen wird (Plan 3.10). `schwierigkeit` ist optional,
+   * weil sie ohne Modell (wenig Daten, Abfragefehler) nicht gesetzt wird.
+   */
+  type ServierteKarte = {
+    id: string;
+    frage: string;
+    antwort: string;
+    beispielsatz: string | null;
+    beispielUebersetzung: string | null;
+    stufe: number;
+    gelernt: boolean;
+    faelligAm: string;
+    leech: boolean;
+    schwierigkeit?: number;
+  };
+
+  const serviert: ServierteKarte[] = [];
+  if (genutzt.length > 0) {
+    const ids = genutzt.map((k) => k.id);
+    const { data: texte, error: textFehler } = await supabase
+      .from("karten")
+      .select("id, frage, antwort, beispielsatz, beispiel_uebersetzung")
+      .in("id", ids);
+
+    if (textFehler) {
+      return NextResponse.json({ error: textFehler.message }, { status: 500 });
+    }
+
+    const texteMap = new Map(
+      (texte ?? []).map((t) => [
+        t.id,
+        {
+          frage: t.frage,
+          antwort: t.antwort,
+          beispielsatz: t.beispielsatz ?? null,
+          beispielUebersetzung: t.beispiel_uebersetzung ?? null,
+        },
+      ]),
+    );
+
+    for (const karte of genutzt) {
+      const text = texteMap.get(karte.id);
+      serviert.push({
+        ...karte,
+        frage: text?.frage ?? "",
+        antwort: text?.antwort ?? "",
+        beispielsatz: text?.beispielsatz ?? null,
+        beispielUebersetzung: text?.beispielUebersetzung ?? null,
+      });
+    }
+  }
+
   return NextResponse.json({
     set: { slug: set.slug, name: set.name, sprache },
-    karten: genutzt,
+    karten: serviert,
     /*
      * Gesamt, nicht die Zahl der gelieferten Karten: 20 sind die Obergrenze
      * fuer eine Runde, nicht der Bestand. Im Uebungsmodus ist es die

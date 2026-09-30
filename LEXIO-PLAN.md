@@ -610,6 +610,21 @@ Set oder eine fremde Karte zu ändern, muss scheitern.
 eingebautem Join, `cache: "no-store"` überall. Pro Sessionstart eine große
 unbeholte Antwort. Paginierung oder Zufallsauswahl statt Komplettladung.
 
+> **Erledigt.** Die Komplettladung ist geteilt (`app/api/lernen/route.ts`):
+> Die erste Abfrage holt nur noch `id` plus Fortschrittszeile
+> (`fortschritt:karten_fortschritt!…`), also die Metadaten, die Sortierung,
+> Faelligkeit und Statistik brauchen — die einstigen ~120 KB Karten-Text
+> bleiben draußen. Texte (`frage`, `antwort`, beide Beispielsaetze) folgen
+> erst für die Karten, die die Runde wirklich ausgibt: eine zweite `.in`-Abfrage
+> auf höchstens `MAX_WIEDERHOLUNG` (40) Karten; ihre ids stehen einzeln in der
+> URL (je 36 Zeichen), weit unter der Grenze, an der die fruehere Variante
+> mit allen Karten großer Sets scheiterte. Bewusst **keine** Zufallsauswahl:
+> die „schlaue Reihenfolge" (Plan 1.8) braucht alle faelligen Karten des Sets,
+> um die haertesten zuordnen zu koennen — Metadaten sind dazu klein genug.
+> Live geprüft mit einem temporären Konto gegen das laufende System:
+> `modus=ueben` serviert 40 Karten mit Volltext (~10 KB statt ~120 KB),
+> die normale Runde 20; `faelligGesamt`/`kartenGesamt`/`setZuGross` unveraendert.
+
 ### Phase 4 — Aufräumen
 
 Migrationen nach `supabase/migrations/` statt Hand-Import. Tests für
