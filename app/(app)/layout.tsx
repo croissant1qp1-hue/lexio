@@ -1,5 +1,6 @@
 import "@/components/navbar/side-bar.css";
 import "@/app/styles/main-body.css";
+import type { Metadata } from "next";
 import Navbar from "@/components/navbar/navbar";
 import PwaRegistrierung from "@/components/pwa/pwa-registrierung";
 import { SetupHinweis } from "@/components/gesundheit/setup-hinweis";
@@ -12,6 +13,18 @@ import { SetupHinweis } from "@/components/gesundheit/setup-hinweis";
  * liegt bewusst ausserhalb – ein Anmeldeformular in einer 210px breiten
  * Spalte ist keine Anmeldung, sondern ein Streit mit dem Layout.
  */
+
+/*
+ * Der gesamte (app)-Bereich liegt hinter einer Anmeldung, Google kann hier
+ * nie etwas finden oder sinnvoll indexieren. noindex wird zentral hier
+ * gesetzt statt auf jeder einzelnen Seite – dann kann eine neue Seite auch
+ * nicht vergessen werden, sich selbst auszuschliessen. Sobald eine
+ * oeffentliche Landing-Page existiert, lebt die ausserhalb dieser Gruppe.
+ */
+export const metadata: Metadata = {
+    robots: { index: false, follow: false },
+};
+
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="container">

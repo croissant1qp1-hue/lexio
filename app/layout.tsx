@@ -6,6 +6,7 @@ import { DesignAnbieter } from "@/components/design/design-anbieter";
 // Client-Komponente: aus einem "use client"-Modul darf der Server keinen
 // String-Wert uebernehmen, er bekame eine Client-Referenz.
 import { DESIGN_SCRIPT } from "@/lib/design";
+import { SITE_URL } from "@/lib/meta";
 import "@/app/styles/global.css";
 
 /*
@@ -75,6 +76,7 @@ const caveat = Caveat({
 });
 
 export const metadata: Metadata = {
+    metadataBase: new URL(SITE_URL),
     title: {
         default: "Lexio – Vokabeln lernen",
         template: "%s · Lexio",
@@ -82,6 +84,22 @@ export const metadata: Metadata = {
     description:
         "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag. " +
         "Eigene Wortlisten, verteiltes Lernen, Statistiken.",
+    openGraph: {
+        title: "Lexio – Vokabeln lernen",
+        description:
+            "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag. " +
+            "Eigene Wortlisten, verteiltes Lernen, Statistiken.",
+        url: "/",
+        siteName: "Lexio",
+        locale: "de_DE",
+        type: "website",
+    },
+    twitter: {
+        card: "summary",
+        title: "Lexio – Vokabeln lernen",
+        description:
+            "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag.",
+    },
     applicationName: "Lexio",
     appleWebApp: {
         capable: true,
