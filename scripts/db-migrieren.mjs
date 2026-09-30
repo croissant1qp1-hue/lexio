@@ -138,11 +138,11 @@ if (/^dein|^\s*$|xxx|platzhalter/i.test(token)) {
 if (trocken) {
   console.log("\n--trocken: es wird nichts ausgeführt. Die Dateien sind:");
   for (const d of liste) {
-    const p = path.join(WURZEL, "supabase", d);
+    const p = path.join(WURZEL, "supabase", "migrations", d);
     const da = fs.existsSync(p);
     const gross = da ? fs.statSync(p).size : 0;
     const zeilen = da ? fs.readFileSync(p, "utf8").split("\n").length : 0;
-    console.log(`  ${da ? "  " : "! "}supabase/${d}  ${da ? `${zeilen} Zeilen, ${gross} Byte` : "FEHLT"}`);
+    console.log(`  ${da ? "  " : "! "}supabase/migrations/${d}  ${da ? `${zeilen} Zeilen, ${gross} Byte` : "FEHLT"}`);
   }
   process.exit(0);
 }
@@ -152,9 +152,9 @@ console.log(`Token    vorhanden (${token.length} Zeichen, wird nicht ausgegeben)
 let schritt = 0;
 for (const datei of liste) {
   schritt += 1;
-  const pfad = path.join(WURZEL, "supabase", datei);
+  const pfad = path.join(WURZEL, "supabase", "migrations", datei);
   if (!fs.existsSync(pfad)) {
-    console.error(`FEHLER  supabase/${datei} gibt es nicht.`);
+    console.error(`FEHLER  supabase/migrations/${datei} gibt es nicht.`);
     process.exit(1);
   }
   const sql = fs.readFileSync(pfad, "utf8");

@@ -301,10 +301,9 @@ und diese drei:
    von Doppelung, die beim Ändern einer Seite vergessen wird — und der Grund,
    warum 003 sich so ausführlich zu diesem Punkt äußert. Ohne Tests ist das
    nur eine höfliche Bitte an den nächsten Entwickler.
-2. **Versions-Tracking für die Migrationen.** Es gibt kein
-   `supabase/migrations/` und keine `config.toml`. Migrationen laufen per Hand
-   über den SQL Editor. Mit sieben Dateien ist das die Stelle, an der sich
-   irgendwann niemand mehr erinnert, was wann lief.
+2. **Versions-Tracking für die Migrationen.** *Erledigt (Phase 4):* die
+   Dateien liegen jetzt in `supabase/migrations/`, `scripts/db-migrieren.mjs`
+   liest von dort und führt sie über die Management-API aus.
 3. **`003b` enthält den Platzhalter `00000000-…`.** Die Datei wirft in diesem
    Zustand absichtlich, aber wer sie später erneut ausführt, ohne die UUID
    einzutragen, hat eine Überraschung.

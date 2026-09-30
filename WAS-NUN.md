@@ -29,7 +29,7 @@ Legt Indizes an, damit die Lernsitzung schneller lädt. Ohne sie wird nichts kap
 
 ```bash
 cd /home/theo/Coding/projekte/lexio
-xclip -selection clipboard -i supabase/004-leistung.sql
+xclip -selection clipboard -i supabase/migrations/004-leistung.sql
 ```
 
 Dann Dashboard → **SQL Editor** → `Strg+V` → **Run**.

@@ -637,6 +637,12 @@ von selbst weg.
 > `lib/mock-*.ts` (4), `components/stats/` (5 Dateien), `components/loading-state-div/`,
 > `components/sprache-auswählen/` – nur noch tote `top-of-page`-Teile enthalten –
 > und `components/navbar/button-element-navbar.tsx`. Build und Lint sauber.
+>
+> **Teil 2 (Migrationen) erledigt.** Alle 14 Dateien liegen jetzt in
+> `supabase/migrations/`; `schema.sql`/`seed.sql` bleiben oben. `scripts/db-migrieren.mjs`
+> liest und meldet von `supabase/migrations/` (Trockenlauf geprüft). `db-status.mjs`
+> bleibt unangetastet – fremd modifiziert (paralleler Agent); sein Hinweistext mit
+> `supabase/<datei>` zeigt nur auf den Pfad und ist nicht funktional.
 
 ### Phase 5 — Responsive-Audit
 
