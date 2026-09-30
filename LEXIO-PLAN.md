@@ -633,6 +633,11 @@ TypeScript **und** SQL (`OFFENE-PUNKTE.md:299-303`). `003b`-UUID ersetzen.
 Toter Code aus `OFFENE-PUNKTE.md:251-266`; bei Phase 0 fällt ein Teil davon
 von selbst weg.
 
+> **Teil 1 (Toter Code) erledigt.** Gelöscht, über den Importgraph geprüft:
+> `lib/mock-*.ts` (4), `components/stats/` (5 Dateien), `components/loading-state-div/`,
+> `components/sprache-auswählen/` – nur noch tote `top-of-page`-Teile enthalten –
+> und `components/navbar/button-element-navbar.tsx`. Build und Lint sauber.
+
 ### Phase 5 — Responsive-Audit
 
 **Abnahmekriterien.** Für jede Seite bei **360 px, 414 px und 768 px**:
