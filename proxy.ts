@@ -203,6 +203,10 @@ export function proxy(request: NextRequest): NextResponse {
  *      sogar gefaehrlich, weil eine strenge script-src-Policy den Worker
  *      selbst einschraenken kann.
  *
+ *      robots.txt und sitemap.xml sind keine HTML-Dokumente, sondern Text
+ *      bzw. XML fuer Crawler. Eine Content-Security-Policy auf einer solchen
+ *      Antwort ist sinnlos, weil der Browser sie dort nicht anwendet.
+ *
  *      Prefetches von next/link (RSC-Payloads) bekommen bewusst keine CSP:
  *      sie sind keine Dokumente, und der Nonce im Prefetch wuerde nur
  *      verwirren.
@@ -211,7 +215,7 @@ export const config = {
   matcher: [
     "/api/:path*",
     {
-      source: "/((?!api|_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|images/).*)",
+      source: "/((?!api|_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|robots\\.txt|sitemap\\.xml|images/).*)",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

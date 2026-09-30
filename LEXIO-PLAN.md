@@ -643,6 +643,24 @@ von selbst weg.
 > liest und meldet von `supabase/migrations/` (Trockenlauf geprüft). `db-status.mjs`
 > bleibt unangetastet – fremd modifiziert (paralleler Agent); sein Hinweistext mit
 > `supabase/<datei>` zeigt nur auf den Pfad und ist nicht funktional.
+>
+> **SEO gehört zu Phase 4 (Nutzerauftrag). Teil 1 (Basistechnik) erledigt:**
+>
+> - `lib/meta.ts` exportiert `SITE_URL` aus `NEXT_PUBLIC_SITE_URL`, Fallback
+>   `http://localhost:3000`. **Beim Deploy muss `NEXT_PUBLIC_SITE_URL` gesetzt
+>   werden**, sonst zeigen OG-Tags ins Leere (localhost).
+> - `app/robots.ts` disallowed die drei Auth-Seiten; `app/sitemap.ts` ist bewusst
+>   **leer** – aktuell gibt es keine öffentlich indexierbare Seite.
+> - Root-Layout: `metadataBase`, OpenGraph, Twitter-Card.
+> - `app/(app)/layout.tsx` setzt zentral `robots: noindex` für den gesamten
+>   Login-Bereich – so rutscht keine neue App-Seite versehentlich in den Index.
+> - `proxy.ts` schließt `robots.txt`/`sitemap.xml` vom Matcher aus; eine CSP auf
+>   Text-/XML-Antworten ist sinnlos.
+> - Geprüft: Build, Lint, Live-Checks (`curl` auf robots/Sitemap/head).
+>
+> **Teil 2 (Landing-Page) offen:** ohne öffentliche Seite bleibt die Sitemap leer
+> und Google hat nichts Nützliches zu indexieren. Landing-Page konzipieren und
+> dann `sitemap.ts` füllen.
 
 ### Phase 5 — Responsive-Audit
 
