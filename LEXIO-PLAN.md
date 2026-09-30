@@ -176,7 +176,9 @@ Dashboard (siehe [Phase 3](#phase-3--reichweite-und-öffentlichkeit)).
    Karten haben den Inhalt `Frage n` → `Antwort n`. Siehe [Phase 2](#phase-2--inhalt-und-import).
 2. **Registrierung ohne E-Mail-Bestätigung.** Jeder, der die URL kennt, kann
    ein Konto anlegen und sofort loslegen. Für eine öffentliche Seite
-   Spam-Einladung. Muss im Supabase-Dashboard abgeschaltet werden.
+   Spam-Einladung. **Nutzerentscheidung am 2026-09-30:** bleibt vorläufig aus,
+   weil kein SMTP-Mailserver konfiguriert ist (siehe Phase 3.9). Wieder
+   aufnehmen, sobald SMTP steht.
 3. **Kein OAuth-Anbieter aktiv.** Google und GitHub sind aus. Funktioniert,
    ist aber nur E-Mail/Passwort. Vor einer Veröffentlichung entscheiden, ob
    Google und GitHub eingerichtet werden.
@@ -583,6 +585,26 @@ ob der Service-Role-Key gesetzt ist (`OFFENE-PUNKTE.md:229-236`).
 Betriebszustand), nur konfigurierte OAuth-Anbieter, Produktions-Build, und
 **ein Handtest der Schreib-Policies im Dashboard** — ein Versuch, ein fremdes
 Set oder eine fremde Karte zu ändern, muss scheitern.
+
+> **Erledigt, mit einer bewussten Ausnahme.** Nutzerentscheidung vom
+> 2026-09-30: Die E-Mail-Bestätigung bleibt **vorläufig aus**, weil im
+> Projekt **kein SMTP-Mailserver hinterlegt** ist — anschalten würde jeden
+> Neuzugang lautlos blockieren, bis eine Bestätigungsmail ankommt. Der
+> Punkt bleibt offen, bis SMTP eingerichtet ist (Docs Social →
+> Authentication; siehe Spielregel "Drei offene Punkte aus dem
+> Betriebszustand", Punkt 2). Alle anderen Teile dieses Checks sind grün:
+>
+> - **OAuth-Anbieter:** keine aktiv — die Anmeldeseite zeigt nur
+>   E-Mail/Passwort, keine toten Knöpfe. Konsistent, nichts zu tun.
+> - **Produktions-Build:** `npm run build` sauber, der gebaute Server lief
+>   auf Port 3999 und beantwortete `/api/gesundheit`.
+> - **Schreib-Policies live geprüft (Handtest):** UPDATE auf ein öffentliches
+>   Set → 0 Zeilen (`[]` mit `Prefer: return=representation`), DELETE →
+>   0 Zeilen, INSERT mit fremder `user_id` → API-Fehler `42501 row-level
+>   security policy violation`. `pg_policies` zeigt die Ursachen: UPDATE/
+>   DELETE gestatten nur `user_id = auth.uid()` (Sets) bzw. ein Set, das
+>   `auth.uid()` gehört (Karten); öffentliche Sets sind nur lesbar.
+>   Commit folgt.
 
 **3.10 Session-Leistung.** `lernen/route.ts:23` zieht bis 1001 Karten mit
 eingebautem Join, `cache: "no-store"` überall. Pro Sessionstart eine große
