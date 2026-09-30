@@ -203,7 +203,7 @@
 
 .fehler {
     color: #ff8b9a;
-    font-size: 0.82rem;
+    font-size: 0.875rem;
 }
 
 .speichern {
@@ -546,7 +546,13 @@
 .demoBereich .hinweis {
     padding: 0.7rem 0 0.2rem;
     text-align: left;
-    font-size: 0.85rem;
+    /* 0.875rem = 14px (Abnahme Phase 5).
+     *
+     * Diese Regel ist spezifischer als das `.hinweis` weiter oben und
+     * gewinnt deshalb – der Wert 0.85rem dort oben wird an dieser Stelle
+     * nie sichtbar. Genau die Falle, in die ein Suchen nach dem
+     * Selektorenname führt. */
+    font-size: 0.875rem;
 }
 
 .demoZeile {
@@ -589,7 +595,7 @@
 .demoAktion {
     flex: 0 0 auto;
     color: var(--sage);
-    font-size: 0.82rem;
+    font-size: 0.875rem;
     font-weight: 600;
     border: 1px solid var(--sage);
     border-radius: 999px;

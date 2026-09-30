@@ -725,6 +725,55 @@ Anmelden, alle vier Schritte des Hinzufügen-Wizards.
 gerenderte Seite. Der Befund zur Profilkarte (Arbeitsregel 2) kam aus dem
 Quelltext; der Blick aufs Handy ist das, was fehlt.
 
+#### Zwischenstand (gerenderter Audit, noch nicht abgenommen)
+
+`scripts/responsive-audit.mjs` misst die gerenderte Seite mit Playwright über
+echtes Chromium: 12 Seiten × 6 Viewports (360/414/768 px, jeweils hoch und
+quer) = 72 Durchläufe, mit dem Wegwerfkonto aus `scripts/audit-konto.mjs`.
+
+Der erste Durchlauf hat einen Fehler mit Breitenwirkung gefunden, der im
+Quelltext nicht auffällt:
+
+`body` trug `font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem)`. Der untere Rand
+der Klammer ist aber nie 16 px: bei 360 px Breite ist `0.9rem + 0.4vw` kleiner
+als `1rem`, und `1rem` löst die Klammer gegen die eigene Schriftgröße auf. Die
+Grundgröße lag damit bei rund **14,4 px** — und weil im Projekt nahezu jede
+Angabe in `rem` steht, schrumpfte alles mit. Die untere Navigationsleiste kam
+so bei **9,3 px** heraus. Dazu kam `@media (max-width: 370px)`, das die
+Beschriftung auf `0.58rem` heruntersetzte — genau im Bereich, den diese
+Abnahme prüft.
+
+Erledigt: Grundgröße auf feste 16 px, Tab-Leiste auf 0,875rem, und 30 Stellen
+im gemessenen Befund auf 0,875rem gehoben. Ergebnis: 72 → 46 Durchläufe mit
+Befund, Textbefunde 72 → 22, zu kleine Bedienflächen 36 → 34. Waagerechter
+Bildlauf, verdeckter Inhalt und Bewegung trotz `prefers-reduced-motion` waren
+in keinem Durchlauf ein Befund.
+
+**Noch offen, bewusst nicht behauptet:**
+
+- 22 Durchläufe mit Text zwischen 11,3 und 13,6 px (siehe Liste unten)
+- 34 Durchläufe mit Bedienflächen unter 44 × 44 px — davon sind viele
+  *verdeckte Checkboxen* (`input` mit 1 × 1 px), deren sichtbare Fläche das
+  Label ist. Das ist ein Messbefund, kein bestätigter Mangel, und braucht den
+  Blick aufs Handy.
+- Hoch-/Querformat ist bisher nur über die Höhe geprobt, nicht gedreht
+  (360 × 420 ist kein Querformat).
+- Screenshots und der Blick auf die gerenderte Oberfläche fehlen noch.
+
+#### Zwei Punkte aus der Abnahme, vom Nutzer gemeldet
+
+1. **„Alles gelernt" ohne Weg zurück.** Klickt man im Wortschatz auf ein
+   Set, erscheint „Alles gelernt" — und es gibt keinen Knopf, um das Set
+   erneut zu lernen. Nach dem Erreichen des Ziels ist der Einstieg in die
+   Wiederholung also tot. Das widerspricht der Kernmechanik der App und muss
+   vor Phase 6 behoben werden.
+2. **Keine Übersicht aller Vokabeln eines Sets.** Es gibt keine Ansicht, die
+   die Vokabeln eines Sets vollständig zeigt. Der Wortschatz zählt und
+   gewichtet, aber man kann nicht nachsehen, was drinsteht.
+
+Beide Punkte sind noch nicht umgesetzt; sie gehören als eigener Schritt vor
+Phase 6.
+
 ---
 
 ## Reihenfolge und Abhängigkeiten

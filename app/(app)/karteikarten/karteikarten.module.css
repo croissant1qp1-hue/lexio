@@ -30,7 +30,7 @@
 
 .untertitel {
     margin: 0.15rem 0 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -141,7 +141,9 @@
     padding: 0.7rem 0.9rem;
     background: var(--bg-elevated-2);
     font-family: var(--mono);
-    font-size: 0.68rem;
+    /* 0.875rem = 14px (Abnahme Phase 5). Vorher 0.68rem, mit der
+       verkleinerte Grundgroesse rund 10.9px. */
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -214,7 +216,7 @@
 }
 
 .meta {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
     white-space: nowrap;
     overflow: hidden;
@@ -270,7 +272,7 @@
 .datum {
     padding: 0.8rem 0.9rem;
     color: var(--text-muted);
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     white-space: nowrap;
 }
 

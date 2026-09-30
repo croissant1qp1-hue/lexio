@@ -33,7 +33,7 @@
 
 .untertitel {
     margin: 0.15rem 0 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -136,7 +136,7 @@
 
 .beispiel {
     margin-top: 0.2rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-style: italic;
     color: var(--text-muted);
     overflow-wrap: anywhere;
@@ -144,7 +144,8 @@
 
 .beispielUebersetzung {
     margin-top: 0.1rem;
-    font-size: 0.8rem;
+    /* 0.875rem = 14px (Abnahme Phase 5). Vorher 0.8rem. */
+    font-size: 0.875rem;
     font-style: normal;
     color: var(--text-muted);
 }
@@ -158,7 +159,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
     white-space: nowrap;
 }
@@ -174,7 +175,7 @@
     display: block;
     max-width: 190px;
     margin-top: 0.35rem;
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-decoration: none;

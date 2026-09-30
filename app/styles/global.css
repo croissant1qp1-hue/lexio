@@ -202,7 +202,24 @@ html {
 body {
     margin: 0;
     padding: 0;
-    font-size: clamp(1rem, 0.9rem + 0.4vw, 1.25rem);
+    /*
+     * Feste 16px, kein clamp.
+     *
+     * Vorher stand hier `clamp(1rem, 0.9rem + 0.4vw, 1.25rem)`. Der untere
+     * Rand war damit nie 16px: bei 360px Bildschirmbreite ist 0.9rem + 0.4vw
+     * kleiner als 1rem, `1rem` selbst loest die Klammer aber gegen die
+     * eigene Schriftgroesse auf. Effektiv wurde die Grundgroesse rund 14,4px –
+     * und weil fast jede Angabe im Projekt in rem steht, schrumpfte alles
+     * mit. Die untere Navigationsleiste kam so bei 9,3px Text heraus, die
+     * Abnahme der Phase 5 verlangt aber 14px.
+     *
+     * Die Klammer war vermutlich gemeint, damit die Typografie auf grossen
+     * Bildschirmen nicht klein bleibt. Das loest `font-size` am html-Element
+     * richtiger: dort wirkt rem auf die Oberflaeche als Einheit, ohne dass
+     * die eigene Schriftgroesse rekursiv in sich selbst hineinlaeuft.
+     * Bis dahin gilt: 16px ist der Boden, nicht der Verhandlungsmasse.
+     */
+    font-size: 16px;
     font-family: var(--font-sans);
     min-height: 100dvh;
     /* min-width:100vw erzeugt horizontalen Scrollbar, sobald eine vertikale

@@ -42,7 +42,7 @@
 
 .untertitel {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -124,7 +124,8 @@
 
 .email,
 .mitgliedSeit {
-    font-size: 0.8rem;
+    /* 0.875rem = 14px (Abnahme Phase 5). Vorher 0.8rem. */
+    font-size: 0.875rem;
     color: var(--text-muted);
     /* Die E-Mail bricht innerhalb ihres Containers um. `break-word` greift
        auch mitten in einem Wort ("sehr.lange.adresse@beispiel.de"), was
@@ -166,7 +167,7 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 0.2rem 0.8rem;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
 }
 
 .levelText {
@@ -215,7 +216,8 @@
 }
 
 .kachelLabel {
-    font-size: 0.75rem;
+    /* 0.875rem = 14px (Abnahme Phase 5). Vorher 0.75rem. */
+    font-size: 0.875rem;
     color: var(--text-muted);
     /* Umbruch erlaubt: "Tage Serie" und "Sets gelernt" duerfen zwei Zeilen
        brauchen, statt die Kachel zu sprengen. */
@@ -245,7 +247,7 @@
 }
 
 .begriff {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -273,7 +275,7 @@
        dem Telefon zu zweizeiligen Knoepfen, statt ueber den Rand zu ragen. */
     min-width: 0;
     padding: 0.6rem 0.95rem;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 500;
     text-decoration: none;
     color: var(--text-primary);

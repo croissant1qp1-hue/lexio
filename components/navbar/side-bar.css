@@ -163,7 +163,15 @@
         padding: 0.4rem 0.15rem;
         border-radius: 0;
         text-align: center;
-        font-size: 0.63rem;
+        /* 0.875rem = 14px bei 16px Grundgroesse. Der Wert stand hier
+         * vorher bei 0.63rem und kam deshalb bei rund 10px heraus – auf dem
+         * Handy die Hauptnavigation in Mikroschrift. Die Abnahme der
+         * Phase 5 verlangt 14px als Untergrenze.
+         *
+         * Die Icons darunter (1.15rem) passen weiterhin: die Leiste ist
+         * 58px hoch, 14px Text plus 18px Icon plus Zeilenabstand fuellen
+         * das ohne Ueberlauf. */
+        font-size: 0.875rem;
         line-height: 1.1;
         /* Ohne das druecken lange Wörter die Beschriftung um und der
            Inhalt springt beim Navigieren. */
@@ -237,7 +245,7 @@
     border-radius: 50%;
     background: var(--sage-dark);
     color: var(--paper-text-inverse, #fff);
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 600;
     line-height: 1;
 }
@@ -249,9 +257,25 @@
     box-shadow: 0 0 0 2px var(--terracotta);
 }
 
-/* Sehr schmale Geraete: die Beschriftung weichen, damit nichts umbricht. */
+/* Sehr schmale Geraete: die Beschriftung bleibt auf 14px, der Text bricht
+   notfalls um statt zu schrumpfen.
+   Vorher stand hier `font-size: 0.58rem` fuer max-width 370px – bei genau
+   dem Breitenbereich, den die Abnahme der Phase 5 ausdruecklich prueft
+   (360px). Ergebnis waren 9.3px in der Hauptnavigation. Der Kommentar
+   "damit nichts umbricht" beschreibt die Absicht, erreicht sie aber mit
+   dem falschen Mittel: kleiner schrumpfen laesst. */
 @media (max-width: 370px) {
     .button {
-        font-size: 0.58rem;
+        font-size: 0.875rem;
+        /* Umbruch erlauben statt verhindern: bei "Statistiken" waere die
+           zweite Zeile unangenehm, aber 9px sind unlesbar. Die Leiste
+           laesst dafuer im Zweifel die Beschriftung kuerzen (siehe
+           .button-text weiter oben, text-overflow: ellipsis). */
+        white-space: normal;
+        line-height: 1.05;
+    }
+
+    .button .fa-solid {
+        font-size: 1rem;
     }
 }

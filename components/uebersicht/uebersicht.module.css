@@ -50,7 +50,7 @@
     background: var(--bg-elevated);
     border: 1px solid var(--line);
     border-radius: 999px;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
     white-space: nowrap;
@@ -201,7 +201,7 @@
 }
 
 .abschnittHinweis {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -286,7 +286,7 @@
 }
 
 .kachelSprache {
-    font-size: 0.7rem;
+    font-size: 0.875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--kachelAkzent, var(--text-muted));
@@ -295,7 +295,7 @@
 .kachelFortschritt {
     margin-top: auto;
     font-family: var(--mono);
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
 
@@ -335,7 +335,7 @@
     background: rgba(14, 12, 9, 0.82);
     color: #eec76b;
     font-family: var(--mono);
-    font-size: 0.66rem;
+    font-size: 0.875rem;
     font-weight: 700;
     z-index: 2;
 }

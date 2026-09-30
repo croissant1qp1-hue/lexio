@@ -28,7 +28,7 @@
 
 .untertitel {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -64,7 +64,10 @@
 }
 
 .kachelLabel {
-    font-size: 0.68rem;
+    /* 0.875rem = 14px (Abnahme Phase 5). Vorher 0.68rem, mit der
+       verkleinerte Grundgroesse rund 10.9px – Grossbuchstaben in
+       Mikroschrift, auf dem kaum lesbar. */
+    font-size: 0.875rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
@@ -81,7 +84,7 @@
 
 .blockTitel {
     margin: 0;
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
@@ -114,7 +117,7 @@
 }
 
 .heuteZiel {
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -134,7 +137,7 @@
 
 .heuteText {
     margin: 0;
-    font-size: 0.85rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
 
@@ -179,7 +182,7 @@
 
 .tagLabel {
     font-family: var(--mono);
-    font-size: 0.65rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -192,7 +195,7 @@
 
 .fussnote {
     margin: 0;
-    font-size: 0.78rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 
@@ -249,7 +252,7 @@
 
 .spracheXp {
     font-family: var(--mono);
-    font-size: 0.8rem;
+    font-size: 0.875rem;
     font-weight: 700;
     color: var(--gold);
     white-space: nowrap;
@@ -270,7 +273,7 @@
 }
 
 .spracheMeta {
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
 }
 

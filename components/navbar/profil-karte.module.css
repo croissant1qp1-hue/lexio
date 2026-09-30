@@ -112,7 +112,7 @@
 
 .level {
     color: #8A8070;
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     font-family: var(--mono);
     white-space: nowrap;
 }
@@ -149,7 +149,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: 0.4rem;
-    font-size: 0.72rem;
+    font-size: 0.875rem;
 }
 
 .prozent {
@@ -199,7 +199,7 @@
 
 .email {
     margin: 0;
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     color: #8A8070;
     font-family: var(--mono);
     /* Eine E-Mail ist lang. Umbruch statt Abschneiden – man muss sie
@@ -233,7 +233,7 @@
 }
 
 .wertLabel {
-    font-size: 0.6rem;
+    font-size: 0.875rem;
     line-height: 1.15;
     color: #8A8070;
     text-transform: uppercase;
