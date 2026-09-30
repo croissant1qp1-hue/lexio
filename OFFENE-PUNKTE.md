@@ -248,7 +248,41 @@ Fehler im `catch`: Formularmeldung „Fehler", obwohl die Wörter in der
 Datenbank sind. Der Nutzer wiederholt und erzeugt ein zweites Set. Randfall,
 aber die Reihenfolge ist die Ursache.
 
-### 10. Toter Code
+### 10. `antwort_verbuchen` ist für `anon` ausführbar
+
+`supabase/migrations/014-sets-gelernt-reparieren.sql:73` (gefunden bei Phase 4,
+Teil 3 — beim Prüfen der SQL-Pendants zu `lib/lernlogik.ts`)
+
+Die Migration 014 kopiert den Funktionsrumpf von 013, hat aber als einzige
+`create or replace function public.antwort_verbuchen` **weder `revoke` noch
+`grant`**. In Postgres ist `create or replace` bei geänderter Signatur eine
+neue Funktion — und deren Vorgabe ist `EXECUTE TO PUBLIC`. Gegenprobe:
+
+```
+select has_function_privilege('anon', p.oid, 'execute') from pg_proc p ...
+→ true
+proacl → {postgres=X/postgres, anon=X/postgres, authenticated=X/postgres, …}
+```
+
+003, 007, 009, 010 und 013 haben jeweils `revoke … from public` /
+`grant … to authenticated` mitgeschrieben; 014 fehlt es.
+
+**Warum das trotzdem kein Loch ist** (live gegengeprüft, nicht nur gelesen):
+Die Funktion ist `security_definer = false` und beginnt mit
+`if v_user is null then raise exception 'Nicht angemeldet.' using errcode =
+'42501'`. Ein Aufruf ohne Sitzung kommt nicht zu den Schreibvorgängen, die RLS
+greift zusätzlich. Ein anonymer Aufruf liefert genau:
+
+```json
+{"code":"42501","message":"Nicht angemeldet."}
+```
+
+Es ist damit eine Abweichung von der beabsichtigten Härtung — die Funktion
+lässt sich ohne Sitzung aufrufen, statt sofort abzubrechen — und kein
+Datenleck. **Fix:** dieselben zwei Zeilen wie in 013 an das Ende von 014 (bzw.
+eine neue Migration 015, wenn 014 schon gelaufen ist).
+
+### 11. Toter Code
 
 Vollständig unbenutzt, über den gesamten Importgraph geprüft:
 

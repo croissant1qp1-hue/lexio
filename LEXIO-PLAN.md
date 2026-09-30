@@ -644,6 +644,29 @@ von selbst weg.
 > bleibt unangetastet – fremd modifiziert (paralleler Agent); sein Hinweistext mit
 > `supabase/<datei>` zeigt nur auf den Pfad und ist nicht funktional.
 >
+> **Teil 3 (Tests) erledigt.** `npm test` (23 Tests, alle grün).
+>
+> - `tests/lernlogik.test.ts` – 18 Tests für die Stufen-, Intervall-, XP- und
+>   Bewertungslogik. Die erwarteten Stufenübergänge stehen als Tabelle **fest im
+>   Test**, nicht aus dem Code abgeleitet – ein Test, der die Erwartung aus der
+>   Quelle zieht, die er prüft, prüft nichts.
+> - `tests/sql-paritaet.test.ts` – 5 Tests gegen den **Quelltext** der
+>   Migrationen, nicht gegen die laufende DB: Bewertungsliste TS ↔ SQL,
+>   Zähler-Zuordnung je Bewertung, `nochmal` als einziger Fehlerzähler,
+>   Leech-Schwelle `LEECH_FEHLER` ↔ `fehler < 8` in der View, und dass die Route
+>   mit `stufeNachAntwort`/`xpFuerBewertung` rechnet statt mit eigenen Zahlen.
+>   Gelesen wird immer die **letzte** Definition (höchste Migrationsnummer) —
+>   sonst würde eine veraltete Fassung geprüft.
+> - Gegengeprüft, dass die Tests beißen: `LEECH_FEHLER` 8→9 und eine neue
+>   Bewertung nur in `BEWERTUNGEN` lassen beide Tests rot werden.
+> - `tsx` als devDependency, weil diese Node-Version ohne TypeScript-Support
+>   gebaut ist (`ERR_NO_TYPESCRIPT`); `tsconfig.json` braucht dafür
+>   `allowImportingTsExtensions`.
+> - **Nebenbefund:** `antwort_verbuchen` ist für `anon` ausführbar (014 ohne
+>   `revoke`/`grant`). Kein Datenleck – `security_definer = false` und der
+>   Aufruf bricht mit 42501 ab – aber eine Abweichung von der beabsichtigten
+>   Härtung. Steht als Punkt 10 in `OFFENE-PUNKTE.md`.
+>
 > **SEO gehört zu Phase 4 (Nutzerauftrag). Teil 1 (Basistechnik) erledigt:**
 >
 > - `lib/meta.ts` exportiert `SITE_URL` aus `NEXT_PUBLIC_SITE_URL`, Fallback

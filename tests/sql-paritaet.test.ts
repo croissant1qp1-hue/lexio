@@ -1,0 +1,161 @@
+/**
+ * Paritaet zwischen lib/lernlogik.ts und den SQL-Migrationen.
+ *
+ * Das ist der Grund fuer diese Tests. Die Level-Logik gibt es an zwei
+ * Stellen: BEWERTUNGEN in TypeScript und die Bewertungsliste in
+ * public.antwort_verbuchen in SQL. Beide muessen dieselben vier Werte
+ * kennen – sonst schreibt die Funktion fuer eine Bewertung, die es in der
+ * App gar nicht gibt (raise exception), oder schlaegt eine neue Bewertung
+ * fehl.
+ *
+ * Ausserdem steht die Leech-Schwelle an zwei Stellen: LEECH_FEHLER im Code
+ * und "fehler < 8" in der View karteikarten_sets_uebersicht. Laufend auseinander
+ * hiesse: die Kachel oben blendet die Karte aus, die Lernroute zeigt sie
+ * trotzdem.
+ *
+ * Es wird nicht gegen eine laufende Datenbank getestet, sondern gegen den
+ * Quelltext der Migrationen: laeuft die DB auseinander, faellt es hier auf,
+ * und zwar bei jedem Build. Der Test liest bewusst die LETZTE Definition
+ * jeder Funktion (die hoechste Migrationsnummer), weil fruehere Dateien
+ * historische Zwischenstaende sind.
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+import { BEWERTUNGEN, LEECH_FEHLER } from "../lib/lernlogik.ts";
+
+const MIGRATIONEN = join(import.meta.dirname, "..", "supabase", "migrations");
+
+/** Migrationsdateien in Ausfuehrungsreihenfolge (nach Nummernpraefix). */
+function migrationen(): string[] {
+  return readdirSync(MIGRATIONEN)
+    .filter((f) => f.endsWith(".sql"))
+    .sort();
+}
+
+/** Inhalt der letzten Datei, die `create ... function public.NAME` enthaelt. */
+function letzteDefinition(name: string): string {
+  const dateien = migrationen();
+  for (let i = dateien.length - 1; i >= 0; i--) {
+    const inhalt = readFileSync(join(MIGRATIONEN, dateien[i]), "utf8");
+    if (inhalt.includes(`function public.${name}`)) return inhalt;
+  }
+  throw new Error(`Keine Migration definiert public.${name}`);
+}
+
+/**
+ * Inhalt der View `karteikarten_sets_uebersicht` – aus der LETZTEN
+ * Definition.
+ *
+ * Die View wird von 002, 006, 007 und 009 ersetzt. Frühere Fassungen kennen
+ * den Leech-Filter noch gar nicht (er kam mit 009 dazu); zuerst den ersten
+ * Treffer zu nehmen, würde also eine uralte Definition prüfen und die
+ * Änderung in 009 nicht bemerken. Deshalb von hinten suchen.
+ */
+function viewUebersicht(): string {
+  const dateien = migrationen();
+  for (let i = dateien.length - 1; i >= 0; i--) {
+    const inhalt = readFileSync(join(MIGRATIONEN, dateien[i]), "utf8");
+    const treffer = inhalt.match(
+      /create or replace view public\.karteikarten_sets_uebersicht[\s\S]*?;/i,
+    );
+    if (treffer) return treffer[0];
+  }
+  throw new Error("View karteikarten_sets_uebersicht wird nicht gefunden");
+}
+
+test("SQL kennt genau die Bewertungen, die TypeScript kennt", () => {
+  const sql = letzteDefinition("antwort_verbuchen");
+
+  // Die Pruefung in der Funktion: "if p_bewertung not in (...) then raise".
+  const validierung = sql.match(/p_bewertung\s+not\s+in\s*\(([^)]*)\)/i);
+  assert.ok(
+    validierung,
+    "antwort_verbuchen validiert p_bewertung nicht – die Liste wurde entfernt?",
+  );
+
+  const inSql = [...validierung[1].matchAll(/'([^']+)'/g)].map((m) => m[1]).sort();
+  const inTs = BEWERTUNGEN.map((b) => b.id).sort();
+
+  assert.deepEqual(
+    inSql,
+    inTs,
+    "Die Bewertungsliste in SQL und die BEWERTUNGEN in TypeScript " +
+      "stimmen nicht überein. Eine neue Bewertung braucht es an beiden Stellen.",
+  );
+});
+
+test("SQL zählt jede Bewertung auf den passenden Zähler", () => {
+  const sql = letzteDefinition("antwort_verbuchen");
+
+  // Pro Bewertung muss es einen Zähler geben, der genau bei ihr hochgeht:
+  // z_einfach nur bei 'einfach'. Sonst stimmen die Statistiken nicht.
+  for (const { id } of BEWERTUNGEN) {
+    const zaehler = new RegExp(
+      `z_${id}\\s*=\\s*public\\.karten_fortschritt\\.z_${id}\\s*\\+\\s*` +
+        `case when p_bewertung = '${id}'\\s+then 1 else 0 end`,
+      "i",
+    );
+    assert.match(
+      sql,
+      zaehler,
+      `Zähler z_${id} wird nicht bei Bewertung '${id}' hochgezählt.`,
+    );
+  }
+});
+
+test("SQL behandelt 'nochmal' als Fehler, alles andere als Treffer", () => {
+  const sql = letzteDefinition("antwort_verbuchen");
+
+  // Der Leech-Zaehler haengt an fehler. Wird 'schwer' hier faelschlich als
+  // Fehler gezaehlt, verliert die Karte nach acht Schwierigkeiten den Status.
+  const fehler = sql.match(
+    /fehler\s*=\s*public\.karten_fortschritt\.fehler\s*\+\s*case when p_bewertung = '(\w+)'\s+then 1 else 0 end/i,
+  );
+  const treffer = sql.match(
+    /treffer\s*=\s*public\.karten_fortschritt\.treffer\s*\+\s*case when p_bewertung = '(\w+)'\s+then 0 else 1 end/i,
+  );
+
+  assert.ok(fehler, "fehler wird in antwort_verbuchen nicht nachgefuehrt");
+  assert.ok(treffer, "treffer wird in antwort_verbuchen nicht nachgefuehrt");
+  assert.equal(fehler[1], "nochmal", "nur 'nochmal' darf den Fehlerzaehler erhoehen");
+  assert.equal(treffer[1], "nochmal", "nur 'nochmal' darf den Trefferzaehler senken");
+});
+
+test("Leech-Schwelle stimmt zwischen Code und View ueberein", () => {
+  const view = viewUebersicht();
+
+  // "karten_faellig" blendet Karten mit fehler >= 8 aus. Die View rechnet das
+  // als "coalesce(f.fehler, 0) < 8". Wenn LEECH_FEHLER sich aendert, muss
+  // diese Zahl hier mitziehen – sonst laufen Kacheln und Lernroute auseinander.
+  // Bewusst grosszuegig: coalesce(...) ist im Laufe der Migrationen gewandert,
+  // die Bedeutung ist dieselbe. Gesucht wird die eine 8, nicht die Form.
+  const schwelle = view.match(/coalesce\(\s*f\.fehler\s*,\s*0\s*\)\s*<\s*(\d+)/i);
+  assert.ok(
+    schwelle,
+    "Die View filtert karten_faellig nicht mehr ueber 'fehler < n' – " +
+      "die Leech-Regel wurde verschoben.",
+  );
+  assert.equal(
+    Number(schwelle[1]),
+    LEECH_FEHLER,
+    `View sagt "fehler < ${schwelle[1]}", Code sagt LEECH_FEHLER = ${LEECH_FEHLER}.`,
+  );
+});
+
+test("die Route rechnet Stufe und XP mit der getesteten Logik", () => {
+  // Schluessen der Kette: app/api/lernen/antwort/route.ts ruft die Funktion
+  // auf. Rechnet sie dort mit eigenen Zahlen statt mit stufeNachAntwort und
+  // xpFuerBewertung, waeren die Tests hier gruen und die Daten trotzdem falsch.
+  const route = readFileSync(
+    join(import.meta.dirname, "..", "app", "api", "lernen", "antwort", "route.ts"),
+    "utf8",
+  );
+
+  assert.match(route, /stufeNachAntwort\(/, "die Route nutzt stufeNachAntwort nicht");
+  assert.match(route, /xpFuerBewertung\(/, "die Route nutzt xpFuerBewertung nicht");
+  assert.match(route, /p_neue_stufe:\s*neueStufe/, "p_neue_stufe wird nicht gesetzt");
+  assert.match(route, /p_xp:\s*xp/, "p_xp wird nicht gesetzt");
+});
