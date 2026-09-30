@@ -29,6 +29,19 @@ import styles from "./anmelden.module.css";
 /** Was gerade laeuft, damit Knopfe nicht mehrfach geklickt werden. */
 type Status = "leer" | "oauth" | "prueft" | "mail";
 
+/*
+ * Client-Cooldown (Phase 3.6). Der Passwort-Versuch geht direkt vom Browser
+ * an Supabase, unser Proxy-Limiter sieht ihn nicht. Deshalb veroegelt die
+ * Seite selbst: wer es mehrmals in kurzer Zeit vergeblich versucht, bekommt
+ * den Absenden-Knopf kurz gesperrt. Das ist kein Ersatz fuer den
+ * Server-seitigen Schutz (den haelt Supabase an seiner Auth-API), sondern
+ * ein ehrlicher Drosselknopf, der verhindert, dass die eigene Seite zum
+ * Hammering-Werkzeug wird.
+ */
+const MAX_FEHLVERSUCHE = 5;
+const FEHLVERSUCH_FENSTER_MS = 60_000;
+const SPERRE_MS = 30_000;
+
 /**
  * Die Logos, je Anbieter.
  *
@@ -155,6 +168,49 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
     const [merken, setMerken] = useState(() => liesStand().merken);
     const [status, setStatus] = useState<Status>("leer");
     const [fehler, setFehler] = useState<string | null>(weiterleitungsFehler);
+
+    /** Zeitpunkt, bis zu dem der Absenden-Knopf gesperrt ist (0 = frei). */
+    const [sperreBis, setSperreBis] = useState(0);
+    /** Verbleibende Sperrsekunden fuer den Countdown. */
+    const [sperreSekunden, setSperreSekunden] = useState(0);
+    /** Zeitstempel der vergangenen Fehlversuche, fuer das Fenster. */
+    const fehlversuche = useRef<number[]>([]);
+
+    /*
+     * Countdown waehrend der Sperre: alle Sekunde die Anzeige nachziehen,
+     * damit der Nutzer sieht, wann er es wieder versuchen darf. Ohne das
+     * stuende "Bitte warten" einfach da, ohne zu sagen, wie lange.
+     */
+    useEffect(() => {
+        if (sperreBis <= Date.now()) return;
+        const timer = window.setInterval(() => {
+            const rest = Math.max(0, Math.ceil((sperreBis - Date.now()) / 1000));
+            setSperreSekunden(rest);
+            if (rest === 0) setSperreBis(0);
+        }, 500);
+        return () => window.clearInterval(timer);
+    }, [sperreBis]);
+
+    /*
+     * Fehlversuch vermerken und, wenn es zu viele in kurzer Zeit werden,
+     * den Absenden-Knopf fuer 30 Sekunden sperren. Die Fensterangabe macht
+     * sie zu einer echten Drossel: Einzelne Versuche ueber den Tag verteilt
+     * zaehlen nicht aufeinander.
+     */
+    function vermerkeFehlversuch(): boolean {
+        const jetzt = Date.now();
+        const fenster = fehlversuche.current.filter((t) => jetzt - t < FEHLVERSUCH_FENSTER_MS);
+        fenster.push(jetzt);
+        fehlversuche.current = fenster;
+        if (fenster.length >= MAX_FEHLVERSUCHE) {
+            fehlversuche.current = [];
+            const bis = jetzt + SPERRE_MS;
+            setSperreBis(bis);
+            setSperreSekunden(Math.ceil(SPERRE_MS / 1000));
+            return true;
+        }
+        return false;
+    }
 
     const emailRef = useRef<HTMLInputElement>(null);
 
@@ -286,6 +342,7 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
     async function absenden(event: React.FormEvent) {
         event.preventDefault();
         if (status !== "leer") return;
+        if (Date.now() < sperreBis) return;
 
         const mail = email.trim().toLowerCase();
         if (!mail || !passwort) {
@@ -320,7 +377,20 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
 
         if (error) {
             setStatus("leer");
-            setFehler(uebersetzeFehler(error.message, modus === "anmelden"));
+            const durchSupabaseGedrosselt = /rate limit|too many/i.test(error.message);
+            if (!durchSupabaseGedrosselt) {
+                const gesperrt = vermerkeFehlversuch();
+                setFehler(
+                    gesperrt
+                        ? "Zu viele Versuche. Bitte warte einen Moment."
+                        : uebersetzeFehler(error.message, modus === "anmelden"),
+                );
+            } else {
+                // Supabase selbst hat gedrosselt: eine eigene Sperre waere
+                // Doppelvernunft. Die Meldung von Supabase zaehlt, und der
+                // Fehlertext sagt, was zu tun ist.
+                setFehler(uebersetzeFehler(error.message, modus === "anmelden"));
+            }
             return;
         }
 
@@ -597,7 +667,7 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
                         <button
                             type="submit"
                             className={styles.absenden}
-                            disabled={status !== "leer"}
+                            disabled={status !== "leer" || sperreBis > 0}
                         >
                             {status === "prueft" ? (
                                 <i className="fa-solid fa-spinner fa-spin" aria-hidden="true" />
@@ -609,11 +679,18 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
                                     aria-hidden="true"
                                 />
                             )}
-                            {status === "prueft"
-                                ? "Einen Moment…"
-                                : modus === "anmelden"
-                                  ? "Anmelden"
-                                  : "Konto erstellen"}
+                            {status === "prueft" ? (
+                                "Einen Moment…"
+                            ) : sperreBis > 0 ? (
+                                <>
+                                    <i className="fa-solid fa-hourglass-half" aria-hidden="true" />
+                                    {sperreSekunden} s warten
+                                </>
+                            ) : modus === "anmelden" ? (
+                                "Anmelden"
+                            ) : (
+                                "Konto erstellen"
+                            )}
                         </button>
 
                         <label className={styles.merkenZeile}>

@@ -1,163 +1,111 @@
-import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { SUPABASE_ANON_KEY, SUPABASE_URL } from "@/lib/supabase/config";
-import { normiereWeiterZiel } from "@/lib/weiter-ziel";
-import { istEchteStoerung } from "@/lib/supabase/user";
 
 /**
- * Zwei Aufgaben, und beide sind noetig:
+ * Rate-Limiting (Phase 3.6).
  *
- *  1. Die Session auffrischen. Supabase schreibt das Refresh-Token in ein
- *     Cookie, das nur kurze Zeit gueltig ist. Ohne diesen Aufruf laeuft die
- *     App nach einer Stunde aus, obwohl der Nutzer angemeldet ist. Der
- *     Aufruf schreibt das neue Token zurueck, deshalb muss die Antwort
- *     weiter unten mit `request` erzeugt werden.
+ * Bis hierher konnte jeder unbegrenzt auf /api/* schiessen: Lesen, Schreiben,
+ * jede Route – alles ohne Zaehler. Fuer eine oeffentliche Seite Pflicht, und
+ * genau das ist der Punkt: das Limit liegt VOR den Routen, nicht in ihnen, und
+ * gilt fuer jede Route, auch fuer die, die jemand noch baut und vergisst zu
+ * schuetzen.
  *
- *  2. Optimistisch umleiten. Wer nicht angemeldet ist, kommt nicht in die
- *     App, sondern auf /anmelden.
+ * Was hier steht, ist bewusst einfach:
  *
- * WAS DAS NICHT IST: Ein Zugriffsschutz. Hier wird nur umgeleitet, was ein
- * schoenes Muster fuer nicht angemeldet ist. Ob jemand fremde Daten sehen
- * darf, entscheidet ausschliesslich die Datenbank ueber ihre RLS-Policies –
- * jede API-Route prueft die Session zusaetzlich selbst. Eine im Proxy
- * umgeleitete Seite ist keine Speicherung.
+ *   – Ein Fenster von 60 Sekunden pro IP und Gruppe. Wer in dem Fenster das
+ *     Limit reisst, bekommt 429 mit `Retry-After` und einer ehrlichen
+ *     Meldung; die Route laeuft gar nicht erst.
+ *   – Drei Gruppen mit unterschiedlich strengen Grenzen:
+ *       auth        /api/auth/*   – 10/Minute. Der OAuth-Code-Tausch
+ *                                   (callback) ist der wertvollste Endpunkt:
+ *                                   er verwandelt einen Code in eine Session.
+ *       gesundheit  /api/gesundheit – 60/Minute. Wird von der Anmeldeseite
+ *                                   von jedem gerufen, der die Seite oeffnet.
+ *       schreiben   alles andere mit POST/PUT/PATCH/DELETE – 30/Minute.
+ *       lesen       alles andere mit GET – 120/Minute.
+ *
+ * Der Speicher ist bewusst im Prozess (Map), nicht in der Datenbank: ein
+ * Rate-Limit, das jede Anfrage erst in die Tabelle schreibt, verlangsamt die
+ * ehrlichen Nutzer, um die Unehrlichen zu treffen. Fuer eine einzelne Instanz
+ * (dieses Projekt laeuft auf einer Maschine) ist der im-Prozess-Zaehler die
+ * richtige Groesse; mehrere Instanzen muessten das in Redis o.ae. verschieben.
+ *
+ * Die IP kommt aus `X-Forwarded-For`. Next hat `request.ip` in v15 entfernt
+ * (siehe Doku-Eintrag "ip and geo removed"), und hinter einem Reverse-Proxy
+ * ist der auf dem Socket ankommende Header ohnehin nicht die IP des
+ * Besuchers. Steht kein Forwarded-Header da, laeuft alles unter einem
+ * gemeinsamen Schluessel – korrekt statt falsch-sicher: in dem Fall ist
+ * nicht erkennbar, wer was ist.
  */
+
+type Eimer = { fensterStart: number; zaehler: number };
+
+const FENSTER_MS = 60_000;
+
+const GRENZEN: Record<string, number> = {
+  auth: 10,
+  gesundheit: 60,
+  schreiben: 30,
+  lesen: 120,
+};
+
+/** IP-scharfer Speicher: Schluessel = ip|gruppe. */
+const speicher = new Map<string, Eimer>();
+
+function gruppe(weg: string, methode: string): string {
+  if (weg.startsWith("/api/auth")) return "auth";
+  if (weg === "/api/gesundheit") return "gesundheit";
+  if (methode !== "GET") return "schreiben";
+  return "lesen";
+}
+
+function ip(request: NextRequest): string {
+  // Erster Eintrag von X-Forwarded-For, wenn vorhanden; sonst ein
+  // gemeinsamer Schluessel fuer alles ohne Forwarding.
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded && forwarded.trim()) {
+    return forwarded.split(",")[0]!.trim();
+  }
+  return "kein-forwarding";
+}
+
+export function proxy(request: NextRequest): NextResponse {
+  const weg = request.nextUrl.pathname;
+  if (!weg.startsWith("/api/")) return NextResponse.next();
+
+  const gruppenName = gruppe(weg, request.method);
+  const grenze = GRENZEN[gruppenName];
+
+  const jetzt = Date.now();
+  const schluessel = `${ip(request)}|${gruppenName}`;
+  const eimer = speicher.get(schluessel);
+
+  if (!eimer || jetzt - eimer.fensterStart >= FENSTER_MS) {
+    // Frisches Fenster (oder das alte abgelaufen): zuruecksetzen.
+    speicher.set(schluessel, { fensterStart: jetzt, zaehler: 1 });
+    return NextResponse.next();
+  }
+
+  eimer.zaehler += 1;
+
+  if (eimer.zaehler <= grenze) {
+    return NextResponse.next();
+  }
+
+  // Limit gerissen. `Retry-After` in Sekunden, damit der Client weiss, wann
+  // er es wieder versuchen darf, statt im Leeren zu raten.
+  const verbleibendSek = Math.max(1, Math.ceil((FENSTER_MS - (jetzt - eimer.fensterStart)) / 1000));
+
+  return NextResponse.json(
+    { error: "Zu viele Anfragen. Bitte kurz warten und es dann erneut versuchen." },
+    { status: 429, headers: { "Retry-After": String(verbleibendSek) } },
+  );
+}
 
 /**
- * Seiten und Pfade, die ohne Anmeldung erreichbar sind.
- *
- * `/api` steht hier mit drin, und das ist der entscheidende Punkt:
- * Eine API-Route, die keine Session hat, antwortet selbst mit 401 – per
- * JSON, mit Statuscode, ohne Umleitung. Ohne diesen Eintrag bekaeme der
- * Browser statt dessen 307 auf /anmelden und als "Antwort" das
- * Anmeldeformular. Der Client haette dann eine 200-HTML-Seite in den
- * Haenden, `res.json()` wuerfe scheitern, und `holeJson` faellt still auf
- * seinen Fallback zurueck: leere Listen, "0 Sets", keine Erkennung der
- * abgelaufenen Session. Nach 45 Minuten waere genau das die Erfahrung –
- * die App wirkt leer, statt zur Anmeldung zu fuehren.
- *
- * Das ist kein Loch: jede API-Route prueft die Session ueber
- * `mitUserOder401`. Der Proxy liefert nur den Anmelde-Status fuer Seiten.
- *
- * Die beiden Passwort-Seiten sind ebenfalls oeffentlich, und das ist
- * keineswegs eine Ausnahme, sondern die Bedingung dafuer, dass sie
- * funktionieren: /passwort-zuruecksetzten erreicht man gerade, weil man
- * NICHT angemeldet ist, und /passwort-aendern oeffnet den Link aus der
- * Mail – dort ist erst eine Recovery-Sitzung vorhanden, keine normale.
- * Beides im Proxy umzuleiten hiesse: die Person kommt nie bei ihrem
- * Passwortformular an.
+ * Nur /api/*. Alles andere – Seiten, _next/static, Bilder – laeuft weiter
+ * ohne Rate-Limit: das kostet nur Umdrehungen und nutzt niemandem.
  */
-const OEFFENTLICH = [
-  "/anmelden",
-  "/api",
-  "/passwort-zuruecksetzen",
-  "/passwort-aendern",
-];
-
-function istOeffentlich(pfad: string): boolean {
-  return OEFFENTLICH.some((p) => pfad === p || pfad.startsWith(`${p}/`));
-}
-
-export async function proxy(request: NextRequest) {
-  let antwort = NextResponse.next({ request });
-
-  const supabase = createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
-      },
-      setAll(neueCookies) {
-        // Erst die Anfrage-Cookies, damit der naechste getAll()-Aufruf in
-        // derselben Anfrage das neue Token sieht, dann die Antwort.
-        neueCookies.forEach(({ name, value }) => request.cookies.set(name, value));
-        antwort = NextResponse.next({ request });
-        neueCookies.forEach(({ name, value, options }) =>
-          antwort.cookies.set(name, value, options),
-        );
-      },
-    },
-  });
-
-  // Refresht die Session und liefert sie zugleich. Ohne `await` waere
-  // `user` hier immer null.
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
-
-  const pfad = request.nextUrl.pathname;
-
-  /*
-   * Supabase war nicht erreichbar – oder das Token war ungueltig.
-   *
-   * `getUser()` liefert in BEIDEN Faellen `user: null` und ein `error`.
-   * "Da ist niemand" (AuthSessionMissingError) und "das weiss ich nicht"
-   * (Timeout, 5xx) sind hier dasselbe Feld, aber nicht dasselbe Ereignis.
-   *
-   * Ohne die Unterscheidung leitet unten jeder Netzausfall auf /anmelden
-   * um – und loescht dabei ueber den 401 der API-Aufrufe die gemerkte
-   * E-Mail aus dem localStorage. Fuenf Sekunden Supabase-Stoerung, ein
-   * erzwungener Neulogin, und die Person muss ihre Adresse noch einmal
-   * tippen. Siehe lib/supabase/user.ts, dort steht dieselbe Pruefung.
-   *
-   * Ein ungueltiges Token (401/403 von /auth/v1/user) landet bewusst NICHT
-   * hier, sondern wird unten wie eine normale fehlende Session behandelt:
-   * eine abgelaufene Sitzung ist genau das, wofuer 401 steht.
-   */
-  if (error && istEchteStoerung(error)) return antwort;
-
-  if (istOeffentlich(pfad)) {
-    // Wer schon angemeldet ist, hat auf der Anmeldeseite nichts zu suchen.
-    // /api/auth/callback wird hier bewusst nicht umgeleitet: dort landet
-    // der Browser nach dem OAuth, und eine Umleitung wuerde den Code
-    // verwerfen.
-    if (user && pfad === "/anmelden") {
-      /*
-       * `weiter` stammt aus der Adresszeile, also von aussen. Ohne
-       * Pruefung genuegt ein Link wie /anmelden?weiter=//fremde-seite –
-       * der Browser interpretiert das als Adresse dieser fremden Seite, mit
-       * allem, was im Referer mitgeht. Dieselbe Regel wie in der
-       * Callback-Route und in der Anmeldeseite, siehe lib/weiter-ziel.ts.
-       *
-       * `pathname` und `search` werden neu gesetzt statt nur `pathname`:
-       * sonst behaelt die Antwort die alte Query (?weiter=…&fehler=…) und
-       * landet auf der Anmeldeseite weiter.
-       */
-      const url = request.nextUrl.clone();
-      const ziel = new URL(normiereWeiterZiel(request.nextUrl.searchParams.get("weiter")), url.origin);
-      return NextResponse.redirect(ziel);
-    }
-    return antwort;
-  }
-
-  if (!user) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/anmelden";
-    // Wohin zurueck, sobald die Anmeldung durch ist. Nur der Pfad, keine
-    // Query-Parameter: sonst landet man auf /anmelden?weiter=/anmelden.
-    url.search = "";
-    url.searchParams.set("weiter", `${pfad}${request.nextUrl.search}`);
-    return NextResponse.redirect(url);
-  }
-
-  return antwort;
-}
-
 export const config = {
-  // Ohne diese Liste liefe der Proxy auch fuer CSS, Bilder und
-  // _next/static – und wuerde dort eine Umleitung erzwingen, an der nichts
-  // ankommt.
-  matcher: [
-    /*
-     * Alles ausser:
-     *   _next/static   Build-Ausgaben, unveraenderlich
-     *   _next/image    Bildoptimierung
-     *   favicon.ico    Browser-Anfrage
-     *   /images        statische Dateien aus public/
-     *   Dateien mit Endung (Bild, CSS, JS, Schrift) – die Regex muss
-     *   escaped werden, sonst ist die . ein Jeder-Zeichen.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|images/|.*\\.(?:svg|png|jpg|jpeg|gif|webp|avif|ico|woff2?|ttf|css|js|map|txt|xml|webmanifest)$).*)",
-  ],
+  matcher: "/api/:path*",
 };
