@@ -1,0 +1,227 @@
+/* Wortschatz – echte Wortliste aller Vokabeln mit Suche (Plan 2.4).
+   Eine wortschatz-weg.tsx wuerde nur die alte Kachelraster-Dopplung
+   zurueckholen: /karteikarten ist die Set-Uebersicht mit Fortschritt,
+   /wortschatz die Wortsicht quer durch alle Sets. */
+
+.wortschatz {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 1.1rem);
+}
+
+.kopf {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.zurueck {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 150ms ease, transform 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.zurueck:hover {
+    background: var(--bg-elevated-2);
+    transform: translateY(-1px);
+}
+
+/* ----------------------------------------------------------------- Suche */
+
+.suchfeld {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0 0.85rem;
+    min-height: 46px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--text-muted);
+}
+
+.suchfeld input {
+    flex: 1;
+    min-width: 0;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+}
+
+.suchfeld input::placeholder {
+    color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------- Liste */
+
+.liste {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+}
+
+.zeile {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.75rem 1rem;
+    align-items: baseline;
+    padding: 0.8rem 0.9rem;
+    border-top: 1px solid var(--line);
+}
+
+.zeile:first-child {
+    border-top: none;
+}
+
+.text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.begriff {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.uebersetzung {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+}
+
+.beispiel {
+    margin-top: 0.2rem;
+    font-size: 0.85rem;
+    font-style: italic;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.beispielUebersetzung {
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+    font-style: normal;
+    color: var(--text-muted);
+}
+
+.setSeite {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.setBild {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.punkt {
+    width: 10px;
+    height: 10px;
+    flex: 0 0 10px;
+    border-radius: 50%;
+}
+
+.setName {
+    display: block;
+    max-width: 190px;
+    margin-top: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.setName:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+/* -------------------------------------------------------------- Zustände */
+
+.leer,
+.fehler {
+    margin: 0;
+    padding: 2rem 1rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.fehler {
+    color: var(--terracotta);
+}
+
+.skelett {
+    height: 220px;
+    border-radius: var(--radius);
+    background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-highlight) 50%, var(--skeleton-base) 75%);
+    background-size: 200% 100%;
+    animation: pulse 1.2s ease-in-out infinite;
+}
+
+@media (max-width: 560px) {
+    .zeile {
+        grid-template-columns: 1fr;
+    }
+
+    .setSeite {
+        align-items: flex-start;
+        text-align: left;
+    }
+
+    .setName {
+        max-width: none;
+    }
+}

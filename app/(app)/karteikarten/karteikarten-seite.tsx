@@ -168,14 +168,24 @@ export default function KarteikartenSeite() {
             {sets.length} {sets.length === 1 ? "Set" : "Sets"} im Wortschatz
           </p>
         </div>
-        <button
-          type="button"
-          className={styles.neu}
-          onClick={() => router.push("/karteikarten-hinzufuegen/vokabeln-hinzufuegen")}
-        >
-          <i className="fa-solid fa-plus" aria-hidden="true" />
-          Vokabeln hinzufügen
-        </button>
+        <div className={styles.kopfknöpfe}>
+          <button
+            type="button"
+            className={styles.wortschatz}
+            onClick={() => router.push("/wortschatz")}
+          >
+            <i className="fa-solid fa-layer-group" aria-hidden="true" />
+            Wortschatz
+          </button>
+          <button
+            type="button"
+            className={styles.neu}
+            onClick={() => router.push("/karteikarten-hinzufuegen/vokabeln-hinzufuegen")}
+          >
+            <i className="fa-solid fa-plus" aria-hidden="true" />
+            Vokabeln hinzufügen
+          </button>
+        </div>
       </header>
 
       <div className={styles.suchfeld}>

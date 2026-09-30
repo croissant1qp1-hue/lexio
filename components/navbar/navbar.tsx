@@ -25,14 +25,16 @@ import type { ProfilDaten } from "./profil-karte";
 /**
  * Fuenf Eintraege, nicht sieben.
  *
- * "Karteikarten" und "Wortschatz" zeigten dieselbe Liste zweimal, einmal als
- * Tabelle und einmal als Aufzaehlung. Auf dem Telefon standen dadurch
- * Eintraege nebeneinander, die dasselbe taten, und die Beschriftung wurde
- * zweizeilig, weil die Leiste breiter wurde als das Label.
+ * Seit Phase 2.4 zeigen "Karteikarten" und "Wortschatz" verschiedene Inhalte:
+ * /karteikarten ist die Set-Uebersicht mit Fortschritt, /wortschatz die
+ * Wortliste quer durch alle Sets. Der Menuepunkt traegt den Namen der
+ * Wortliste; die Set-Uebersicht ist von dort und von der Startseite aus
+ * erreichbar. Auf dem Telefon bliebe sonst die Beschriftung zweizeilig,
+ * weil die Leiste breiter wuerde als das Label.
  */
 const NAVBAR_ELEMENTE = [
     { name: "Übersicht", abkuerzung: "Start", icon: "fa-solid fa-house", href: "/" },
-    { name: "Wortschatz", icon: "fa-solid fa-layer-group", href: "/karteikarten" },
+    { name: "Wortschatz", icon: "fa-solid fa-layer-group", href: "/wortschatz" },
     { name: "Statistiken", icon: "fa-solid fa-chart-simple", href: "/statistiken" },
     // Frueher stand hier "Profil" als Kurzel. Seit es /profil gibt, waeren
     // zwei Eintraege in der unteren Tableiste gleich beschriftet – und der

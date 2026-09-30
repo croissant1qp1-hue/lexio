@@ -1,21 +1,16 @@
-import { redirect } from "next/navigation";
+import WortschatzSeite from "./wortschatz-seite";
 
 /**
- * /wortschatz ist weg.
+ * /wortschatz ist seit Phase 2.4 eine echte Wortliste, kein Redirect mehr.
  *
- * Es gab zwei Seiten fuer denselben Inhalt: /wortschatz als Kachelraster
- * und /karteikarten als Tabelle mit Suche. Beide holten /api/karteikarten,
- * beide zeigten dieselben Zahlen in zwei Formaten, und beide waren in der
- * Navigation erreichbar. In der unteren Tableiste standen sie nebeneinander
- * und unterschieden sich in zwei Wörtern.
- *
- * /karteikarten gewinnt: die Tabelle hat Suche, XP und "zuletzt gelernt",
- * und sie verträgt viele Sets besser als ein Raster.
- *
- * Diese Datei ist ein 301-artiger Redirect, kein Redirect im Proxy. Eine
- * alte Lesezeichen-Adresse soll funktionieren – nicht als Fehlerseite, und
- * nicht als 404, aus der man nicht herausfindet, wohin es geht.
+ * Davor zeigte der Eintrag auf /karteikarten, und /wortschatz selbst leitete
+ * dorthin weiter – zwei Seiten fuer denselben Inhalt, und der Menueeintrag
+ * versprach eine Wortliste, die es nicht gab. Seit 2.4 ist die Arbeit
+ * getrennt: /karteikarten ist die Set-Uebersicht mit Fortschritt, /wortschatz
+ * die Wortsicht quer durch alle Sets mit Suche. Diese Datei ist ein Server
+ * Component ohne eigene Daten – die Liste holt ihr Inhalt clientseitig ueber
+ * /api/wortschatz, weil die Route den angemeldeten Nutzer braucht.
  */
-export default function WortschatzWeiterleitung() {
-    redirect("/karteikarten");
+export default function WortschatzSeiteRoh() {
+    return <WortschatzSeite />;
 }
