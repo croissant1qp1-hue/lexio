@@ -19,6 +19,26 @@
 -- auch nur noch dieser Person. Eine zweite Person startet bei null. Das ist
 -- kein Fehler, sondern der Punkt: der Lernstand ist jetzt wirklich privat.
 --
+-- STAND JETZT (2026-09-30, bei der Planarbeit geprueft)
+-- ------------------------------------------------------
+-- `eigene` unten ist auf das einzige echte Konto gesetzt:
+--   a47d7318-1686-4a7f-91b9-fbc889c17035  (theo.diesch@gmail.com)
+-- Es gibt weitere auth.users-Zeilen, die sind Wegwerf-Konten aus Tests.
+--
+-- ACHTUNG, ehrlicher Hinweis: die uebernommenen Werte sind nicht mehr da.
+-- public.karten hat die Legacy-Spalalten (stufe, gelernt, treffer, fehler,
+-- faellig_am) weiterhin als Spalte, aber alle 100 Demokarten stehen auf
+-- Stufe 0 ohne Treffer und ohne Fehler. Ein Stand wurde also nie gepflegt,
+-- oder er ist beim Import verlorengegangen. Diese Datei hat deshalb nichts
+-- zu retten – sie schreibt 100 Zeilen mit Stufe 0, die der Runde dann sagen
+-- "nichts gelernt", so wie vorher.
+--
+-- Sie wird trotzdem lauffaehig gehalten: `eigene` ist nicht mehr der
+-- Platzhalter, das Skript bricht also nicht mehr mit "Kein Konto mit dieser
+-- UUID" ab, und wer sie ausfuehrt, bekommt eine Ausgabe statt eines Fehlers.
+-- Wer sie nicht braucht, laesst sie liegen – sie steht nicht in der
+-- STAND-Liste von scripts/db-migrieren.mjs und laeuft nie von selbst.
+--
 -- ANWENDUNG
 -- ---------
 -- Diese Datei enthaelt KEINE psql-Befehle. Ein Aufruf wie \set eigene_uuid
@@ -39,7 +59,9 @@
 do $$
 declare
   -- >>> HIER ERSETZEN <<<  (id aus auth.users, nicht die email)
-  eigene constant uuid := '00000000-0000-0000-0000-000000000000'::uuid;
+  -- 2026-09-30: auf das einzige echte Konto gesetzt (theo.diesch@gmail.com).
+  -- Weitere auth.users-Zeilen sind Wegwerf-Konten aus Tests.
+  eigene constant uuid := 'a47d7318-1686-4a7f-91b9-fbc889c17035'::uuid;
   gefunden boolean;
   gesamt bigint;
   uebernommen bigint;

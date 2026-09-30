@@ -667,6 +667,26 @@ von selbst weg.
 >   Aufruf bricht mit 42501 ab – aber eine Abweichung von der beabsichtigten
 >   Härtung. Steht als Punkt 10 in `OFFENE-PUNKTE.md`.
 >
+> **Teil 4 (`003b`-UUID) erledigt, mit Befund.**
+>
+> `eigene` steht auf dem einzigen echten Konto (`a47d7318-…`, theo.diesch@gmail.com);
+> die übrigen `auth.users`-Zeilen sind Wegwerf-Konten aus Tests. Die Datei bricht
+> damit nicht mehr mit „Kein Konto mit dieser UUID" ab.
+>
+> **Befund: es gibt nichts zu übernehmen.** `public.karten` hat die Legacy-Spalten
+> (`stufe`, `gelernt`, `treffer`, `fehler`, `faellig_am`) weiterhin als Spalte, aber
+> alle 100 Demokarten stehen auf Stufe 0 ohne Treffer und ohne Fehler. Der alte
+> Stand wurde nie gepflegt oder ist beim Import verlorengegangen. 003b würde 100
+> Zeilen mit Stufe 0 schreiben — genau das, was vorher schon da war.
+>
+> Geprüft, nicht behauptet: mit eingetragener UUID läuft die Datei in `BEGIN/ROLLBACK`
+> durch, mit dem alten Platzhalter bricht sie mit der erwarteten Meldung ab.
+> Zeilenzahl in der Datenbank danach unverändert (6 gesamt, 5 davon deine).
+>
+> **Teil 4 ist damit inhaltlich erledigt.** `003b` steht weiterhin nicht in der
+> `STAND`-Liste von `scripts/db-migrieren.mjs` und läuft nie von selbst — richtig so
+> für eine Einmal-Aktion.
+>
 > **SEO gehört zu Phase 4 (Nutzerauftrag). Teil 1 (Basistechnik) erledigt:**
 >
 > - `lib/meta.ts` exportiert `SITE_URL` aus `NEXT_PUBLIC_SITE_URL`, Fallback
