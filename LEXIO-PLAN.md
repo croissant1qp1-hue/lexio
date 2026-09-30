@@ -492,6 +492,13 @@ verspricht — und der Import macht sie erst wertvoll.
 > noch erarbeitet — hier steht nur der Auftrag, dass es mehr als eine
 > unbequeme Weg-Variante gibt.
 
+**Abnahme (Phase 2):** Wortschatz-Sicht abgenommen — Liste, Suche, Set-Links
+und der Wechsel zwischen Wortsicht und Set-Übersicht in beide Richtungen
+(Commit `ea94203`). Der Leerzustand arbeitet wieder (2.1), das Starter-Set
+steht live (2.2), der Textblock-Import ist geprüft (2.3). **Phase 2
+abgeschlossen am 2026-09-30.** Die Merknote zu angenehmeren Eingabe-Varianten
+bleibt als späterer Auftrag offen.
+
 ### Phase 3 — Reichweite und Öffentlichkeit
 
 **3.1 Web-Push.** Service Worker + VAPID-Schlüssel + Permission-Dialog. Der
