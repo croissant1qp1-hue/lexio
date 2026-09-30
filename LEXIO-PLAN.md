@@ -525,18 +525,48 @@ Entweder konfigurierbar oder aus der realen Rundenzahl abgeleitet.
 **3.4 `sets_gelernt` reparieren.** `003:486` zusammen mit dem Upsert
 `003:638-640`.
 
+> **Erledigt.** Migration 014: neue Tabelle `xp_tag_sets` (PK
+> `(user_id, datum, set_id)`), damit ein Tag mehrere Sets zaehlt statt nur
+> das erste. `antwort_verbuchen`/`antwort_rueckgaengig` schreiben hier,
+> beide Views lesen hier, RLS und Grants passend. Live geprueft:
+> `xp_tag_sets=1`, `xp_events=4`, ner-Zaehler bleiben konsistent — laufende
+> Praxis war, dass nur das erste Set des Tages gezählt wurde. Commit
+> `db26965`.
+
 **3.5 PWA.** Kein Service Worker, kein Manifest, alle Fetchs mit
 `cache: "no-store"`. Fürs Lernen im Zug.
+
+> **Erledigt.** Manifest (`app/manifest.ts`), Icons 192/512/maskable aus dem
+> Logo, Service Worker in `public/sw.js` mit Offline-App-Shell
+> (Network-first fuer Navigationen, Cache-first fuer `/_next/static` und
+> Bilder, `/api/*` bleibt bewusst ungecacht). Registrierung beim App-Start
+> (`components/pwa/pwa-registrierung.tsx`). Commit `97e197f`.
 
 **3.6 Rate-Limiting.** Es gibt **keines**, weder für Anmeldung noch für die
 API. Die Anmeldeseite erkennt Supabases „rate limit"-Fehler und zeigt sie an
 (`anmelden-seite.tsx:126`), erzeugt wird aber keine Begrenzung. Für eine
 öffentliche Seite Pflicht.
 
+> **Erledigt.** `proxy.ts` (Next 16 nennt Middleware `proxy`): In-Memory-
+> Sliding-Window je IP und Gruppe — `auth` 10/min, `gesundheit` 60/min,
+> Schreiben 30/min, Lesen 120/min; 429 mit `Retry-After`. Live gemessen:
+> 120-mal 200er-Reihe, dann 429er. Anmelde-Cooldown clientseitig ergaenzend
+> (5 Fehlversuche, 30 s Sperre). Commit `e652235`.
+
 **3.7 Security-Header.** `next.config.ts` ist ~30 Zeilen und enthält nur die
 Bild-Quellen für die OAuth-Logos. Kein `poweredByHeader: false`, keine CSP,
 kein HSTS. `app/layout.tsx:138` injiziert das Theme-Skript per
 `dangerouslySetInnerHTML` — genau der Fall für eine CSPNonce.
+
+> **Erledigt.** `next.config.ts`: `poweredByHeader: false` plus statische
+> Header (nosniff, Referrer-Policy, X-Frame-Options, Permissions-Policy,
+> HSTS). `proxy.ts` setzt pro Anfrage eine CSP mit frischem Nonce
+> (`script-src 'self' 'nonce-…' 'strict-dynamic'`), `connect-src` erlaubt
+> den Supabase-Ursprung, `style-src` bleibt bewusst `'unsafe-inline'` (die
+> App setzt dutzende Inline-Style-Attribute). `app/layout.tsx` reicht den
+> Nonce an das Theme-Skript. Live geprueft: Nonce steht in jedem
+> Script-Tag, `/api/*`, `/_next/static`, `sw.js`, Manifest und Bilder
+> bekommen keine CSP (SW-Antwort: bewusst nicht). Commit folgt.
 
 **3.8 `/api/gesundheit` absichern.** Der Endpunkt ist öffentlich und verrät,
 ob der Service-Role-Key gesetzt ist (`OFFENE-PUNKTE.md:229-236`).

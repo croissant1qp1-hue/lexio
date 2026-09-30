@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Caveat, Fraunces, IBM_Plex_Mono, Inter } from "next/font/google";
 import { DesignAnbieter } from "@/components/design/design-anbieter";
 // DESIGN_SCRIPT kommt bewusst aus lib/design und nicht aus der
@@ -118,7 +119,14 @@ export const viewport: Viewport = {
  * app/(app)/layout.tsx – so bekommt /anmelden keine Seitenleiste, was ein
  * Anmeldeformular auf 210px Breite absurd aussehen lassen wuerde.
  */
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+    // Der Nonce kommt aus dem Proxy (proxy.ts, Phase 3.7). Dort wird er pro
+    // Anfrage frisch erzeugt und als `x-nonce`-Request-Header an Next
+    // gereicht. Ohne ihn wuerde die Content-Security-Policy das
+    // Inline-Skript unten blockieren – deshalb muss diese Stelle den Wert
+    // kennen und ihn an das Script-Tag weiterreichen.
+    const nonce = (await headers()).get("x-nonce") ?? undefined;
+
     return (
         <html
             lang="de"
@@ -135,7 +143,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   klassisches Script statt useEffect – ein Effekt waere erst
                   nach dem Paint fertig.
                 */}
-                <script dangerouslySetInnerHTML={{ __html: DESIGN_SCRIPT }} />
+                <script nonce={nonce} dangerouslySetInnerHTML={{ __html: DESIGN_SCRIPT }} />
             </head>
             <body>
                 <DesignAnbieter>{children}</DesignAnbieter>
