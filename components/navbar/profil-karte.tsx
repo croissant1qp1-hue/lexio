@@ -132,7 +132,11 @@ export default function ProfilKarte({ daten }: { daten: ProfilDaten }) {
 
             {/* Balken: der Wert kommt aus derselben Rechnung wie die Zahl
                 darüber. Zwei unabhaengige Werte wären irgendwann
-                widerspruechlich. */}
+                widerspruechlich.
+                Die Kerben bei 50 % und 80 % sind die Meilensteine aus Phase
+                3.2 – der Balken zeigt so, dass der Weg ins nächste Level
+                Stufen hat, nicht nur ein Ziel. Die 100-%-Marke ist das
+                Balkenende selbst. */}
             <div
                 className={styles.balken}
                 role="progressbar"
@@ -142,6 +146,8 @@ export default function ProfilKarte({ daten }: { daten: ProfilDaten }) {
                 aria-label={`Fortschritt zu Level ${info.level + 1}`}
             >
                 <div className={styles.fuellung} style={{ width: `${info.prozent}%` }} />
+                <span className={styles.kerbe} style={{ left: "50%" }} aria-hidden="true" />
+                <span className={styles.kerbe} style={{ left: "80%" }} aria-hidden="true" />
             </div>
             <div className={styles.fuss}>
                 <span className={styles.prozent}>{info.prozent} %</span>

@@ -135,6 +135,7 @@
 /* ---------------------------------------------------------------- Balken */
 
 .balken {
+    position: relative;
     height: 10px;
     border-radius: 999px;
     background: var(--bg-elevated-2);
@@ -146,6 +147,18 @@
     border-radius: inherit;
     background: var(--terracotta);
     transition: width 0.4s ease;
+}
+
+/* Meilensteine aus Phase 3.2: 50 % und 80 % des Weges. Die Kerbe hat die
+   Farbe der Schiene, damit sie auch ueber der Fuellung als Luecke bleibt. */
+.kerbe {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    transform: translateX(-50%);
+    background: var(--bg-elevated-2);
+    border-radius: 999px;
 }
 
 .fuss {

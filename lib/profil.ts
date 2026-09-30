@@ -8,15 +8,44 @@
  * Bewusst eine reine Funktion ohne React und ohne Datenbank: sie ist die
  * einzige Stelle, die definiert, was ein Level ist, und damit die einzige,
  * die man aendern muss, wenn sich die Formel aendert.
+ *
+ * Seit Phase 3.2 ist Level nicht mehr flach (1500 XP je Stufe), sondern
+ * eine Kurve: jeder Aufstieg kostet zehn Prozent mehr als der letzte.
+ * Konstante 1500 ueber alle Ebenen hiess 187 perfekte Antworten je Level,
+ * egal ob man gerade anfaengt oder seit einem Jahr lernt. Mit zehn Prozent
+ * Wachstum fangen niedrige Level leicht an, ab 20 ist gut spuerbar, dass es
+ * weitergeht. Basis 1000 ist auf acht XP je Karte eine Runde mit ~125
+ * perfekten Antworten fuer den ersten Aufstieg – hoch genug, dass Level 1
+ * nicht schon nach einer Sitzung vorbei ist.
  */
 
-/** XP, die man je Level braucht. */
-export const XP_PRO_LEVEL = 1500;
+/**
+ * XP fuer den Aufstieg aus `zuLevel` heraus, gerundet auf volle Zehn.
+ *
+ * Der Faktor ist absichtlich konservativ: Level 1 kostet mit 1000 etwas
+ * weniger als die alten 1500, aber die Kurve waechst gleichmaessig statt zu
+ * springen. Zehn Prozent lassen sich an den Zahlen schoen erklaeren
+ * („Level 12 kostet 3130 XP"), ohne dass die Anzeige einzelne Centbetraege
+ * zeigt.
+ */
+export function xpFuerAufstieg(zuLevel: number): number {
+    const n = Math.max(1, Math.floor(zuLevel));
+    return Math.round((1000 * Math.pow(1.1, n - 1)) / 10) * 10;
+}
+
+/** Sicherer Deckel, damit die Schleife nie ewig laeuft. */
+const MAX_LEVEL = 120;
 
 /** Level 1 beginnt bei 0 XP – wer gerade erst angefangen hat, ist Level 1. */
 export function levelAusXp(xp: number): number {
     if (!Number.isFinite(xp) || xp <= 0) return 1;
-    return Math.floor(xp / XP_PRO_LEVEL) + 1;
+    let verbleib = Math.floor(xp);
+    for (let level = 1; level < MAX_LEVEL; level += 1) {
+        const kosten = xpFuerAufstieg(level);
+        if (verbleib < kosten) return level;
+        verbleib -= kosten;
+    }
+    return MAX_LEVEL;
 }
 
 export type LevelInfo = {
@@ -33,14 +62,21 @@ export type LevelInfo = {
 export function levelInfo(xp: number): LevelInfo {
     const sicher = Number.isFinite(xp) && xp > 0 ? Math.floor(xp) : 0;
     const level = levelAusXp(sicher);
-    const xpImLevel = sicher % XP_PRO_LEVEL;
+
+    let davor = 0;
+    for (let l = 1; l < level; l += 1) davor += xpFuerAufstieg(l);
+
+    const xpImLevel = sicher - davor;
+    const schwellenXp = xpFuerAufstieg(level);
 
     return {
         xp: sicher,
         level,
         xpImLevel,
-        prozent: Math.round((xpImLevel / XP_PRO_LEVEL) * 100),
-        bisNaechstes: XP_PRO_LEVEL - xpImLevel,
+        // Nie 100 gefuellt, solange noch XP fehlen: 999 von 1000 XP wuerde
+        // sonst schon den vollen Balken zeigen. 100 gibt es nur am Deckel.
+        prozent: Math.min(99, Math.floor((xpImLevel / schwellenXp) * 100)),
+        bisNaechstes: Math.max(0, schwellenXp - xpImLevel),
     };
 }
 

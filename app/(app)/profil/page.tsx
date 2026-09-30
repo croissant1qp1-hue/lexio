@@ -133,7 +133,8 @@ export default async function ProfilSeite() {
                     </div>
                 </div>
 
-                {/* Balken mit derselben Rechnung wie die Zahl daneben. */}
+                {/* Balken mit derselben Rechnung wie die Zahl daneben. Die Kerben bei
+                    50 % und 80 % sind die Meilensteine aus Phase 3.2. */}
                 <div
                     className={styles.balken}
                     role="progressbar"
@@ -143,6 +144,8 @@ export default async function ProfilSeite() {
                     aria-label={`Fortschritt zu Level ${info.level + 1}`}
                 >
                     <div className={styles.fuellung} style={{ width: `${info.prozent}%` }} />
+                    <span className={styles.kerbe} style={{ left: "50%" }} aria-hidden="true" />
+                    <span className={styles.kerbe} style={{ left: "80%" }} aria-hidden="true" />
                 </div>
                 <div className={styles.fuss}>
                     <span className={styles.levelText}>

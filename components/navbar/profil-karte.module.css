@@ -118,6 +118,7 @@
 }
 
 .balken {
+    position: relative;
     height: 8px;
     background-color: #d7cbb2;
     border-radius: 999px;
@@ -129,6 +130,18 @@
     background-color: var(--sage);
     border-radius: 999px;
     transition: width 400ms ease;
+}
+
+/* Meilensteine aus Phase 3.2: 50 % und 80 % des Weges. Die Kerbe hat die
+   Farbe der Schiene, damit sie auch ueber der Fuellung als Luecke bleibt. */
+.kerbe {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    transform: translateX(-50%);
+    background-color: #d7cbb2;
+    border-radius: 999px;
 }
 
 .fuss {
