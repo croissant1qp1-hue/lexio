@@ -1,6 +1,7 @@
 import "@/components/navbar/side-bar.css";
 import "@/app/styles/main-body.css";
 import Navbar from "@/components/navbar/navbar";
+import PwaRegistrierung from "@/components/pwa/pwa-registrierung";
 import { SetupHinweis } from "@/components/gesundheit/setup-hinweis";
 
 /**
@@ -16,6 +17,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <div className="container">
             <Navbar />
             <main className="main-body">
+                <PwaRegistrierung />
                 {/*
                  * Nur sichtbar, wenn die Datenbank fehlt. Dann ist die App
                  * nicht benutzbar, und eine leere Liste oder ein 503toast
