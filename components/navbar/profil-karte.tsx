@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { levelInfo, xpFormatieren } from "@/lib/profil";
+import { IconFlamme } from "@/components/icone";
 import styles from "./profil-karte.module.css";
 
 export type ProfilDaten = {
@@ -175,7 +176,12 @@ export default function ProfilKarte({ daten }: { daten: ProfilDaten }) {
 
                     <div className={styles.werte}>
                         <div className={styles.wert}>
-                            <span className={styles.wertZahl}>{daten.streak}</span>
+                            <span className={styles.wertZahl}>
+                                <span className={styles.serieZeichen}>
+                                    <IconFlamme title="Lernserie" />
+                                </span>
+                                {daten.streak}
+                            </span>
                             <span className={styles.wertLabel}>
                                 {daten.streak === 1 ? "Tag Serie" : "Tage Serie"}
                             </span>

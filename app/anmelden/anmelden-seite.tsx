@@ -10,6 +10,7 @@ import { gemerkteEmail, liesStand, merkeAnmeldung } from "@/lib/geraet";
 import { MIN_PASSWORT, PASSWORT_FEHLER } from "@/lib/passwort";
 import { setzeSessionDauer } from "@/lib/supabase/session-dauer";
 import { SetupHinweis } from "@/components/gesundheit/setup-hinweis";
+import { IconEnvelope } from "@/components/icone";
 import { useGesundheit } from "@/components/gesundheit/use-gesundheit";
 import styles from "./anmelden.module.css";
 
@@ -439,7 +440,9 @@ export default function AnmeldenSeite({ weiter, weiterleitungsFehler }: Anmelden
         return (
             <div className={styles.seite}>
                 <div className={styles.karte}>
-                    <span className={styles.zeichen} aria-hidden="true">✉</span>
+                    <span className={styles.zeichen} aria-hidden="true">
+                        <IconEnvelope />
+                    </span>
                     <h1 className={styles.titelFastFertig}>Fast geschafft</h1>
                     <p className={styles.text}>
                         Wir haben eine E-Mail an <strong>{email.trim().toLowerCase()}</strong> geschickt.

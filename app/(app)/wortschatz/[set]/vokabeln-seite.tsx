@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { holeJson, ApiFehler } from "@/lib/api-client";
+import { IconHaken } from "@/components/icone";
 import styles from "./wortschatz.module.css";
 
 type Karte = {
@@ -168,7 +169,11 @@ export default function VokabelnSeite({ setSlug }: { setSlug: string }) {
               <div key={k.id} className={styles.vokabelZeile}>
                 <dt className={styles.vokabelBegriff}>
                   {k.frage}
-                  {k.gelernt ? <span className={styles.gelerntHaken}> ✓</span> : null}
+                  {k.gelernt ? (
+                    <span className={styles.gelerntHaken}>
+                      <IconHaken title="gelernt" />
+                    </span>
+                  ) : null}
                 </dt>
                 <dd className={styles.vokabelAntwort}>
                   {k.antwort}

@@ -225,11 +225,24 @@
     min-width: 0;
 }
 
+/* Die Zahl bleibt Monospace. Die Flamme davor ist ein SVG und damit
+   1em gross, was die Zeile sonst auf das Vierfache der Zahl aufblaeht.
+   .serieZeichen fixiert sie auf dieselbe Hoehe wie die Ziffern und richtet
+   sie unten aus – eine Flamme, die neben einer 18 schwebt, sieht nach
+   Tippfehler aus. */
 .wertZahl {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
     font-family: var(--mono);
     font-size: 0.9rem;
     font-weight: 700;
     color: var(--dark-brown-text);
+}
+
+.serieZeichen {
+    font-size: 0.85rem;
+    color: var(--terracotta);
 }
 
 .wertLabel {

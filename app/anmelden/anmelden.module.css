@@ -531,9 +531,14 @@
     color: var(--text-primary);
 }
 
+/* Siehe .endeZeichen im Lernmodul: das SVG misst sich an 1em, also
+   entscheidet die Schriftgroesse hier die Bildgroesse. */
 .zeichen {
-    font-size: 2.6rem;
+    display: flex;
+    justify-content: center;
+    font-size: 3rem;
     line-height: 1;
+    color: var(--gold);
 }
 
 /* ------------------------------------------------------------------ Telefon */

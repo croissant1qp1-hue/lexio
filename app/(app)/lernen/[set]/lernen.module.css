@@ -836,9 +836,16 @@
     padding: 2rem 0;
 }
 
+/* Das Icon auf dem Endbildschirm. Die Schriftgroesse ist weg: das SVG
+   misst sich an 1em seiner eigenen Schrift, also steuert hier die Groesse
+   und nicht mehr die Schrift des Elternteils. Das haelt das Bild beim
+   Umdrehen des Handys auf demselben optischen Mass. */
 .endeZeichen {
-    font-size: 3.4rem;
+    display: flex;
+    justify-content: center;
+    font-size: 4rem;
     line-height: 1;
+    color: var(--gold);
 }
 
 .endeTitel {

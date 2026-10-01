@@ -6,6 +6,7 @@ import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprache
 import { holeJson, ApiFehler } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import type { ProfilDaten } from "@/components/navbar/profil-karte";
+import { IconLoeschen } from "@/components/icone";
 import styles from "./uebersicht.module.css";
 
 type SetZeile = {
@@ -334,7 +335,7 @@ export default function Uebersicht() {
             onClick={(e) => e.stopPropagation()}
           >
             <span className={styles.loeschZeichen} aria-hidden="true">
-              🗑️
+              <IconLoeschen />
             </span>
             <h2 className={styles.loeschTitel}>Set wirklich löschen?</h2>
             <p className={styles.loeschText}>

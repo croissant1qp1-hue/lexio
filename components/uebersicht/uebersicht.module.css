@@ -554,9 +554,15 @@
     gap: 0.8rem;
 }
 
+/* Siehe .endeZeichen im Lernmodul: das SVG misst sich an 1em, also
+   entscheidet die Schriftgroesse die Bildgroesse. Terrakotta, weil das
+   Zeichen zum Loeschen gehoert und nicht zum Gold der Erfolgsmeldungen. */
 .loeschZeichen {
-    font-size: 2.6rem;
+    display: flex;
+    flex-shrink: 0;
+    font-size: 3rem;
     line-height: 1;
+    color: var(--terracotta);
 }
 
 .loeschTitel {

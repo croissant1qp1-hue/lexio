@@ -77,17 +77,34 @@
 
 /* Das Haekchen der getroffenen Auswahl: rechts in der Kachel, ein eigener
    Zustand statt einer Farbe allein – fuer Menschen und fuer Screenshot-Tests
-   gleichermassen klar. */
+   gleichermassen klar.
+
+   Als Maske statt als Textzeichen, damit es dieselbe Kontur hat wie
+   <IconHaken /> und nicht wie eine eingebettete Schrift dasteht.
+
+   Die URL steht hier und nicht in global.css, weil CSS-Module fremde
+   Klassen nicht zusammenfuehren koennen (@value global gibt es im Projekt
+   nicht). Sie ist dieselbe Kurve wie im Icon und MUSS dort mitgeaendert
+   werden: M5.25 12.5 -> 9.75 17 -> 18.75 7. Laenger als 1.6, weil eine
+   Maske als Form ohne Fuellung wirkt und sonst duenner wirkt als die
+   Kontur daneben. */
 .spracheAktiv::after {
-    content: "✓";
+    content: "";
     position: absolute;
     right: 0.8rem;
     top: 50%;
     transform: translateY(-50%);
-    font-family: var(--font-sans);
-    font-size: 1rem;
-    font-weight: 800;
-    color: var(--gold);
+    width: 1.05rem;
+    height: 1.05rem;
+    background-color: var(--gold);
+    -webkit-mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.25 12.5l4.5 4.5L18.75 7'/%3E%3C/svg%3E");
+    mask-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5.25 12.5l4.5 4.5L18.75 7'/%3E%3C/svg%3E");
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask-position: center;
+    -webkit-mask-size: contain;
+    mask-size: contain;
 }
 
 .sprache:hover {

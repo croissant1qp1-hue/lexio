@@ -3,6 +3,10 @@
  *
  * Aufruf: node scripts/audit-konto.mjs
  *        node scripts/audit-konto.mjs --loeschen <uuid>
+ *
+ * Schreibt die Session nach stdout. Mit AUDIT_KONTO_DATEI=<pfad> kommt sie
+ * zusaetzlich in eine Datei (nicht ueber stdout, damit man den Pfad nicht
+ * umleiten muss und trotzdem die Rueckmeldung auf dem Bildschirm sieht).
  * Läuft nur für Phase 5 (Responsive-Audit). Das Konto wird nach dem
  * Audit wieder gelöscht (--loeschen <uuid>).
  *
@@ -17,6 +21,7 @@
  * liest Cookies.
  */
 import { createClient } from "@supabase/supabase-js";
+import { writeFileSync } from "node:fs";
 
 const praefix = "kiro.audit.";
 const email = `${praefix}${Date.now()}@lexio.test`;
@@ -117,18 +122,57 @@ if (!data.session) {
 }
 
 const cookieName = `sb-${new URL(url).hostname.split(".")[0]}-auth-token`;
+const expiresAt = Math.floor(Date.now() / 1000) + data.session.expires_in;
 const cookieValue = encodeURIComponent(JSON.stringify({
   access_token: data.session.access_token,
   refresh_token: data.session.refresh_token,
-  expires_at: Math.floor(Date.now() / 1000) + data.session.expires_in,
+  expires_at: expiresAt,
   token_type: data.session.token_type,
   user: data.user,
 }));
 
-console.log(JSON.stringify({
+const ergebnis = {
   email,
   passwort,
   userId: data.user.id,
   cookieName,
   cookieValue,
-}, null, 2));
+};
+
+/*
+ * Die Datei schreiben, nicht nur auf stdout.
+ *
+ * Vorher stand hier nur ein console.log. Das Skript wird seit der
+ * Responsive-Pruefung mit `> /tmp/konto.json` aufgerufen, und das war
+ * einen Nachmittag lang die Ursache einer Fehlersuche, die nichts mit dem
+ * Code zu tun hatte: die Datei enthielt eine Session, die zum Zeitpunkt des
+ * Aufrufs schon eine Stunde alt war. Jede Anfrage damit bekam 503
+ * ("Anmeldestatus gerade nicht abfragbar"), der Server versuchte den
+ * abgelaufenen Token zu erneuern, und der Refresh-Token war durch den
+ * allerersten Aufruf verbraucht.
+ *
+ * Ein Audit, das eine veraltete Session verwendet, prueft nicht die App,
+ * sondern den Fehlerpfad. Deshalb wird hier beides getan: die Datei
+ * enthaelt dieselben Werte wie stdout, und die Ablaufzeit steht als
+ * `expiresAt` mit drin, damit man beim naechsten Lesen sieht, ob sie
+ * noch gilt.
+ */
+const ausgabe = {
+  ...ergebnis,
+  expiresAt: new Date(expiresAt * 1000).toISOString(),
+};
+
+const dateiZiel = process.env.AUDIT_KONTO_DATEI;
+if (dateiZiel) {
+  // `mode: "wx"` nicht, das würde beim zweiten Lauf schreitend fehlschlagen –
+  // das Skript soll ohne Aufwand mehrfach laufen können.
+  writeFileSync(dateiZiel, JSON.stringify(ausgabe, null, 2) + "\n", {
+    encoding: "utf8",
+    mode: 0o600,
+  });
+  console.error(`Session geschrieben: ${dateiZiel} (gültig bis ${ausgabe.expiresAt})`);
+}
+
+// Auf stdout bleibt es: die Werte werden von weiteren Skripts gelesen, und
+// `> datei` funktioniert damit weiter.
+console.log(JSON.stringify(ausgabe, null, 2));

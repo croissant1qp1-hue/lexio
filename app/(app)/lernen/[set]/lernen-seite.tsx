@@ -10,6 +10,7 @@ import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import { spreche, stimmen, stoppe, tonVerfuegbar } from "@/lib/sprachausgabe";
 import { LAUTSTÄRKE_VOLUMEN, liesTon, TON_SPEICHER } from "@/lib/ton";
+import { IconLeererStapel, IconSterne, IconTasse, IconZielfahne } from "@/components/icone";
 import styles from "./lernen.module.css";
 
 type Karte = {
@@ -721,7 +722,7 @@ if (karten.length === 0) {
                 <div className={styles.seite}>
                     <div className={styles.ende}>
                         <span className={styles.endeZeichen} aria-hidden="true">
-                            ☕
+                            <IconTasse />
                         </span>
                         <h2 className={styles.endeTitel}>Alles gelernt</h2>
                         {/* Leerer Stapel. Im normalen Modus kann er lügen: fällig ist nichts,
@@ -805,10 +806,10 @@ if (karten.length === 0) {
         return (
             <div className={styles.seite}>
                 <div className={styles.ende}>
-                    <span className={styles.endeZeichen} aria-hidden="true">
-                        📝
-                    </span>
-                    <h2 className={styles.endeTitel}>Noch keine Vokabeln</h2>
+<span className={styles.endeZeichen} aria-hidden="true">
+                            <IconLeererStapel />
+                        </span>
+                        <h2 className={styles.endeTitel}>Noch keine Vokabeln</h2>
                     <p className={styles.endeText}>
                         {set?.name} ist angelegt, enthält aber noch keine Wortpaare. Füge Vokabeln
                         hinzu, dann kannst du mit dem Lernen anfangen.
@@ -839,9 +840,9 @@ if (karten.length === 0) {
         return (
             <div className={styles.seite}>
                 <div className={styles.ende}>
-                    <span className={styles.endeZeichen} aria-hidden="true">
-                        {uebrig > 0 ? "🎉" : "🏁"}
-                    </span>
+<span className={styles.endeZeichen} aria-hidden="true">
+                            {uebrig > 0 ? <IconSterne /> : <IconZielfahne />}
+                        </span>
                     <h2 className={styles.endeTitel}>
                         {uebrig > 0
                             ? "Runde geschafft"

@@ -136,9 +136,14 @@
    Haken steht deshalb als Zeichen im Text – und faellt auch dann auf, wenn
    Farben gar nicht unterschieden werden. */
 .gelerntHaken {
-    margin-left: 0.35rem;
-    color: var(--sage-dark, var(--text-muted));
-    font-weight: 700;
+    display: inline-flex;
+    /* Hochsetzen statt Mitte: der Haken sitzt optisch neben der
+       Grossbuchstaben-Linie, nicht auf der geometrischen Mitte des
+       Zeichentraegers. */
+    vertical-align: 0.18em;
+    margin-left: 0.3rem;
+    color: var(--sage);
+    font-size: 0.95em;
 }
 
 .vokabelAntwort {
