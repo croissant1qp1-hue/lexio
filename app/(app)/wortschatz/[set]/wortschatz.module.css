@@ -178,6 +178,179 @@
     color: var(--text-secondary);
 }
 
+/* Die Meldung einer gescheiterten Aktion.
+ *
+ * Anders als .hinweisBox nicht hinterlegt: hier hat gerade etwas nicht
+ * geklappt, und ein Kasten, der aussieht wie eine Info, verwechselt sich mit
+ * einem. Der Fehler braucht Abstand zu den Zeilen, damit er beim Scrollen
+ * auffaellt und nicht mit dem Beispielsatz darunter verschmilzt. */
+.fehler {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--terracotta);
+    border-radius: var(--radius);
+    background: var(--bg-elevated-2);
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--terracotta);
+}
+
+/* Aktionen an einer Vokabelzeile.
+ *
+ * `display: flex` und nicht `inline-flex`: die Knoepfe sollen UNTER dem
+ * Begriff beginnen, nicht neben ihm weiterlaufen. Mit `inline-flex` stehen sie
+ * im Fluss des Textes und rutschen so weit nach rechts, wie der Begriff lang
+ * ist – bei "Naturwissenschaften" also aus der Zeile hinaus.
+ *
+ * `fit-content` verhindert, dass die Knopfzeile die volle Breite nimmt und
+ * dadurch wie ein Block aussieht; `flex-wrap` bricht auf dem Handy um, wenn
+ * zwei Knoepfe mit Text nicht nebeneinander passen. */
+.zeilenAktionen {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+    width: fit-content;
+    max-width: 100%;
+    margin-top: 0.45rem;
+}
+
+/* 44px wie ueberall, aber ohne Rahmen und Fuellung.
+ *
+ * Ein Rahmen um jeden Vorgang wuerde die Liste zu einer Formularseite machen:
+ * 40 Vokabeln, 80 Rahmen. Diese Knoepfe sind Werkzeuge und gehoeren zur
+ * Zeile, nicht zum Set. */
+.kleinKnopf {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    padding: 0.3rem 0.5rem;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Ohne sichtbaren Rahmen ist der Knopf auf weissem Grund fast unsichtbar.
+ * Der Hover macht ihn sichtbar, der Tastaturfokus sowieso – und wer nur mit
+ * dem Finger arbeitet, sieht ihn nach dem ersten Antippen. */
+.kleinKnopf:hover:not(:disabled) {
+    color: var(--text-primary);
+    background: var(--bg-elevated-2);
+    border-color: var(--line);
+}
+
+.kleinKnopf:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.kleinKnopf:focus-visible,
+.kleinHaupt:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+}
+
+/* Das Loeschen in Terrakotta – auch als Text, nicht nur als Muelleimer.
+ * Es soll beim Ueberfahren auffallen, nicht erst beim Nachdenken darueber. */
+.kleinGefahr {
+    color: var(--terracotta);
+}
+
+.kleinGefahr:hover:not(:disabled) {
+    color: var(--terracotta);
+    border-color: var(--terracotta);
+    background: transparent;
+}
+
+/* Das Speichern im Bearbeitungszustand ist der Hauptweg und bekommt
+ * darum eine Fuellung. Alle anderen Knoepfe dieser Seite bleiben ruhig. */
+.kleinHaupt {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.3rem 0.9rem;
+    border: 1px solid var(--text-primary);
+    border-radius: 8px;
+    background: var(--text-primary);
+    color: var(--background);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kleinHaupt:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* Felder im Bearbeitungszustand. */
+.feldGanz {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.6rem;
+}
+
+.feldName {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.feld {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    /* `resize: vertical` fehlt absichtlich: ein aufgezogenes Feld in einer
+       Liste sprengt die Zeile und schiebt alles darunter aus dem Bild. Wer
+       einen langen Satz eintippt, bekommt die hoehere Zeilenzahl hier. */
+    resize: none;
+}
+
+.feld:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 1px;
+}
+
+/* Die Loeschfrage in der Zeile.
+ *
+ * Kein Kasten, kein Dialog: der Begriff steht im Text, und darunter stehen
+ * zwei Knoepfe. Wer eine Vokabel loeschen will, ist an dieser Stelle; wer
+ * nicht, liest den Satz und scrollt weiter. */
+.loeschFrage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.loeschText {
+    font-size: 0.9rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Die Knoepfe der Loeschfrage sitzen direkt neben dem Satz und nicht in
+ * einer eigenen Zeile darunter – das `margin-top` waere hier ein Abstand ohne
+ * Gegenstand. */
+.loeschFrage > .zeilenAktionen {
+    margin-top: 0;
+}
+
 .aktionen {
     display: flex;
     flex-wrap: wrap;

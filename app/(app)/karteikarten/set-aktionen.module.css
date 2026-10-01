@@ -80,6 +80,7 @@
 .haupt,
 .gefahr,
 .gefaer,
+.neutral,
 .abbrechen {
     min-height: 44px;
     padding: 0.65rem 1rem;
@@ -115,9 +116,40 @@
     color: var(--text-secondary);
 }
 
+/* Zwischen "Hauptweg" und "Abbruch".
+ *
+ * Das Duplizieren gehoert zu den guten Wegen und ist trotzdem nicht die
+ * Hauptaktion des Dialogs – beim eigenen Set ist das Bearbeiten. Wer es mit
+ * Umkehrfarbe markiert, konkurriert es mit dem Bearbeiten um die Aufmerksamkeit
+ * und sieht aus wie eine Loeschung mit umgekehrtem Vorzeichen.
+ *
+ * Fuer das Demo-Set ist es wiederum der einzige Weg, und dort steht es allein
+ * im Dialog. Ein Knopf, der allein steht, muss nicht lauter werden, um
+ * aufgefallen zu sein. */
+.neutral {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--text-primary);
+}
+
+/* Das Icon wächst nicht mit der Schrift, es wird von ihr gesteuert. */
+.neutral > svg {
+    font-size: 1.1em;
+    flex: none;
+}
+
+.neutral:hover {
+    border-color: var(--gold);
+}
+
 .haupt:disabled,
 .gefahr:disabled,
 .gefaer:disabled,
+.neutral:disabled,
 .abbrechen:disabled,
 .knopf:disabled {
     opacity: 0.55;
@@ -153,6 +185,7 @@
 .haupt:focus-visible,
 .gefahr:focus-visible,
 .gefaer:focus-visible,
+.neutral:focus-visible,
 .abbrechen:focus-visible,
 .dialog:focus-visible {
     outline: 2px solid var(--gold);
@@ -164,6 +197,21 @@
     font-size: 0.95rem;
     line-height: 1.5;
     color: var(--text-secondary);
+}
+
+.warnung strong {
+    color: var(--text-primary);
+}
+
+/* Der zweite Satz im Dialog: klaert, was beim Kopieren passiert, und bleibt
+ * deshalb leiser als die Zeile darueber. Zu gross gesetzt konkurriert er mit
+ * dem Namen, um den es geht. */
+.hinweis {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    opacity: 0.85;
 }
 
 .fehler {

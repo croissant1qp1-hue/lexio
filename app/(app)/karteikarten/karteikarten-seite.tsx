@@ -307,19 +307,28 @@ export default function KarteikartenSeite() {
                     )}
                   </span>
                     {/*
-                     * Nur fuer eigene Sets. Bei den vorgefertigten Sets waere
-                     * der Knopf eine Sackgasse: die Route gibt 403 zurueck,
-                     * und der Nutzer haette vorher raten muessen, warum.
+                     * Auch fuer die vorgefertigten Sets, aber mit weniger
+                     * Rechten: dort gibt es nur das Duplizieren.
+                     *
+                     * Vorher stand der Knopf ausschliesslich bei eigenen Sets,
+                     * weil er Bearbeiten und Loeschen anbot und beides bei
+                     * einem Demo-Set 403 gibt. Damit war die haeufigste Aufgabe
+                     * unsichtbar: jemand sieht "Italienisch (Grundlagen)" und
+                     * will 12 Woerter streichen oder eigene ergaenzen. Der Weg
+                     * dorthin war: 40 Karten von Hand eintippen.
+                     *
+                     * Der Knopf erscheint deshalb immer. `eigen` entscheidet,
+                     * was der Dialog anbietet – nichts wird angeboten, was die
+                     * Route verweigern wuerde.
                      */}
-                    {set.eigen && (
-                      <SetAktionen
-                        slug={set.id}
-                        name={set.name}
-                        sprache={set.sprache}
-                        kartenAnzahl={set.kartenGesamt}
-                        onGeaendert={neuLaden}
-                      />
-                    )}
+                    <SetAktionen
+                      slug={set.id}
+                      name={set.name}
+                      sprache={set.sprache}
+                      kartenAnzahl={set.kartenGesamt}
+                      eigen={set.eigen ?? false}
+                      onGeaendert={neuLaden}
+                    />
                   </th>
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGelernt}</td>
                   <td className={`${styles.rechts} ${styles.zahl}`}>{set.kartenGesamt}</td>

@@ -135,11 +135,18 @@ function pruefePaar(
  * die Position im Set ist das, woran man sich gewöhnt hat.
  */
 export async function GET(request: Request) {
-  // Nur `supabase` und die Antwort, nicht `user`: beim Lesen gibt es keine
-  // Besitzpruefung (siehe unten). `mitUserOder401` liefert beides, aber ein
-  // ungenutzter Schreibzugriff ist eine Warnung, die irgendwann niemand mehr
-  // liest – und die dann einen echten Fehler verdeckt.
-  const { supabase, antwort: nichtAngemeldet } = await mitUserOder401();
+  /*
+   * Hier wird `user` doch gebraucht, auch wenn nicht geschrieben wird: die
+   * Antwort sagt, ob das Set diesem Konto gehoert. Vorher stand hier nur
+   * `supabase`, weil beim Lesen keine Besitzpruefung noetig war – das stimmt
+   * fuer die Sichtbarkeit, nicht fuer die Oberflaeche.
+   *
+   * Ohne dieses Feld muesste die Vokabelansicht Bearbeiten und Loeschen auch
+   * bei einem Demo-Set anzeigen und den 403 der Route aushalten. Dann
+   * entscheidet sich beim Klick, ob der Knopf taugt. Das ist genau der
+   * Fehler, der beim Set-Dialog schon einmal drin war.
+   */
+  const { supabase, user, antwort: nichtAngemeldet } = await mitUserOder401();
   if (nichtAngemeldet) return nichtAngemeldet;
 
   const setSlug = new URL(request.url).searchParams.get("setSlug")?.trim() ?? "";
@@ -192,7 +199,28 @@ export async function GET(request: Request) {
         "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler)",
     )
     .eq("set_id", set.id)
+    /*
+     * ZWEI Sortierschluessel, nicht einer. `created_at` allein ist hier eine
+     * Lotterie, und das war nicht immer so:
+     *
+     * Bei einem Set, das ueber /api/karten mit 40 Paaren auf einmal entsteht,
+     * bekommen alle Karten in derselben INSERT-Anweisung denselben
+     * `now()`. Gemessen am Demovorsatz: 100 Karten, EIN Zeitstempel
+     * (2026-09-29T16:55:36.997968). Bei gleichem Wert entscheidet Postgres die
+     * Reihenfolge nach der physischen Lage der Zeilen – was meistens der
+     * Einfuegereihenfolge entspricht und nicht garantiert ist.
+     *
+     * Sichtbar wurde das beim Duplizieren: nach einem Bearbeiten lieferte
+     * derselbe Aufruf einmal "der" an erster Stelle und einmal "sein". Fuer den
+     * Nutzer heisst das, dass er eine Zeile anzeigt und eine andere bearbeitet.
+     *
+     * `id` als zweiter Schluessel macht die Sache eindeutig, ohne dass sich
+     * etwas aendert, wenn die Zeitstempel verschieden sind. Deshalb wird es
+     * hier und in /api/lernen genauso gemacht – eine Liste, die sich beim
+     * Neuladen umsortiert, ist schlimmer als eine, die gleich bleibt.
+     */
     .order("created_at", { ascending: true })
+    .order("id", { ascending: true })
     .limit(MAX_LISTE);
 
   if (error) {
@@ -224,7 +252,17 @@ export async function GET(request: Request) {
   });
 
   return NextResponse.json({
-    set: { slug: set.slug, name: set.name },
+    set: {
+      slug: set.slug,
+      name: set.name,
+      /*
+       * `user_id !== null` allein reicht nicht: ein fremdes privates Set ist
+       * ueber RLS gar nicht erst geladen worden, aber `user_id !== null` waere
+       * trotzdem wahr. Der Vergleich mit der Session ist deshalb noetig, und
+       * liefert bei einem Demo-Set zuverlaessig `false`.
+       */
+      eigen: set.user_id !== null && set.user_id === user.id,
+    },
     karten,
     anzahl: karten.length,
     // true, wenn die Liste abgeschnitten wurde und oben etwas fehlt.

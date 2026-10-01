@@ -195,6 +195,12 @@ export async function GET(request: Request) {
     .eq("set_id", set.id)
     .eq("fortschritt.user_id", user.id)
     .order("created_at", { ascending: true })
+    // Zweiter Sortierschluessel, weil ein Bulk-Import allen Karten denselben
+    // Zeitstempel gibt. Ohne das kann sich die Reihenfolge des Stapels
+    // zwischen zwei Abrufen aendern – und der Nutzer bekaeme am selben Tag
+    // eine andere Reihenfolge. Siehe die ausfuehrliche Begruendung in
+    // GET /api/karten.
+    .order("id", { ascending: true })
     .limit(MAX_SET_KARTEN + 1);
 
   if (kartenFehler) {

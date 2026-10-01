@@ -502,7 +502,7 @@ abgearbeitet. Vier Varianten, in dieser Reihenfolge:
 | 1 | Wortliste ohne Trennzeichen einfügen | erledigt |
 | 2 | Beispielsätze automatisch ergänzen | erledigt |
 | 3 | Datei hochladen (`.txt`, `.csv`) | erledigt |
-| 4 | Set duplizieren, Karten bearbeiten/löschen | offen |
+| 4 | Set duplizieren, Karten bearbeiten/löschen | erledigt |
 
 > **1 — Wortliste ohne Trennzeichen.** Eine deutsche Wortliste, wie sie aus
 > einem Buch oder einer anderen App herauskopiert wird, hat kein Trennzeichen:
@@ -630,12 +630,79 @@ abgearbeitet. Vier Varianten, in dieser Reihenfolge:
 > Treffer, die es im Bild nicht gibt. Der sichtbare Knopf ist ein `<label>`;
 > der Klickpfad ist derselbe, und ohne JavaScript geht er auch.
 
+> **4 — Set duplizieren, Karten bearbeiten und löschen.** Drei Routen:
+> `POST /api/sets/<slug>/duplizieren`, `PATCH /api/karten/<id>` und
+> `DELETE /api/karten/<id>`; dazu `lib/kopie-name.ts` für die Namensregel.
+> 15 Tests für den Namen, 91 insgesamt.
+>
+> Verifiziert am 2026-10-02, live mit Playwright gegen die echte Datenbank,
+> **59 Prüfungen, 0 Fehlschläge, 0 Browserfehler**. Auszug:
+>
+> | Fall | Ergebnis |
+> |---|---|
+> | Demo-Set kopieren | 100 Karten, Inhalt und Reihenfolge identisch |
+> | Lernstand in der Kopie | 0 Zeilen, Stufe 0, nichts fällig |
+> | Karte bearbeiten | Begriff, Übersetzung, Satz und Satzübersetzung gespeichert |
+> | Leeres Beispielfeld | entfernt den Satz, lässt die Übersetzung stehen |
+> | Karte löschen | 100 → 99, Zähler im Kopf stimmt mit |
+> | Leeres Set kopieren | 201, Kopie ist leer |
+> | Karte im Demo-Set | kein Bearbeiten, kein Löschen — nicht ausgegraut, gar nicht da |
+> | ohne Anmeldung | 401 auf allen drei Routen |
+>
+> Drei Entscheidungen, die nicht aus dem Katalog kommen:
+>
+>   - **Demo-Sets lassen sich duplizieren, bearbeiten und löschen lassen sie
+>     nicht.** Das ist der ganze Nutzen dieser Phase: wer „Englisch Grundlagen"
+>     sieht und zwölf Wörter streichen will, hatte vorher nur den Weg, alle 100
+>     Karten von Hand zu tippen. Der Dialog startet bei einem Demo-Set direkt
+>     im Duplizieren-Schritt — nicht weil das kürzer ist, sondern weil
+>     Bearbeiten und Löschen dort 403 geben und der Nutzer sonst an zwei Knöpfen
+>     vorbeikommt, die nichts können. Der Knopf in der Übersicht erscheint
+>     deshalb jetzt bei **allen** Sets, und `eigen` entscheidet, was er anbietet.
+>   - **Kein Namensfeld beim Duplizieren.** Der Server vergibt den Namen nach
+>     einer festen Regel, und die Zahl steigt bei jeder Kopie: „Italienisch",
+>     „Italienisch (Kopie)", „Italienisch (Kopie 2)". Ein Namensfeld würde die
+>     Regel aushebeln — wer „Mein Set" einträgt, bekäme „Mein Set (Kopie)" und
+>     müsste selbst wie die Regel denken. Der Dialog zeigt die Vorschau, der
+>     Server entscheidet. Die Regel steht in `lib/kopie-name.ts`, nicht in der
+>     Route, weil der Wizard sie später ebenfalls braucht.
+>   - **Löschen fragt in der Zeile nach, nicht in einem Dialog.** Bei einem
+>     ganzen Set ist ein Dialog berechtigt, bei einem einzelnen Vokabelbegriff
+>     ist er Kram: es gibt keine zweite Aktion, die man verwechseln könnte.
+>     Der Begriff steht in der Frage, damit niemand auf „Ja" klickt, weil er
+>     die Zeile daneben für die richtige hielt.
+>
+> Zwei Fehler, die erst die Messung zeigte — beide in der Reihenfolge der
+> Karten, und beide wären dem Nutzer stillschweigend begegnet:
+>
+>   - **Die Reihenfolge einer Kopie war nicht die des Originals.** Beim ersten
+>     Durchlauf stand in der Liste „der", in der Datenbank war es „sein" —
+>     dieselbe Route, dieselbe Abfrage, zwei Antworten. Ursache: alle Karten
+>     einer Bulk-Anweisung bekommen in Postgres denselben `now()`. Gemessen am
+>     Demovorsatz: **100 Karten, ein einziger Zeitstempel**
+>     (`2026-09-29T16:55:36.997968`). Bei gleichem Wert entscheidet Postgres
+>     nach der physischen Zeilenlage, und die ist nicht garantiert. Behoben an
+>     zwei Stellen: die Lese-Routen sortieren jetzt nach `created_at` **und**
+>     `id`, und die Kopie verteilt die Zeitstempel selbst (Basis + 1 ms je
+>     Karte, Index über alle Blöcke hinweg). Verifiziert: sechs Abrufe
+>     hintereinander liefern dieselbe Reihenfolge, und sie ist exakt die des
+>     Originals.
+>   - **Nach dem Bearbeiten sah der Nutzer eine andere Karte als die, die er
+>     bearbeitet hatte** — dieselbe Ursache, andere Seite. Das war kein Fehler
+>     der Oberfläche, sondern die Bestätigung des ersten: Die Liste zeigte, was
+>     gespeichert war, aber die Reihenfolge war nicht die, mit der man
+>     gearbeitet hatte.
+>
+> Was **nicht** gebaut wurde: Undo. Postgres kennt über HTTP keine
+> Transaktionen, ein gelöschter Begriff ist weg. Für das Löschen eines kompletten
+> Sets gilt dasselbe seit dem Set-Löschen.
+
 **Abnahme (Phase 2):** Wortschatz-Sicht abgenommen — Liste, Suche, Set-Links
 und der Wechsel zwischen Wortsicht und Set-Übersicht in beide Richtungen
 (Commit `ea94203`). Der Leerzustand arbeitet wieder (2.1), das Starter-Set
-steht live (2.2), der Textblock-Import ist geprüft (2.3). **Phase 2
-abgeschlossen am 2026-09-30.** Die Merknote zu angenehmeren Eingabe-Varianten
-bleibt als späterer Auftrag offen.
+steht live (2.2), der Textblock-Import ist geprüft (2.3). Alle vier Varianten
+aus 2.5 sind umgesetzt und live geprüft. **Phase 2 abgeschlossen am
+2026-09-30.**
 
 ### Phase 3 — Reichweite und Öffentlichkeit
 
