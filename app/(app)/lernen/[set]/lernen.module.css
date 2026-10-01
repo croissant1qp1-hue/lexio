@@ -928,6 +928,34 @@
     color: var(--text-primary);
 }
 
+/*
+ * Dritte Stufe, unter "knopfLeise": reiner Textlink ohne Rahmen.
+ *
+ * Auf dem Endschirm stehen bis zu vier Wege. Rahmen um jeden davon machen
+ * die Seite zu einer Buttonwand und die Hauptaktion nicht mehr erkennbar.
+ * "Alle Vokabeln ansehen" ist der seltene Weg und darf entsprechend leise
+ * sein – aber anklickbar bleiben muss es trotzdem, also min-height 44px
+ * (Abnahme Phase 5) und nicht nur eine Textzeile.
+ */
+.knopfText {
+    min-height: 44px;
+    width: 100%;
+    max-width: 300px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    font-family: inherit;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+    cursor: pointer;
+    transition: color 160ms ease;
+}
+
+.knopfText:hover {
+    color: var(--text-primary);
+}
+
 /* Kurze Displays (iPhone SE und aehnlich): Karte verkleinern, damit
    Kopfzeile, Karte und Bewertungs-Buttons ohne Scrollen passen. */
 @media (max-height: 700px) {

@@ -1,0 +1,200 @@
+/* Vokabeln eines Sets (/wortschatz/[set]).
+   Eigenes Blatt statt Import der Wortschatz-Liste: die hier braucht
+   Kopfzeile mit zurueck-Link, Filterzeile und Paarliste, und die
+   Wortschatz-Seite braucht Suchfeld und Set-Seitenleiste. Gemeinsam sind
+   Farben und Abstände, nicht die Klassen. */
+
+.spalte {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 900px;
+    margin-inline: auto;
+    padding: clamp(0.75rem, 2.5vw, 1.5rem) clamp(0.75rem, 3vw, 1.5rem) 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(0.75rem, 2vw, 1.1rem);
+}
+
+/* Die Kopfzeile der Wortschatz-Seite stellt Titel und "Zurück" nebeneinander.
+   Hier steht der Titel ueber allem – die Liste gehoert zum Set, und der
+   Weg zurueck ist eine Nebenhandlung. */
+.kopf {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+}
+
+.titel {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(1.7rem, 6vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-primary);
+}
+
+.untertitel {
+    margin: 0.15rem 0 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.zurueck {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 44px;
+    padding: 0.6rem 1.1rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.92rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background-color 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+    white-space: nowrap;
+}
+
+.zurueck:hover {
+    background: var(--bg-elevated-2);
+}
+
+.filterZeile {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.filterKnopf {
+    /* min-height 44px: Abnahme Phase 5, Bedienflaeche nicht kleiner als
+       44 x 44. Die Beschriftung ist kurz, die Flaeche ist trotzdem da. */
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, border-color 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.filterKnopf:hover {
+    background: var(--bg-elevated-2);
+    color: var(--text-primary);
+}
+
+/* aria-pressed statt einer zusaetzlichen Klasse: der Zustand steht schon
+   im Attribut, und ein zweiter Zustand im Styling muesste von Hand
+   mitgepflegt werden. */
+.filterKnopf[aria-pressed="true"] {
+    background: var(--bg-elevated-2);
+    border-color: var(--line-strong, var(--line));
+    color: var(--text-primary);
+}
+
+.vokabelListe {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated);
+}
+
+.vokabelZeile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.8rem 0.9rem;
+    border-top: 1px solid var(--line);
+    min-width: 0;
+}
+
+.vokabelZeile:first-child {
+    border-top: none;
+}
+
+.vokabelBegriff {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+/* Kein Farbwechsel fuer "gelernt". Ein gruenes Kuestchen sieht man auf dem
+   Handy nicht, und wer es nicht sieht, glaubt, die Vokabel sei offen. Der
+   Haken steht deshalb als Zeichen im Text – und faellt auch dann auf, wenn
+   Farben gar nicht unterschieden werden. */
+.gelerntHaken {
+    margin-left: 0.35rem;
+    color: var(--sage-dark, var(--text-muted));
+    font-weight: 700;
+}
+
+.vokabelAntwort {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+    display: flex;
+    flex-direction: column;
+}
+
+.vokabelBeispiel {
+    margin-top: 0.2rem;
+    font-size: 0.875rem;
+    font-style: italic;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+}
+
+.vokabelBeispielUebersetzung {
+    font-style: normal;
+    color: var(--text-muted);
+}
+
+.hinweisBox {
+    margin: 0;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg-elevated-2);
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.aktionen {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.knopf {
+    min-height: 46px;
+    padding: 0.7rem 1.4rem;
+    border: none;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #eec878 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    color: #17110a;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 150ms ease, filter 150ms ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.knopf:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.05);
+}

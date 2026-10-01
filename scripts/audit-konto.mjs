@@ -2,6 +2,7 @@
  * Legt ein Wegwerf-Konto an und gibt Cookie + UUID zurück.
  *
  * Aufruf: node scripts/audit-konto.mjs
+ *        node scripts/audit-konto.mjs --loeschen <uuid>
  * Läuft nur für Phase 5 (Responsive-Audit). Das Konto wird nach dem
  * Audit wieder gelöscht (--loeschen <uuid>).
  *
@@ -23,6 +24,67 @@ const passwort = `Audit-${Math.random().toString(36).slice(2)}-9`;
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+/*
+ * Löschen zuerst prüfen.
+ *
+ * Der Anon-Client kann kein Konto entfernen – dazu braucht es die
+ * Management-API mit dem Access Token. Der Aufruf unten nutzt deshalb
+ * bewusst nicht den Supabase-Client, sondern POST /database/query auf
+ * auth.users. `delete from auth.users` nimmt die Zeile und per ON DELETE
+ * CASCADE auch alles, was an ihr hängt (karten_fortschritt, Sets des
+ * Nutzers). Deshalb ist das Löschen vollständig und nicht halb.
+ *
+ * Der Token kommt aus .env (SUPABASE_ACCESS_TOKEN) und wird nur für diesen
+ * einen Aufruf gelesen, nicht gespeichert und nicht ausgegeben.
+ */
+const loeschen = process.argv[2];
+if (loeschen === "--loeschen") {
+  const uuid = process.argv[3];
+  if (!uuid) {
+    console.error("Aufruf: node scripts/audit-konto.mjs --loeschen <uuid>");
+    process.exit(1);
+  }
+  const token = process.env.SUPABASE_ACCESS_TOKEN;
+  if (!token) {
+    console.error("SUPABASE_ACCESS_TOKEN fehlt. .env laden.");
+    process.exit(1);
+  }
+  // Nur eine UUID als SQL-Literal zulassen. Der Wert kommt aus der
+  // Kommandozeile, und das hier ist der einzige Weg, ein Löschkommando
+  // zusammenzubauen – deshalb die Prüfung, statt String-Interpolation
+  // ohne Kontrolle.
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(uuid)) {
+    console.error(`Keine gültige UUID: ${uuid}`);
+    process.exit(1);
+  }
+  const projekt = process.env.SUPABASE_PROJECT_REF ?? "vvdouxtdvnhrptkptohp";
+  const antwort = await fetch(
+    `https://api.supabase.com/v1/projects/${projekt}/database/query`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: `delete from auth.users where id = '${uuid}' returning id`,
+      }),
+    },
+  );
+  const ergebnis = await antwort.json();
+  if (!antwort.ok) {
+    console.error("Löschen fehlgeschlagen:", JSON.stringify(ergebnis));
+    process.exit(1);
+  }
+  const geloescht = Array.isArray(ergebnis) ? ergebnis.length : 0;
+  if (geloescht === 0) {
+    console.log(`Konto ${uuid} war schon weg (oder existierte nie).`);
+  } else {
+    console.log(`Konto ${uuid} gelöscht (${geloescht} Zeile).`);
+  }
+  process.exit(0);
+}
 
 if (!url || !key) {
   console.error("NEXT_PUBLIC_SUPABASE_URL / ANON_KEY fehlen. .env laden.");

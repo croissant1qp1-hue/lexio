@@ -711,41 +711,43 @@ export default function LernenSeite({
         );
     }
 
-    if (karten.length === 0) {
-        return (
-            <div className={styles.seite}>
-                <div className={styles.ende}>
-                    <span className={styles.endeZeichen} aria-hidden="true">
-                        ☕
-                    </span>
-                    <h2 className={styles.endeTitel}>Alles gelernt</h2>
-                    {/* Leerer Stapel. Im normalen Modus kann er lügen: fällig ist nichts,
-                 aber die ausgeblendeten Problemskarten existieren trotzdem –
-                 dann erklärt der Text sie und der Knopf darüber holt sie
-                 herein. */}
-                    <p className={styles.endeText}>
-                        {leechAnzahl > 0 && !leechModus ? (
-                            <>
-                                Für {set?.name} sind heute keine neuen Karten fällig.{" "}
-                                {leechAnzahl}{" "}
-                                {leechAnzahl === 1 ? "Problemskarte wartet" : "Problemskarten warten"}{" "}
-                                allerdings darauf, geübt zu werden.
-                            </>
-                        ) : (
-                            <>
-                                Für {set?.name} sind heute keine Karten fällig. Komm später wieder – dann
-                                wartet der nächste Stapel.
-                            </>
-                        )}
-                    </p>
-                    {/*
-                     * Im normalen Modus ist ein leerer Stapel kein Grund, die
-                     * Seite zu verlassen: "Nochmal lernen" holt dieselben Karten
-                     * als Wiederholung (modus=ueben). Nur wenn das Set wirklich
-                     * keine Vokabeln hat (kartenGesamt 0), waere der Knopf eine
-                     * Sackgasse – dann bleibt nur der Weg zurueck.
-                     */}
-                    {kartenGesamt > 0 && (
+if (karten.length === 0) {
+        /*
+         * Leerer Stapel, aber das Set hat Karten: Heute ist einfach nichts
+         * faellig. "Nochmal lernen" holt dieselben Karten als Wiederholung.
+         */
+        if (kartenGesamt > 0) {
+            return (
+                <div className={styles.seite}>
+                    <div className={styles.ende}>
+                        <span className={styles.endeZeichen} aria-hidden="true">
+                            ☕
+                        </span>
+                        <h2 className={styles.endeTitel}>Alles gelernt</h2>
+                        {/* Leerer Stapel. Im normalen Modus kann er lügen: fällig ist nichts,
+                         * aber die ausgeblendeten Problemskarten existieren trotzdem –
+                         * dann erklärt der Text sie und der Knopf darüber holt sie
+                         * herein. */}
+                        <p className={styles.endeText}>
+                            {leechAnzahl > 0 && !leechModus ? (
+                                <>
+                                    Für {set?.name} sind heute keine neuen Karten fällig.{" "}
+                                    {leechAnzahl}{" "}
+                                    {leechAnzahl === 1 ? "Problemskarte wartet" : "Problemskarten warten"}{" "}
+                                    allerdings darauf, geübt zu werden.
+                                </>
+                            ) : (
+                                <>
+                                    Für {set?.name} sind heute keine Karten fällig. Komm später wieder – dann
+                                    wartet der nächste Stapel.
+                                </>
+                            )}
+                        </p>
+                        {/*
+                         * Im normalen Modus ist ein leerer Stapel kein Grund, die
+                         * Seite zu verlassen: "Nochmal lernen" holt dieselben Karten
+                         * als Wiederholung (modus=ueben).
+                         */}
                         <button
                             type="button"
                             className={styles.knopf}
@@ -753,23 +755,71 @@ export default function LernenSeite({
                         >
                             Nochmal lernen
                         </button>
-                    )}
-                    {/*
-                     * Alle fälligen Karten sind ausgeblendete
-                     * Problemskarten: "Alles gelernt" stimmt dann nicht –
-                     * es gibt nichts zum Lernen, wohl aber zum Üben. Der
-                     * Weg dorthin darf nicht fehlen, sonst stünde die
-                     * Knopfkette hinter einer leeren Seite.
-                     */}
-                    {leechAnzahl > 0 && !leechModus && (
+                        {/*
+                         * Alle fälligen Karten sind ausgeblendete
+                         * Problemskarten: "Alles gelernt" stimmt dann nicht –
+                         * es gibt nichts zum Lernen, wohl aber zum Üben. Der
+                         * Weg dorthin darf nicht fehlen, sonst stünde die
+                         * Knopfkette hinter einer leeren Seite.
+                         */}
+                        {leechAnzahl > 0 && !leechModus && (
+                            <button
+                                type="button"
+                                className={styles.knopfLeise}
+                                onClick={() => router.push(`/lernen/${setSlug}?modus=leech`)}
+                            >
+                                Problemskarten üben
+                            </button>
+                        )}
                         <button
                             type="button"
-                            className={styles.knopfLeise}
-                            onClick={() => router.push(`/lernen/${setSlug}?modus=leech`)}
+                            className={styles.knopfText}
+                            onClick={() => router.push(`/wortschatz/${setSlug}`)}
                         >
-                            Problemskarten üben
+                            Alle Vokabeln ansehen
                         </button>
-                    )}
+                        <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
+                            Zur Übersicht
+                        </button>
+                    </div>
+                </div>
+            );
+        }
+
+        /*
+         * Leerer Stapel UND keine Karten: Das Set ist angelegt, aber leer.
+         *
+         * Beide Faelle liefern `karten: []` aus der API, und beide sahen
+         * deshalb vorher wie derselbe aus – mit dem Text "Alles gelernt"
+         * und, weil der Knopf an `kartenGesamt > 0` hing, ohne jede
+         * Moeglichkeit weiterzukommen. Das war die gemeldete Sackgasse: ein
+         * eigenes Set anlegen, den Hinzufuegen-Wizard verlassen, und dann
+         * bekommt man eine tellscheuende Gliederung mit Totenkopf-Kaffee.
+         *
+         * "Alles gelernt" waere hier schlicht falsch. Es wurde nichts
+         * gelernt, es gibt nichts zu lernen. Der Weg fuehrt deshalb zum
+         * Set zurueck, wo "Vokabeln hinzufuegen" steht – nicht mitten in
+         * den Wizard, der haengt an Schritt 2 und dort erst die Sprache
+         * abfragt, obwohl das Set sie schon hat.
+         */
+        return (
+            <div className={styles.seite}>
+                <div className={styles.ende}>
+                    <span className={styles.endeZeichen} aria-hidden="true">
+                        📝
+                    </span>
+                    <h2 className={styles.endeTitel}>Noch keine Vokabeln</h2>
+                    <p className={styles.endeText}>
+                        {set?.name} ist angelegt, enthält aber noch keine Wortpaare. Füge Vokabeln
+                        hinzu, dann kannst du mit dem Lernen anfangen.
+                    </p>
+                    <button
+                        type="button"
+                        className={styles.knopf}
+                        onClick={() => router.push("/karteikarten")}
+                    >
+                        Vokabeln hinzufügen
+                    </button>
                     <button type="button" className={styles.knopfLeise} onClick={() => router.push("/")}>
                         Zur Übersicht
                     </button>

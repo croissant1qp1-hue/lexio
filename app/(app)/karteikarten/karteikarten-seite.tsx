@@ -287,6 +287,24 @@ export default function KarteikartenSeite() {
                             Nochmal lernen
                         </Link>
                     )}
+                    {/*
+                     * Der Weg zum Nachschlagen. Der Set-Name fuehrt zum Lernen
+                     * und die Zeile ebenfalls – beides richtig, aber beides
+                     * fuehrt nicht dorthin, wo man hingeht, wenn man wissen
+                     * will, welche Woerter ueberhaupt drinstehen. Die Lernseite
+                     * zeigt hoechstens den Stapel von heute; bei 100 Karten
+                     * sieht man davon 20 und haelt es fuer den Bestand.
+                     */}
+                    {set.kartenGesamt > 0 && (
+                        <Link
+                            href={`/wortschatz/${set.id}`}
+                            className={styles.nochmal}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <i className="fa-solid fa-list-ul" aria-hidden="true" />
+                            Vokabeln ansehen
+                        </Link>
+                    )}
                   </span>
                     {/*
                      * Nur fuer eigene Sets. Bei den vorgefertigten Sets waere

@@ -762,17 +762,56 @@ in keinem Durchlauf ein Befund.
 
 #### Zwei Punkte aus der Abnahme, vom Nutzer gemeldet
 
-1. **„Alles gelernt" ohne Weg zurück.** Klickt man im Wortschatz auf ein
-   Set, erscheint „Alles gelernt" — und es gibt keinen Knopf, um das Set
-   erneut zu lernen. Nach dem Erreichen des Ziels ist der Einstieg in die
-   Wiederholung also tot. Das widerspricht der Kernmechanik der App und muss
-   vor Phase 6 behoben werden.
-2. **Keine Übersicht aller Vokabeln eines Sets.** Es gibt keine Ansicht, die
-   die Vokabeln eines Sets vollständig zeigt. Der Wortschatz zählt und
-   gewichtet, aber man kann nicht nachsehen, was drinsteht.
+Beide Punkte sind erledigt. Sie standen hier zuerst nur als Meldung, weil sie
+beim Messen der responsiven Seiten auffielen und funktional sind.
 
-Beide Punkte sind noch nicht umgesetzt; sie gehören als eigener Schritt vor
-Phase 6.
+1. **„Alles gelernt" ohne Weg zurück** — *erledigt*.
+   Klickt man ein leeres Set an, kam der Endbildschirm „Alles gelernt" mit
+   Kaffeetasse und ohne jede Handlungsmöglichkeit: der „Nochmal lernen"-Knopf
+   hängt an `kartenGesamt > 0`, und ein leeres Set hat null Karten. Am echten
+   Konto reproduziert an `karteikarten_sets.slug = 'englisch-satze-ki-testen'`,
+   0 Karten.
+
+   Die Ursache war nicht der fehlende Knopf, sondern eine Lüge in der
+   Zwischenebene: `app/api/lernen/route.ts:363` kommentierte, der Client
+   unterscheide „nichts fällig" von „noch nichts angelegt" — im Client gab es
+   diese Unterscheidung nicht. Beide Fälle liefern `karten: []` und sahen
+   deshalb gleich aus.
+
+   `lernen-seite.tsx` trennt sie jetzt. Leeres Set: „Noch keine Vokabeln",
+   Text, was fehlt, und ein Weg zu „Vokabeln hinzufügen". Der Verweis geht
+   bewusst nach `/karteikarten` und **nicht** mitten in den Hinzufügen-Wizard:
+   Schritt 2 dort fragt die Sprache ab, obwohl das Set sie schon hat, und die
+   Seite ist derzeit ohnehin Gegenstand eines parallelen Arbeitsstands.
+
+   Nebenbei gefunden und richtiggestellt: die 404-Meldung der Lernroute lautete
+   „Sprache nicht gefunden", obwohl an dieser Stelle das **Set** gesucht wird.
+   Bei fremden Konten (RLS) ist genau das der Normalfall, und die Meldung
+   behauptete dann etwas Falsches.
+
+2. **Keine Übersicht aller Vokabeln eines Sets** — *erledigt*.
+   Neu: `/wortschatz/[set]`. Zeigt Begriff, Übersetzung, Beispielsatz samt
+   Übersetzung, den Lernstand je Vokabel und Filter „Alle / Offen / Gelernt".
+   Erreichbar von der Set-Übersicht („Vokabeln ansehen") und vom Endbildschirm
+   des Lernens.
+
+   Dazu `GET /api/karten?setSlug=`. Bewusst getrennt von der Lernroute: die
+   Lernroute liefert den Stapel **von heute** (20 oder 40), nicht den Bestand —
+   bei 100 Karten sieht man 20 davon und hält das für den ganze Set.
+
+   Geprüft am Demoset: 100 Vokabeln, Zähler „100 Vokabeln · 1 gelernt", Filter
+   „Offen 99 / Gelernt 1", Haken an der gelernten Vokabel, kein waagerechter
+   Bildlauf bei 360 px und bei gedreht 780 px.
+
+   Eine Vermutung aus der Recherche hat sich dabei als **falsch** erwiesen und
+   ist nicht in den Code gewandert: der Filter `.eq("fortschritt.user_id", …)`
+   auf der eingebetteten Ressource löscht keine Karten ohne Fortschrittszeile.
+   Das Auditkonto hatte dort null Zeilen und bekam trotzdem alle 100 Karten
+   zurück. Grund ist der To-One-Hinweis im Embed — die Bedingung wandert ins
+   ON eines Left Joins. Ohne den Hinweis wäre es ein Inner Join, und dann wäre
+   die gemeldete „Alles gelernt"-Sackgasse bei *jedem* frischen Konto sofort
+   aufgetreten. Der Kommentar an der Abfrage steht jetzt an der Stelle, an der
+   er jemanden vom Nachbauen dieser Fehlannahme abhält.
 
 ---
 

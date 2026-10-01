@@ -142,7 +142,15 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: setFehler.message }, { status: 500 });
   }
   if (!set) {
-    return NextResponse.json({ error: "Sprache nicht gefunden" }, { status: 404 });
+    /*
+     * Meldungstext war "Sprache nicht gefunden". Die Sprache wird an dieser
+     * Stelle noch gar nicht nachgeschlagen – gefehlt hat das Set. Bei der
+     * Suche nach den eigenen Sets eines anderen Kontos (RLS) ist genau das
+     * der Normalfall, und die Meldung behauptet dann etwas Falsches: Es
+     * gab nie eine Sprachfrage. "Set nicht gefunden" sagt, was fehlt, ohne
+     * zu behaupten, man wisse mehr als die Abfrage.
+     */
+    return NextResponse.json({ error: "Set nicht gefunden" }, { status: 404 });
   }
 
   /*

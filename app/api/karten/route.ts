@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
+import { migrationsMeldung } from "@/lib/db-fehler";
 
 const MAX_LAENGE = 200;
 
@@ -15,6 +16,30 @@ const MAX_SATZ = 300;
 
 /** Hoechstes Anzahl Paare pro Anfrage. */
 const MAX_PAARE = 100;
+
+/**
+ * Hoechstes Anzahl Vokabeln in einer Liste (GET).
+ *
+ * Kein Seitenumbruch: die Liste ist fuer "was steht in diesem Set drin",
+ * und da waere eine zweite Seite nur eine Stelle, an der Karten
+ * verschwinden koennen. Ueber 500 Karten in einem Set ist hier nicht
+ * vorgesehen – wenn es passiert, sagt die Antwort `gekuerzt: true`, statt
+ * stillschweigend eine Zahl zu liefern, die nicht dem Bestand entspricht.
+ */
+const MAX_LISTE = 500;
+
+/** Zeile aus `karten` mit eingebettetem Fortschritt. */
+type KartenZeile = {
+  id: string;
+  frage: string;
+  antwort: string;
+  beispielsatz: string | null;
+  beispiel_uebersetzung: string | null;
+  fortschritt:
+    | { stufe: number; gelernt: boolean; faellig_am: string | null; fehler: number }
+    | { stufe: number; gelernt: boolean; faellig_am: string | null; fehler: number }[]
+    | null;
+};
 
 type Paar = {
   frage: string;
@@ -93,6 +118,119 @@ function pruefePaar(
   return { frage, antwort, beispielsatz, beispielUebersetzung };
 }
 
+
+/**
+ * Alle Vokabeln eines Sets auflisten.
+ *
+ * Aufruf: GET /api/karten?setSlug=<slug>
+ *
+ * Warum das hier und nicht in der Lernroute: die Lernroute liefert
+ * bewusst nur den Stapel von heute (20 oder 40 Karten), nicht den Bestand.
+ * Wer sehen will, was in einem Set steht, braucht alle – und das ist eine
+ * andere Frage mit einer anderen Ausgabe, keine Variante der Lernrunde.
+ *
+ * Die Reihenfolge ist `created_at`, wie beim Anlegen. Eine alphabetische
+ * Sortierung waere fuer eine Vokabelliste verlockender, aber dann verschiebt
+ * sich beim Nachschlagen alles, was man vor drei Wochen angelegt hat, und
+ * die Position im Set ist das, woran man sich gewöhnt hat.
+ */
+export async function GET(request: Request) {
+  // Nur `supabase` und die Antwort, nicht `user`: beim Lesen gibt es keine
+  // Besitzpruefung (siehe unten). `mitUserOder401` liefert beides, aber ein
+  // ungenutzter Schreibzugriff ist eine Warnung, die irgendwann niemand mehr
+  // liest – und die dann einen echten Fehler verdeckt.
+  const { supabase, antwort: nichtAngemeldet } = await mitUserOder401();
+  if (nichtAngemeldet) return nichtAngemeldet;
+
+  const setSlug = new URL(request.url).searchParams.get("setSlug")?.trim() ?? "";
+  if (!setSlug) {
+    return NextResponse.json({ error: "Set fehlt" }, { status: 400 });
+  }
+
+  const { data: set, error: setFehler } = await supabase
+    .from("karteikarten_sets")
+    .select("id, slug, name, user_id")
+    .eq("slug", setSlug)
+    .maybeSingle();
+
+  if (setFehler) {
+    return NextResponse.json({ error: setFehler.message }, { status: 500 });
+  }
+  if (!set) {
+    return NextResponse.json({ error: "Set nicht gefunden" }, { status: 404 });
+  }
+
+  /*
+   * Lesen ist fuer alle Sets erlaubt, Schreiben nicht (siehe POST). Deshalb
+   * wird hier keine Besitzpruefung gemacht: Demokarten sind zum Lesen da,
+   * und RLS regelt die Sichtbarkeit von Sets anderer Konten bereits.
+   *
+   * Der Join auf karten_fortschritt bringt den eigenen Lernstand je Karte.
+   * Der Filter `.eq("fortschritt.user_id", user.id)` steht in beiden
+   * Lese-Routen, und die naheliegende Sorge ist, dass er Karten OHNE
+   * Fortschrittszeile wegfiltert – dann waere ein frisches Konto ueberall
+   * bei null Karten und die App wuerde "nichts zu lernen" behaupten.
+   *
+   * Gemessen am 2026-09-30 gegen die echte Datenbank: es passiert nicht.
+   * Das Auditkonto hatte null Zeilen in karten_fortschritt und bekam
+   * trotzdem alle 100 Karten des Demosets zurueck, jede mit den
+   * Nullwerten aus `zeile?.stufe ?? 0`. Der Grund ist der Hinweis im
+   * Embed (`!karten_fortschritt_karte_id_fkey`): er legt eine
+   * To-One-Beziehung fest, und die Bedingung wandert ins ON eines Left
+   * Joins – Elternzeilen ohne Treffer bleiben erhalten. Ohne den Hinweis
+   * waere es ein Inner Join und genau die Katastrophe.
+   *
+   * Deshalb steht hier kein `gekuerzt` als Notnagel, sondern `anzahl` als
+   * die Zahl der gelieferten Zeilen – und weil dieselbe Semantik auch in
+   * app/api/lernen/route.ts gilt, ist `kartenGesamt` dort der echte
+   * Bestand und kein Teil davon.
+   */
+  const { data, error } = await supabase
+    .from("karten")
+    .select(
+      "id, frage, antwort, beispielsatz, beispiel_uebersetzung, " +
+        "fortschritt:karten_fortschritt!karten_fortschritt_karte_id_fkey(stufe, gelernt, faellig_am, fehler)",
+    )
+    .eq("set_id", set.id)
+    .order("created_at", { ascending: true })
+    .limit(MAX_LISTE);
+
+  if (error) {
+    const migration = migrationsMeldung(error);
+    if (migration) {
+      return NextResponse.json({ error: migration }, { status: 503 });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  const zeilen = (data ?? []) as unknown as KartenZeile[];
+
+  const karten = zeilen.map((karte) => {
+    const zeile = Array.isArray(karte.fortschritt) ? karte.fortschritt[0] : karte.fortschritt;
+    return {
+      id: karte.id,
+      frage: karte.frage,
+      antwort: karte.antwort,
+      // Leere Strings statt null: die Liste zeigt sie nur an, wenn etwas
+      // drinsteht, und muss dafuer nicht erst prüfen, was die Datenbank
+      // meint. Ein fehlender Beispielsatz ist ein Normalfall, kein Fehler.
+      beispielsatz: karte.beispielsatz ?? "",
+      beispielUebersetzung: karte.beispiel_uebersetzung ?? "",
+      gelernt: zeile?.gelernt ?? false,
+      stufe: zeile?.stufe ?? 0,
+      fehler: zeile?.fehler ?? 0,
+      faellig: (zeile?.faellig_am ?? null) !== null,
+    };
+  });
+
+  return NextResponse.json({
+    set: { slug: set.slug, name: set.name },
+    karten,
+    anzahl: karten.length,
+    // true, wenn die Liste abgeschnitten wurde und oben etwas fehlt.
+    gekuerzt: zeilen.length >= MAX_LISTE,
+  });
+}
 
 export async function POST(request: Request) {
   const { supabase, user, antwort: nichtAngemeldet } = await mitUserOder401();
