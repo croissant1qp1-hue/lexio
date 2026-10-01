@@ -10,22 +10,26 @@ Stand dieses Projekts (geprüft mit `node scripts/db-status.mjs`):
 | Registrierung erlaubt | ✅ |
 | E-Mail-Bestätigung abgeschaltet | ✅ Konto ist sofort nutzbar |
 | Datenbank erreichbar | ✅ |
-| **Migration 003 ausgeführt** | ❌ fehlt vollständig |
+| **Migration 003 ausgeführt** | ✅ 27.09.2026, Ende-zu-Ende geprüft |
 | **Datenbankpasswort in `.env`** | ❌ dort steht ein Schlüssel, kein Passwort |
+| Migration 004 (nur Geschwindigkeit) | ⬜ optional |
 | Anmeldeanbieter (optional) | ❌ keiner aktiviert — läuft über E-Mail/Passwort |
 
 ---
 
-## 1. Migration 003 (Pflicht)
+## 1. Migration 003 (erledigt)
 
-Ohne diese Datei hat `karteikarten_sets` keine Spalte `user_id`. Jedes Set
-gehört dann niemandem, jede fremde Änderung ist möglich, und jede
-Lernantwort scheitert. Die App zeigt dann auf jeder Seite eine Fehlermeldung
-statt Inhalt.
+Ausgeführt am 27.09.2026 im SQL Editor. `node scripts/db-status.mjs` meldet
+alle sechs geprüften Objekte als vorhanden, und der komplette Weg über die App
+funktioniert: Registrierung, `profil`-Trigger, Wortschatz, Lernantwort, XP,
+Streak, Statistiken.
 
-**SQL Editor** → Inhalt von `supabase/003-auth-und-user-daten.sql` einfügen →
-**Run**. Danach optional `supabase/003b-demofortschritt-uebernehmen.sql` und
-`supabase/004-leistung.sql`.
+002 wurde nie ausgeführt und muss auch nicht nachgeholt werden: 003 legt
+`eigenes_set` selbst an und setzt die Policies, die es braucht, mit eigenen.
+
+Wer 003 erneut ausführen will: mehrfach ausführbar, `if not exists` überall.
+Danach optional `supabase/004-leistung.sql` (nur Indizes) und
+`supabase/003b-demofortschritt-uebernehmen.sql` (Fortschritt übernehmen).
 
 Prüfen:
 

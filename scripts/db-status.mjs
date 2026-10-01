@@ -149,8 +149,6 @@ if (!einstellungen) {
 } else {
   const offen = einstellungen.disable_signup !== true;
   const mitMail = einstellungen.mailer_autoconfirm !== false;
-  const google = einstellungen.external?.google === true;
-  const github = einstellungen.external?.github === true;
 
   console.log(offen ? ok("Registrierung offen.") : schlecht("Registrierung ist abgeschaltet."));
   console.log(
@@ -158,9 +156,47 @@ if (!einstellungen) {
       ? ok("Keine E-Mail-Bestaetigung noetig – Konto sofort nutzbar.")
       : gelb("E-Mail-Bestaetigung aktiv. Pruefen, ob im Dashboard ein SMTP-Server haengt."),
   );
-  if (google) console.log(ok("Google ist aktiviert."));
-  if (github) console.log(ok("GitHub ist aktiviert."));
-  if (!google && !github) console.log(gelb("Google und GitHub sind beide aus."));
+
+  /*
+   * Alle sieben Anbieter melden, nicht nur Google und GitHub. Die
+   * Anmeldeseite zeigt einen Knopf fuer jeden aktiven Anbieter von selbst
+   * an – wer nur zwei prueft, haelt die anderen fuenf faelschlich fuer
+   * abwesend.
+   */
+  const ANBIETER = {
+    google: "Google",
+    github: "GitHub",
+    discord: "Discord",
+    spotify: "Spotify",
+    facebook: "Facebook",
+    // X wird in den Auth-Einstellungen weiterhin unter "twitter" gefuehrt.
+    twitter: "X",
+    x: "X",
+    twitch: "Twitch",
+  };
+  const aktiv = [];
+  const aus = [];
+  for (const [schluessel, name] of Object.entries(ANBIETER)) {
+    // Bei X zaehlt nur, wenn mindestens einer der beiden Schluessel true ist.
+    const an = einstellungen.external?.[schluessel] === true;
+    if (!an) continue;
+    if (!aktiv.includes(name)) aktiv.push(name);
+  }
+  for (const [schluessel, name] of Object.entries(ANBIETER)) {
+    if (aktiv.includes(name) && einstellungen.external?.[schluessel] !== true) continue;
+    if (!aus.includes(name)) aus.push(name);
+  }
+
+  if (aktiv.length > 0) console.log(ok(`Aktiv: ${aktiv.join(", ")}`));
+  if (aus.length > 0) {
+    console.log(
+      gelb(`Aus (${aus.length}): ${aus.join(", ")}`) +
+        "  \n  Dashboard → Authentication → Providers → Enable",
+    );
+  }
+  if (aktiv.length === 0) {
+    console.log(gelb("Kein Anmeldeanbieter aktiv – nur E-Mail und Passwort moeglich."));
+  }
 }
 
 /* ------------------------------------------------------------ 5. Ergebnis */

@@ -1,0 +1,19 @@
+.sprache-auswählen-layout {
+    background-color: blue;
+
+    display: flex;
+    flex-direction: column;
+
+    height: 100vh;
+}
+
+.mainPartSeite {
+    background-color: red;
+
+    display: flex;
+    flex-direction: column;
+
+    width: 100%;
+    flex: 1;
+    gap: 400px;
+}
