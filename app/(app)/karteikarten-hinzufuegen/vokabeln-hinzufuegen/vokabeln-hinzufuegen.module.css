@@ -495,6 +495,109 @@
     line-height: 1.4;
 }
 
+/* Datei-Auswahl. Das echte input ist unsichtbar und liegt ueber der
+  Flaeche, damit der ganze Kasten anklickbar ist – ohne JavaScript, ohne
+   falsche Rolle, mit dem echten feld als Beschriftung fuer Screenreader.
+   `sr-only` ist bewusst nicht als Klasse im Projekt vorhanden, deshalb
+   hier die drei noetigen Regeln direkt. */
+.dateiFeld {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+.dateiKasten {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 12px;
+    border: 1px dashed var(--line);
+    background: var(--input-bg);
+    transition: border-color 160ms ease, background 160ms ease;
+    box-sizing: border-box;
+}
+
+.dateiKasten:hover,
+.dateiKasten:focus-within {
+    border-color: var(--sage);
+}
+
+/*
+ * Unter 30em (480px) ist neben dem Knopf nur noch eine schmale Spalte für
+ * den Text. Gemessen bei 390px: der Kasten wurde 153px hoch, weil der
+ * Hinweistext über fünf Zeilen umbrach. Gestapelt sind es zwei Zeilen.
+ */
+@media (max-width: 30em) {
+    .dateiKasten {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.6rem;
+    }
+
+    .dateiKnopf {
+        /* Volle Breite: ein Ziel, das man nicht verfehlen kann. Die 44px
+           kommen aus min-height, mit weniger Polsterung bleibt es flach. */
+        width: 100%;
+        justify-content: center;
+        padding: 0.45rem 0.85rem;
+    }
+}
+
+.dateiKnopf {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+    padding: 0.5rem 0.85rem;
+    /* 44px Gesamt, nicht 44px plus Polsterung: ohne border-box misst der
+       Browser den Inhalt, und der Knopf wurde 62px hoch (gemessen). */
+    min-height: 44px;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dateiKasten:hover .dateiKnopf,
+.dateiFeld:focus-visible + .dateiKnopf {
+    border-color: var(--sage);
+    color: var(--sage);
+}
+
+.dateiText {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.dateiTitel {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    /* Ein langer Dateiname darf die Zeile nicht aufblaehen. */
+    overflow-wrap: anywhere;
+}
+
+.dateiHinweis {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    line-height: 1.35;
+}
+
 /* Gruene Erfolgsmeldung nach dem Uebernehmen. Bewusst kein .fehler, denn es
    ist kein Fehler – sie steht ohne rote Farbe, damit Erfolg nicht wie ein
    Problem aussieht. */

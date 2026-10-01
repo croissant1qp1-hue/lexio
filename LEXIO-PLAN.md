@@ -501,7 +501,7 @@ abgearbeitet. Vier Varianten, in dieser Reihenfolge:
 |---|---|---|
 | 1 | Wortliste ohne Trennzeichen einfügen | erledigt |
 | 2 | Beispielsätze automatisch ergänzen | erledigt |
-| 3 | Datei hochladen (`.txt`, `.csv`) | offen |
+| 3 | Datei hochladen (`.txt`, `.csv`) | erledigt |
 | 4 | Set duplizieren, Karten bearbeiten/löschen | offen |
 
 > **1 — Wortliste ohne Trennzeichen.** Eine deutsche Wortliste, wie sie aus
@@ -550,6 +550,58 @@ abgearbeitet. Vier Varianten, in dieser Reihenfolge:
 > spanischen Set ist das der Normalfall, weil es nur eine englische Quelle
 > gibt —, sagt die Oberfläche das jetzt, statt den Knopf verschwinden zu
 > lassen.
+
+> **3 — Datei hochladen.** `lib/datei-import.ts` liest `.txt`, `.csv`
+> und `.tsv` und macht daraus genau die Form, die `textblockEinlesen` bereits
+> versteht: eine Zeile je Vokabel, Felder durch Tabulator. Die Datei
+> durchläuft also **denselben** Importweg wie eingefügter Text — ein
+> zweiter Vokabel-Parser wäre die Art von Doppelarbeit, die sich bei der
+> nächsten Erweiterung rächt.
+>
+> Verifiziert am 2026-10-01, live in der Oberfläche mit Playwright, elf
+> Dateien:
+>
+> | Fall | Ergebnis |
+> |---|---|
+> | Excel, deutsch (BOM, `;`, CRLF, Quotes, 4 Spalten) | 3 Vokabeln, Kopfzeile genannt |
+> | Google Sheets (`,`, Kopfzeile) | 2 Vokabeln |
+> | Tabellenexport (Tabulator) | 2 Vokabeln |
+> | Wortliste ohne Trennzeichen | 3 offene Zeilen |
+> | Kopfzeile ASCII / mit Umlaut / englisch | erkannt, Inhalt darunter importiert |
+> | nur Kopfzeile, nichts darunter | Abbruch mit der Kopfzeile im Text |
+> | PNG, 645 kB, leere Datei | Ablehnung mit Begründung |
+>
+> Drei Fehler, die erst die Messung zeigte:
+>
+>   - **Eine Kopfzeile aus einem deutschen Excel blieb als Vokabel stehen.**
+>     Die Kopfwörter waren per `Ü→u` normalisiert, „Übersetzung" wurde also zu
+>     `ubersetzung` — und stand nicht in der Liste, die `uebersetzung`
+>     enthielt. Genau die wichtigste Kopfzeile der App fiel durch, wenn sie
+>     mit Umlaut geschrieben war. Jetzt werden Umlaute nach `ae/oe/ue/ss`
+>     übersetzt, wodurch beide Schreibweisen auf denselben Schlüssel fallen.
+>     Ebenso fehlten die englischen Spaltennamen: „Word | Meaning | Example"
+>     aus Google Sheets wurde als Vokabel importiert.
+>   - **Ein PNG als Wortliste.** Das `accept`-Attribut ist kein Schutz, es ist
+>     ein Filter im Dateidialog; per Drag-and-drop kommt alles durch. Gemessen:
+>     drei Zeilen Müll. Neu ist `istTextdatei()` — Endung oder Text-MIME-Typ,
+>     und im Zweifel der Inhalt (NUL-Byte, Anteil von Steuerzeichen).
+>   - **Eine Datei, die nur aus der Kopfzeile besteht,** erzeugte eine
+>     Phantomvokabel, weil `textblockEinlesen("")` eine offene Zeile
+>     zurückgibt. Gespeichert wurde dann ein Set mit einem leeren Eintrag.
+>     Jetzt: Abbruch, mit der Kopfzeile im Text, damit der Nutzer sie von
+>     Hand nachragen kann.
+>
+> Der Import passiert **sofort**, ohne Zwischenstopp im Textfeld. Grund:
+> die Zeilenliste ist die bessere Vorschau — jede Zeile einzeln editierbar,
+> jede mit eigener Fehlermeldung. Bei 500 Zeilen wäre ein Textfeld voller
+> Rohdaten nur ein zweiter Ort, an dem dieselben Daten liegen.
+>
+> Eine Entscheidung mit Folgen: `box-sizing` am Datei-Knopf. Ohne ihn misst
+> der Browser `min-height: 44px` am Inhalt, dazu kommen 16px Polsterung —
+> gemessen 62px, und der Dateikasten auf dem Handy 172px hoch. Unter 30em
+> stapelt sich der Kasten jetzt.
+>
+> 35 Tests im Datei-Parser, 76 insgesamt.
 
 **Abnahme (Phase 2):** Wortschatz-Sicht abgenommen — Liste, Suche, Set-Links
 und der Wechsel zwischen Wortsicht und Set-Übersicht in beide Richtungen

@@ -4,9 +4,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { farbeVonSprache, type Sprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, sendeJson, ApiFehler } from "@/lib/api-client";
-import { textblockEinlesen } from "@/lib/einzelimport";
+import { textblockEinlesen, type EinzelErgebnis } from "@/lib/einzelimport";
+import {
+    dateiEinlesen,
+    dateiZuGross,
+    groesseText,
+    istTextdatei,
+} from "@/lib/datei-import";
 import styles from "./vokabeln-hinzufuegen.module.css";
 import SprachAuswahl from "./sprach-auswahl";
+import { IconDatei } from "@/components/icone";
 
 type Status = "idle" | "speichert" | "fehler";
 
@@ -36,6 +43,15 @@ type SetZeile = {
  * beim Senden – sonst muesste man an beiden Enden daran denken.
  */
 type Paar = { frage: string; antwort: string; beispiel: string; beispielUebersetzung: string };
+
+/*
+ * Was beide Wege liefern: der eingefuegte Text ergibt ein `EinzelErgebnis`,
+ * die Datei ein `DateiErgebnis`. Der Unterschied ist nur die Kopfzeile –
+ * die kennt nur der Dateiweg. Das Feld ist deshalb optional, und die
+ * Oberflaeche muss es nicht mit einem `in`-Test abfragen (der hat hier
+ * schon einmal `unknown` produziert). Fehlt es, gab es keine Kopfzeile.
+ */
+type ImportErgebnis = EinzelErgebnis & { kopfzeile?: string[] };
 
 const LEER: Paar = { frage: "", antwort: "", beispiel: "", beispielUebersetzung: "" };
 
@@ -313,8 +329,93 @@ export default function VokabelnHinzufuegenSeite() {
      * werden kann, bevor sie in Schritt 3 gespeichert wird.
      */
     function textblockUebernehmen() {
+        uebernehmen(textblockEinlesen(textblock), textblock);
+    }
+
+    /*
+     * Eine Datei lesen (Feature 3) und genauso uebernehmen wie eingefuegten
+     * Text – nur eben ohne Tippen.
+     *
+     * Der Import passiert SOFORT, nicht erst nach einem Klick auf "Wörter
+     * übernehmen". Der Grund ist die Vorschau: was danach im Bild steht, sind
+     * die Zeilen in der normalen Liste, jede einzeln editierbar, jede mit
+     * eigener Fehlermeldung. Das ist eine bessere Vorschau als ein Textfeld
+     * voller Rohdaten. Bei 500 Zeilen waere ein Zwischenstopp im Textfeld
+     * nur ein zweiter Ort, an dem dieselben Daten liegen.
+     *
+     * Der Weg ist trotzdem derselbe wie beim Einfuegen: `uebernehmen` nimmt
+     * ein `EinzelErgebnis` und macht daraus Zeilen. Zwei Wege, ein Parser.
+     */
+    async function dateiLesen(datei: File) {
         setFehler({});
 
+        if (dateiZuGross(datei.size)) {
+            setFehler({
+                textblock:
+                    `Die Datei ist ${groesseText(datei.size)} gross. ` +
+                    "Bitte eine Liste bis 500 kB wählen – bei einer " +
+                    "Wortliste ist das sehr viel.",
+            });
+            return;
+        }
+
+        let inhalt: string;
+        try {
+            inhalt = await datei.text();
+        } catch {
+            setFehler({ textblock: "Die Datei konnte nicht gelesen werden." });
+            return;
+        }
+
+        if (!inhalt.trim()) {
+            setFehler({
+                textblock: "Die Datei ist leer. Es steht nichts drin, was importiert werden könnte.",
+            });
+            return;
+        }
+
+        if (!istTextdatei(inhalt, datei.name, datei.type)) {
+            setFehler({
+                textblock:
+                    `„${datei.name}" ist keine Textdatei. ` +
+                    "Der Import erwartet eine Wortliste als .txt, .csv oder .tsv.",
+            });
+            return;
+        }
+
+        const ergebnis = dateiEinlesen(inhalt, datei.name);
+
+        /*
+         * Eine Datei, die nur aus einer Kopfzeile besteht, hat keine
+         * Vokabeln. Der Import liefert dann absichtlich eine leere Liste,
+         * statt eine leere Zeile als Karte zu speichern.
+         */
+        if (ergebnis.paare.length === 0) {
+            setFehler({
+                textblock: ergebnis.kopfzeileWeg
+                    ? `„${datei.name}" enthält nur die Kopfzeile ` +
+                      `(${ergebnis.kopfzeile.join(" | ")}). ` +
+                      "Darunter stehen keine Vokabeln."
+                    : `In „${datei.name}" steht keine Vokabel.`,
+            });
+            return;
+        }
+
+        /*
+         * Die Meldung wird unten in `uebernehmen` gebaut, nicht hier: dort
+         * stehen alle Faelle schon aneinander – Zeilenzahl, offene Zeilen,
+         * weggelassene Zeilen, Kopfzeile. Zwei Stellen, die dieselbe Meldung
+         * bauen, laufen auseinander, und am Ende gewinnt die zuletzt
+         * geschriebene.
+         *
+         * Als `quelle` den DATEINAMEN, nicht den Inhalt: in der Meldung
+         * steht "Gelesen aus: woerter.csv" – der Name ist die Information,
+         * die der Nutzer bei 500 Zeilen noch braucht.
+         */
+        uebernehmen(ergebnis, datei.name);
+    }
+
+    function uebernehmen(ergebnis: ImportErgebnis, quelle: string) {
         /*
          * Zwei Parser, in dieser Reihenfolge.
          *
@@ -350,15 +451,14 @@ export default function VokabelnHinzufuegenSeite() {
          * Siehe die Messung in lib/einzelimport.ts: dort stehen beide
          * Ergebnisse nebeneinander.
          */
-        const ergebnis = textblockEinlesen(textblock);
-
         if (ergebnis.paare.length === 0) {
             setFehler({
                 textblock:
                     "Daraus wurde keine Vokabel erkannt. Möglich sind:\n" +
                     "Haus ; Übersetzung   (Tabulator, Doppelpunkt, =, ->)\n" +
                     "1. Haus = house      (Nummerierung wird weggelassen)\n" +
-                    "Haus                (nur der Begriff, Übersetzung danach)",
+                    "Haus                (nur der Begriff, Übersetzung danach)" +
+                    (quelle ? `\n\nAus: ${quelle}` : ""),
             });
             return;
         }
@@ -375,19 +475,49 @@ export default function VokabelnHinzufuegenSeite() {
         const neueListe = nurLeereStartzeile ? ergebnis.paare : [...paare, ...ergebnis.paare];
         setPaare(neueListe);
         setTextblock("");
-        // Bei offenen Zeilen sagt die Meldung, WAS zu tun ist. "12 Zeilen
-        // uebernommen" allein laesst den Nutzer raten, ob nun etwas fehlt –
-        // und das fuehrt zum Speichern, das dann an der ersten leeren
-        // Uebersetzung haengenbleibt.
+
+        /*
+         * Zaehlt, was beim Import verloren ging, und sagt es. Drei Faelle:
+         *
+         *   - offene Zeilen (Begriff ohne Uebersetzung): die Meldung sagt,
+         *     WAS zu tun ist. "12 Zeilen uebernommen" allein laesst raten,
+         *     ob etwas fehlt – und das fuehrt zum Speichern, das dann an
+         *     der ersten leeren Uebersetzung haengenbleibt.
+         *   - eine Kopfzeile, die weggelassen wurde: siehe dateiLesen.
+         *   - uebersprungene Zeilen (mehr als vier Spalten): stillschweigend
+         *     fallen gelassen waere Datenverlust ohne jede Spur.
+         */
         const offen = ergebnis.ohneUebersetzung;
-        setTextblockMeldung(
-            `${ergebnis.paare.length} Vokabel${ergebnis.paare.length === 1 ? "" : "n"} ` +
-                "übernommen." +
-                (offen > 0
-                    ? ` Bei ${offen} fehlt die Übersetzung – bitte in der ` +
-                      "Liste ergänzen."
-                    : " Prüfe die Zeilen und speichere dann."),
+        const kopf = ergebnis.kopfzeile ?? [];
+        const teile: string[] = [];
+
+        teile.push(
+            `${ergebnis.paare.length} Vokabel${
+                ergebnis.paare.length === 1 ? "" : "n"
+            } übernommen` +
+                (quelle ? ` aus ${quelle}` : "") +
+                ".",
         );
+        if (offen > 0) {
+            teile.push(
+                `Bei ${offen} fehlt die Übersetzung – bitte in der Liste ergänzen.`,
+            );
+        }
+        if (ergebnis.uebersprungen > 0) {
+            teile.push(
+                `${ergebnis.uebersprungen} Zeile${
+                    ergebnis.uebersprungen === 1 ? "" : "n"
+                } nicht übernommen (mehr als vier Spalten).`,
+            );
+        }
+        if (kopf.length > 0) {
+            teile.push(`Kopfzeile weggelassen: ${kopf.join(" | ")}.`);
+        }
+        if (offen === 0 && ergebnis.uebersprungen === 0 && kopf.length === 0) {
+            teile.push("Prüfe die Zeilen und speichere dann.");
+        }
+
+        setTextblockMeldung(teile.join(" "));
         setEingabeArt("zeilen");
         window.setTimeout(() => textblockRef.current?.scrollIntoView({ block: "center" }), 30);
 
@@ -928,6 +1058,55 @@ export default function VokabelnHinzufuegenSeite() {
 
                     {eingabeArt === "textblock" ? (
                         <div className={styles.textblock}>
+                            {/*
+                             * Datei statt Liste abtippen (Feature 3).
+                             *
+                             * Der Weg ist bewusst kurz: Datei waehlen, der
+                             * Inhalt landet im Textfeld, "Wörter übernehmen"
+                             * parst ihn wie eingefuegten Text. Es gibt also
+                             * nur EINEN Parser fuer beide Wege.
+                             *
+                             * Das input ist versteckt, das label ist der
+                             * Kasten. Damit ist der ganze Kasten
+                             * anklickbar, das Feld ist trotzdem mit Tab
+                             * erreichbar, und der Screenreader liest das
+                             * echte file-input vor – nicht irgendeine
+                             * nachgebaute Rolle.
+                             */}
+                            <div className={styles.dateiKasten}>
+                                <input
+                                    id="wortliste-datei"
+                                    type="file"
+                                    className={styles.dateiFeld}
+                                    accept=".txt,.csv,.tsv,text/plain,text/csv,text/tab-separated-values"
+                                    onChange={(e) => {
+                                        const datei = e.target.files?.[0];
+                                        /*
+                                         * `value` wird zurueckgesetzt, sonst
+                                         * loest der Wechsel auf DIESELBE Datei
+                                         * kein onChange mehr aus – der Nutzer
+                                         * waehlt sie zweimal und wundert sich,
+                                         * dass nichts passiert.
+                                         */
+                                        e.target.value = "";
+                                        if (datei) void dateiLesen(datei);
+                                    }}
+                                />
+                                <label htmlFor="wortliste-datei" className={styles.dateiKnopf}>
+                                    <IconDatei aria-hidden="true" />
+                                    Datei wählen
+                                </label>
+                                <span className={styles.dateiText}>
+                                    <span className={styles.dateiTitel}>
+                                        Oder eine Wortliste als Datei
+                                    </span>
+                                    <span className={styles.dateiHinweis}>
+                                        .txt, .csv, .tsv bis 500 kB. Semikolon, Komma,
+                                        Tabulator. Kopfzeile wird erkannt.
+                                    </span>
+                                </span>
+                            </div>
+
                             <label className={styles.feld}>
                                 <span className={styles.label}>Mehrere Wörter auf einmal</span>
                                 <textarea
