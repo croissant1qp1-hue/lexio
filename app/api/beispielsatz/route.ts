@@ -26,12 +26,37 @@ const MAX_LAENGE = 200;
  *      `.env` als GROQ_API_KEY. Ist er nicht gesetzt, antwortet die Route
  *      weiterhin sauber, nur ohne KI-Stueck (quelle = "keine").
  *
- * Sprachsicherheit
+* Sprachsicherheit
  * ----------------
- * `sprache` ist der Code der ZIELSPRACHE des Sets (also des Begriffs, nicht
- * der Uebersetzung). Der Tatoeba-Korpus ist Englisch-Deutsch; er wird nur
- * angefragt, wenn die Zielsprache wirklich Englisch ist. Sonst kaeme z. B.
+ * `sprache` ist der Code der Lernsprache des Sets, also der Sprache der
+ * Übersetzung. Der Tatoeba-Korpus ist Englisch-Deutsch; er wird nur
+ * angefragt, wenn die Lernsprache wirklich Englisch ist. Sonst kaeme z. B.
  * fuer ein italienisches "ciao" ein englischer Satz aus dem Korpus.
+ *
+ * WELCHES Wort gesucht wird – und warum das erst nach der Korrektur stimmt
+ * ------------------------------------------------------------------------
+ * Der Korpus ist nach ENGLISCHEN Wörtern sortiert. In einem deutschen Set
+ * steht das englische Wort in `antwort`, das deutsche in `frage`:
+ *
+ *     frage = "Haus"     antwort = "house"      <- so legt der Wizard es ab
+ *
+ * Die Route fragte zuerst `frage` im Korpus ab und bekam bei 35.125
+ * Korpuszeilen ausnahmslos zurueck: "haus" ist kein englisches Wort, der
+ * Treffer liegt unter "house". Genau die Wörter, für die man einen Satz
+ * braucht, haben dadurch keinen bekommen.
+ *
+ * Deshalb fragt die Route jetzt BEIDE Seiten ab, in dieser Reihenfolge:
+ *
+ *   1. `antwort` – das ist nach Konvention das Wort der Lernsprache, und
+ *      genau das steht im Korpus. Wer "Haus = house" eintippt, trifft hier.
+ *   2. `frage` – damit funktioniert auch die umgekehrte Eingabe
+ *      "house = Haus". Wer einen deutschen Begriff ohne englische
+ *      Entsprechung kennt, kommt so zum Zug.
+ *
+ * Das ist keine Spracherkennung, sondern ein Versuch und Fallback: welche
+ * Seite die Lernsprache ist, kann die Route nicht wissen, also fragt sie
+ * beide. Ein Fehltreffer ist ausgeschlossen – abgefragt wird nach exaktem
+ * Schluessel, es wird also nie ein fremder Satz ausgegeben.
  *
  * Antwortschema
  * -------------
@@ -44,12 +69,20 @@ type Antwort =
   | { satz: string; uebersetzung: string; quelle: "tatoeba" | "ki" | "cache" }
   | { satz: null; uebersetzung: null; quelle: "keine" };
 
-/** Normalisiert ein Wort fuer den Korpus-Schluessel: klein, nur a-z (Umlaute). */
+/**
+ * Normalisiert ein Wort fuer den Korpus-Schluessel.
+ *
+ * Wichtig: zwischen zwei Wörtern bleibt ein Leerzeichen stehen. Die erste
+ * Fassung hat jeden Leerzeichen entfernt und damit die Wortgrenze selbst
+ * zerstört – "ice cream" wurde zu "icecream" und traf nie. Wörter, die der
+ * Generator in den Korpus geschrieben hat, sind ebenfalls normalisiert, also
+ * muss diese Normalisierung auf beiden Seiten identisch sein.
+ */
 function normiere(wort: string): string {
   return wort
-    .toLowerCase()
-    .replace(/[^a-zäöüß]/g, "")
-    .trim();
+      .toLowerCase()
+      .replace(/[^a-zäöüß]+/g, " ")
+      .trim();
 }
 
 /**
@@ -96,24 +129,30 @@ function sprachName(code: string | null | undefined): string {
 /**
  * Gespraech mit der kostenlosen KI (Groq, llama-3.3-70b). Liefert
  * { satz, uebersetzung } oder null, wenn nichts Brauchbares zurueckkommt.
+ *
+ * `lernwort` ist das Wort, das im Satz vorkommen soll – also das Wort der
+ * Lernsprache. Die erste Fassung setzte hier die deutsche Seite ein und
+ * bat die KI, einen englischen Satz mit dem deutschen Wort zu erfinden. Das
+ * ergibt Muell ("Das Haus ist alt" statt eines Satzes mit "house"), also
+ * wandert das Wort jetzt aus der Korpus-Suche mit hierher.
  */
 async function frageKi(
   frage: string,
   antwort: string,
+  lernwort: string,
   sprache: string | null,
 ): Promise<{ satz: string; uebersetzung: string } | null> {
   const schluessel = process.env.GROQ_API_KEY;
   if (!schluessel) return null;
 
-  const system:
-    | "Du erfindest kurze, natuerliche Beispielsaetze fuer Vokabellernende."
-    | string = "Du erfindest kurze, natuerliche Beispielsaetze fuer Vokabellernende.";
+  const system =
+    "Du erfindest kurze, natuerliche Beispielsaetze fuer Vokabellernende.";
 
   const ziel = sprachName(sprache);
 
   const prompt =
     `Erfinde EINEN kurzen, natuerlichen Beispielsatz in ${ziel}, ` +
-    `in dem das Wort „${frage}“ vorkommt. Der Satz ist das Wort in Aktion, ` +
+    `in dem das Wort „${lernwort}“ vorkommt. Der Satz ist das Wort in Aktion, ` +
     `nicht eine Definition. Dazu die deutsche Uebersetzung des ganzen Satzes.\n` +
     `Die Vokabel lautet: ${frage} → ${antwort}.\n\n` +
     `Antworte NUR mit JSON, ohne Codeblock, in dieser Form:\n` +
@@ -209,24 +248,36 @@ export async function POST(request: Request) {
   }
 
   /*
-   * 1. Tatoeba-Korpus – aber nur, wenn die Zielsprache wirklich Englisch
+   * 1. Tatoeba-Korpus – aber nur, wenn die Lernsprache wirklich Englisch
    *    ist. Der Korpus kennt nur EN→DE; ein spanischer Begriff gehoert nicht
    *    durch diese Tuer.
+   *
+*    Beide Seiten des Paars werden abgefragt, die Uebersetzung zuerst: sie
+   *    ist nach Konvention das englische Wort, und genau da steht der
+   *    Treffer. Siehe die Begruendung im Dateikopf.
+   *
+   *    `lernwort` steht fuer den Fall, dass gar nichts getroffen wurde: dann
+   *    fragt die KI, und die soll das Wort der Lernsprache erfinden lassen.
+   *    Das ist die Uebersetzung. Trifft der Korpus, wird direkt geantwortet
+   *    und `lernwort` gar nicht gebraucht.
    */
+const lernwort = antwort;
   if ((sprache ?? null)?.toLowerCase() === "en") {
-    for (const kandidat of korbuskandidaten(frage)) {
-      const { data: treffer } = await supabase
-        .from("beispielsatz_korpus")
-        .select("satz, uebersetzung")
-        .eq("wort", kandidat)
-        .maybeSingle();
+    for (const seite of [antwort, frage]) {
+      for (const kandidat of korbuskandidaten(seite)) {
+        const { data: treffer } = await supabase
+          .from("beispielsatz_korpus")
+          .select("satz, uebersetzung")
+          .eq("wort", kandidat)
+          .maybeSingle();
 
-      if (treffer?.satz) {
-        return NextResponse.json({
-          satz: treffer.satz,
-          uebersetzung: treffer.uebersetzung,
-          quelle: "tatoeba",
-        } satisfies Antwort);
+        if (treffer?.satz) {
+          return NextResponse.json({
+            satz: treffer.satz,
+            uebersetzung: treffer.uebersetzung,
+            quelle: "tatoeba",
+          } satisfies Antwort);
+        }
       }
     }
   }
@@ -261,7 +312,7 @@ export async function POST(request: Request) {
    * 3. Kostenlose KI. Ohne Groq-Schluessel in .env fällt sie aus, und die
    *    Antwort ist ehrlich "keine" – kein Fehler, nur nichts.
    */
-  const vonKi = await frageKi(frage, antwort, sprache);
+  const vonKi = await frageKi(frage, antwort, lernwort, sprache);
   if (!vonKi) {
     return NextResponse.json({ satz: null, uebersetzung: null, quelle: "keine" }, { status: 200 });
   }

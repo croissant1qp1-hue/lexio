@@ -494,6 +494,63 @@ verspricht — und der Import macht sie erst wertvoll.
 > noch erarbeitet — hier steht nur der Auftrag, dass es mehr als eine
 > unbequeme Weg-Variante gibt.
 
+**2.5 Angenehmere Eingabe-Varianten.** Die Merknote aus 2.4 wird hier
+abgearbeitet. Vier Varianten, in dieser Reihenfolge:
+
+| # | Variante | Stand |
+|---|---|---|
+| 1 | Wortliste ohne Trennzeichen einfügen | erledigt |
+| 2 | Beispielsätze automatisch ergänzen | erledigt |
+| 3 | Datei hochladen (`.txt`, `.csv`) | offen |
+| 4 | Set duplizieren, Karten bearbeiten/löschen | offen |
+
+> **1 — Wortliste ohne Trennzeichen.** Eine deutsche Wortliste, wie sie aus
+> einem Buch oder einer anderen App herauskopiert wird, hat kein Trennzeichen:
+>
+> ```
+> Haus
+> Baum
+> Fluss
+> ```
+>
+> Dafür gibt es `lib/einzelimport.ts`. Erkannt werden Nummerierung
+> (`1.`, `1)`, `•`), Tabulator, Pipe, Semikolon, Doppelpunkt, `=`, `->`, `=>`
+> und Trennworte (`means`, `ist`, `sind`, `heißt`, `heisst`). Eine Zeile mit
+> nur einem Begriff wird als **offene, sichtbare Zeile** übernommen — leer,
+> in der Liste sichtbar, dort zu ergänzen. Sie geht nicht verloren.
+>
+> Ausdrücklich **nicht** geraten wird: es gibt keine lokale Wörterbuchdatei
+> und keinen Cloud-Schlüssel, und ein still falsches Wort in einer
+> Vokabelkarte ist schlimmer als eine sichtbare Lücke. Der Bindestrich trennt
+> nur, wenn die rechte Seite wie eine Übersetzung aussieht, sonst zerfällt
+> jeder Nebensatz mit Gedankenstrich. 41 Tests grün.
+>
+> **2 — Beispielsätze automatisch.** `/api/beispielsatz` liefert zu einem
+> Wortpaar einen echten Satz aus dem Tatoeba-Korpus (EN→DE, Migration 012)
+> samt deutscher Übersetzung, mit Cache und optionaler KI dahinter.
+>
+> Verifiziert am 2026-10-01: Der Korpus war leer (Tabelle angelegt, nie
+> befüllt) und `GROQ_API_KEY` fehlt in `.env` — die Route gab für **jedes**
+> Wort `quelle: "keine"` zurück. Nach dem Einspielen von **35.125** Korpus-
+> zeilen (Tatoeba `eng-deu`, `npm run beispielsatz:korpus`) liefert sie
+> 16/16 getestete Wörter, live in der Oberfläche geprüft.
+>
+> Zwei Fehler, die erst die Messung zeigte:
+>
+>   - Die Route fragte `frage` im englischsprachigen Korpus ab. Bei „Haus =
+>     house" steht der Begriff aber auf der deutschen Seite, der Treffer lag
+>     unter `house` — 0 Treffer bei voller Tabelle. Jetzt werden beide Seiten
+>     abgefragt, Übersetzung zuerst.
+>   - Die Auto-Ergänzung nach dem Textblock-Import lief nie an: sie las
+>     `paareRef`, der über einen `useEffect` einen Render hinterherhinkt.
+>     Gemessen: **0** API-Aufrufe bei zwei importierten Wörtern. Jetzt wird
+>     die frisch erzeugte Liste übergeben.
+>
+> Ehrlich statt still: Findet sich für eine Zeile nichts — bei einem
+> spanischen Set ist das der Normalfall, weil es nur eine englische Quelle
+> gibt —, sagt die Oberfläche das jetzt, statt den Knopf verschwinden zu
+> lassen.
+
 **Abnahme (Phase 2):** Wortschatz-Sicht abgenommen — Liste, Suche, Set-Links
 und der Wechsel zwischen Wortsicht und Set-Übersicht in beide Richtungen
 (Commit `ea94203`). Der Leerzustand arbeitet wieder (2.1), das Starter-Set

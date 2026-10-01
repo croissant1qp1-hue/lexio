@@ -365,11 +365,15 @@ export default function VokabelnHinzufuegenSeite() {
 
         // Erste, noch leere Zeile ersetzen, sonst staendest du vor einer
         // leeren Zeile und weisst nicht, wohin sie gehoert.
-        setPaare((alt) => {
-            const nurLeereStartzeile =
-                alt.length === 1 && !alt[0].frage.trim() && !alt[0].antwort.trim();
-            return nurLeereStartzeile ? ergebnis.paare : [...alt, ...ergebnis.paare];
-        });
+        //
+        // Die fertige Liste wird hier GEBILDET und nicht erst im setPaare-
+        // Aufrufer, weil die Auto-Ergaenzung unten dieselbe Liste braucht.
+        // `paare` ist hier der Stand des gerenderten Bildes und damit genau
+        // das, was der Nutzer sieht – ein Ref waere hier der falsche Weg.
+        const nurLeereStartzeile =
+            paare.length === 1 && !paare[0].frage.trim() && !paare[0].antwort.trim();
+        const neueListe = nurLeereStartzeile ? ergebnis.paare : [...paare, ...ergebnis.paare];
+        setPaare(neueListe);
         setTextblock("");
         // Bei offenen Zeilen sagt die Meldung, WAS zu tun ist. "12 Zeilen
         // uebernommen" allein laesst den Nutzer raten, ob nun etwas fehlt –
@@ -393,8 +397,15 @@ export default function VokabelnHinzufuegenSeite() {
          * jede Zeile einzeln einen Beispielsatz tippen. Gutsein ist unser
          * einziger Job, wenn wir nicht stoeren. Ohne Abbruch-Flag, nur bis
          * zur Schritt-Grenze.
+         *
+         * `neueListe` wird uebergeben statt aus `paareRef` gelesen: der Ref
+         * haengt an einem useEffect und laeuft deshalb noch einen Render
+         * hinterher. Beim ersten Aufruf nach dem Import stand dort noch die
+         * eine leere Zeile, `ziele` war leer, und die Funktion kehrte sofort
+         * zurueck – es ging kein einziger API-Aufruf raus. Live gemessen:
+         * 0 Aufrufe bei zwei importierten Woertern.
          */
-        void beispielSaetzeErgaenzen();
+        void beispielSaetzeErgaenzen(neueListe);
     }
 
     /*
@@ -408,9 +419,15 @@ export default function VokabelnHinzufuegenSeite() {
      * Die KI-Quote ist kostenlos und damit begrenzt; 40 parallele Aufrufe
      * ruinierten die Wartezeit und das Paket. Hier sind es hoechstens
      * MAX_PARALLEL gleichzeitige Anfragen, der Rest wartet in einer Queue.
+     *
+     * `quelle` ist die Liste, fuer die gearbeitet werden soll. Ohne Argument
+     * (Knopf "Beispielsätze ergänzen") kommt der aktuelle Bildschirmstand aus
+     * `paareRef`; beim Textblock-Import wird die gerade erzeugte Liste
+     * uebergeben, weil der Ref noch nicht nachgezogen hat.
      */
-    async function beispielSaetzeErgaenzen() {
-        const ziele = paareRef.current
+    async function beispielSaetzeErgaenzen(quelle?: Paar[]) {
+        const basis = quelle ?? paareRef.current;
+        const ziele = basis
             .map((p, index) => ({ p, index }))
             .filter(
                 ({ p }) =>
@@ -494,10 +511,26 @@ export default function VokabelnHinzufuegenSeite() {
             setBeispielMeldung(
                 `${gefundeneSätze} ${
                     gefundeneSätze === 1 ? "Beispielsatz" : "Beispielsätze"
-                } automatisch ergänzt.`,
+                } automatisch ergänzt.` +
+                    (gefundeneSätze < ziele.length
+                        ? ` Für ${ziele.length - gefundeneSätze} wurde nichts gefunden – ` +
+                          "die kannst du selbst eintragen."
+                        : ""),
             );
         } else {
-            setBeispielMeldung(null);
+            /*
+             * Nichts gefunden ist kein Fehler, aber es ist auch nichts, was
+             * man dem Nutzen zumuten kann. Vorher verschwand der Knopf
+             * ersatzlos und die Zeilen blieben einfach leer – bei einem
+             * spanischen Set passiert das bei JEDEM Wort, weil es dort keine
+             * Quelle gibt. Er sagen, woran es liegt, ist ehrlicher als
+             * Stille.
+             */
+            setBeispielMeldung(
+                `Zu ${ziele.length === 1 ? "diesem Wort" : `diesen ${ziele.length} Wörtern`} ` +
+                    "gibt es noch keinen Beispielsatz. Du kannst sie selbst " +
+                    "eintragen – das Feld ist optional.",
+            );
         }
         setFehler({});
     }
