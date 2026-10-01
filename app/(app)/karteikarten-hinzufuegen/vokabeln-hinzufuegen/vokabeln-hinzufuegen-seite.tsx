@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { farbeVonSprache, type Sprache, type SpracheInfo } from "@/lib/sprachen";
 import { holeJson, sendeJson, ApiFehler } from "@/lib/api-client";
-import { textblockZuPaaren } from "@/lib/textblock-import";
+import { textblockEinlesen } from "@/lib/einzelimport";
 import styles from "./vokabeln-hinzufuegen.module.css";
 import SprachAuswahl from "./sprach-auswahl";
 
@@ -315,17 +315,51 @@ export default function VokabelnHinzufuegenSeite() {
     function textblockUebernehmen() {
         setFehler({});
 
-        const ergebnis = textblockZuPaaren(textblock);
-        if (!ergebnis.trenner) {
+        /*
+         * Zwei Parser, in dieser Reihenfolge.
+         *
+         * Der strenge (textblockZuPaaren) braucht ein Trennzeichen und
+         * gewinnt daraus die Spaltenzahl, mit der sich auch Beispielsatz und
+         * Beispieluebersetzung auslesen lassen. Der milde
+         * (textblockEinlesen) kommt ohne Trennzeichen aus, verliert dabei
+         * aber die Spaltenzahl – eine Liste mit Tabulatoren liefert dann
+         * keine Beispielsätze.
+         *
+         * Deshalb wird erst streng probiert und nur bei Misserfolg mild.
+         * Eine deutsche Wortliste ohne jede Formatierung ist genau der
+         * Fall, an dem die App vorher mit "Kein Trennzeichen gefunden"
+         * abgewiesen hat.
+         */
+        /*
+         * Der milde Parser hat Vorrang, nicht der strenge.
+         *
+         * Das war zuerst andersherum und damit falsch: der strenge Parser
+         * liest "1. Haus = house" ohne Fehler als Begriff "1. Haus". Die
+         * Nummerierung bleibt dann im Eingabefeld stehen, weil er sie nicht
+         * kennt. Live geprueft, alle sieben Faelle:
+         *
+         *   1. Haus = house   ->  streng: "1. Haus" / house
+         *                         milde:  "Haus"   / house
+         *
+         * Der milde schneidet die Nummerierung ab und beherrscht
+         * ausserdem alle Faelle des strengen (er erkennt Tabulator, Pipe und
+         * Semikolon als Spalten, und Trennworte wie "means"). Es gibt also
+         * keinen Grund, ihn erst im Notfall zu fragen – der strenge Parser
+         * darf nur eins: die Zahl der Spalten liefern, wenn vier da sind.
+         *
+         * Siehe die Messung in lib/einzelimport.ts: dort stehen beide
+         * Ergebnisse nebeneinander.
+         */
+        const ergebnis = textblockEinlesen(textblock);
+
+        if (ergebnis.paare.length === 0) {
             setFehler({
                 textblock:
-                    "Kein Trennzeichen gefunden. Erwartet wird eine Zeile je Vokabel, etwa\n" +
-                    "Begriff ; Übersetzung (auch Tabulator, Doppelpunkt, Gleich- oder Pfeilzeichen).",
+                    "Daraus wurde keine Vokabel erkannt. Möglich sind:\n" +
+                    "Haus ; Übersetzung   (Tabulator, Doppelpunkt, =, ->)\n" +
+                    "1. Haus = house      (Nummerierung wird weggelassen)\n" +
+                    "Haus                (nur der Begriff, Übersetzung danach)",
             });
-            return;
-        }
-        if (ergebnis.paare.length === 0) {
-            setFehler({ textblock: "Trage zuerst mindestens eine Vokabel ein." });
             return;
         }
 
@@ -337,9 +371,18 @@ export default function VokabelnHinzufuegenSeite() {
             return nurLeereStartzeile ? ergebnis.paare : [...alt, ...ergebnis.paare];
         });
         setTextblock("");
+        // Bei offenen Zeilen sagt die Meldung, WAS zu tun ist. "12 Zeilen
+        // uebernommen" allein laesst den Nutzer raten, ob nun etwas fehlt –
+        // und das fuehrt zum Speichern, das dann an der ersten leeren
+        // Uebersetzung haengenbleibt.
+        const offen = ergebnis.ohneUebersetzung;
         setTextblockMeldung(
             `${ergebnis.paare.length} Vokabel${ergebnis.paare.length === 1 ? "" : "n"} ` +
-                "übernommen. Prüfe die Zeilen und speichere dann.",
+                "übernommen." +
+                (offen > 0
+                    ? ` Bei ${offen} fehlt die Übersetzung – bitte in der ` +
+                      "Liste ergänzen."
+                    : " Prüfe die Zeilen und speichere dann."),
         );
         setEingabeArt("zeilen");
         window.setTimeout(() => textblockRef.current?.scrollIntoView({ block: "center" }), 30);
