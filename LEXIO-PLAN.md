@@ -596,12 +596,39 @@ abgearbeitet. Vier Varianten, in dieser Reihenfolge:
 > jede mit eigener Fehlermeldung. Bei 500 Zeilen wäre ein Textfeld voller
 > Rohdaten nur ein zweiter Ort, an dem dieselben Daten liegen.
 >
-> Eine Entscheidung mit Folgen: `box-sizing` am Datei-Knopf. Ohne ihn misst
-> der Browser `min-height: 44px` am Inhalt, dazu kommen 16px Polsterung —
-> gemessen 62px, und der Dateikasten auf dem Handy 172px hoch. Unter 30em
-> stapelt sich der Kasten jetzt.
->
 > 35 Tests im Datei-Parser, 76 insgesamt.
+>
+> **Der Knopf selbst**, nachgemessen an vier Breiten (390, 768, 1440, 1920):
+>
+> | Breite | Kasten | Knopf |
+> |---|---|---|
+> | 390px (Handy) | 324×136 | 293×44, volle Breite |
+> | 768px (Tablet) | 626×82 | 140×44 |
+> | 1440px | 606×82 | 140×44 |
+> | 1920px | 606×82 | 140×44 |
+>
+> Kein Überlauf, kein Element ragt aus seinem Kasten, überall 44px Höhe.
+>
+> Zwei Entscheidungen, die nicht aus dem Katalog kommen:
+>
+>   - **`box-sizing: border-box` am Knopf.** Ohne das misst `min-height:
+>     44px` den Inhalt, dazu kommen 16px Polsterung — gemessen **62px**. Der
+>     Knopf war auf dem Handy fast halb so hoch wie nötig, und der ganze
+>     Kasten 172px statt 136px.
+>   - **Kein `translateY` beim Drücken.** Der Rahmen darum beult sich sichtbar
+>     mit, und das liest sich wie ein Fehler. Der Knopf verändert nur die
+>     Farbe.
+>
+> Die Tastatur sieht denselben Zustand wie die Maus: der Kasten reagiert auf
+> `:focus-within`, nicht nur auf `:hover`. Die Tab-Reihenfolge im Schritt ist
+> Dateifeld → Textfeld → „Wörter übernehmen" — das Dateifeld ist der erste
+> Stopp, weil es im Markup vor dem Textfeld steht. Gemessen, nicht vermutet.
+>
+> Das versteckte `<input>` ist mit `clip: rect(0,0,0,0)` unsichtbar, aber
+> **nicht** positioniert über der Fläche. Ein aufgelegtes, unsichtbares Feld
+> fängt Klicks ab, die an den Text daneben gehen, und liefert bei Tests
+> Treffer, die es im Bild nicht gibt. Der sichtbare Knopf ist ein `<label>`;
+> der Klickpfad ist derselbe, und ohne JavaScript geht er auch.
 
 **Abnahme (Phase 2):** Wortschatz-Sicht abgenommen — Liste, Suche, Set-Links
 und der Wechsel zwischen Wortsicht und Set-Übersicht in beide Richtungen

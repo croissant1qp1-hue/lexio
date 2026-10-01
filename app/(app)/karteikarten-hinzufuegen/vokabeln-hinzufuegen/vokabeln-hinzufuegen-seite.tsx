@@ -1058,20 +1058,30 @@ export default function VokabelnHinzufuegenSeite() {
 
                     {eingabeArt === "textblock" ? (
                         <div className={styles.textblock}>
-                            {/*
+{/*
                              * Datei statt Liste abtippen (Feature 3).
                              *
-                             * Der Weg ist bewusst kurz: Datei waehlen, der
-                             * Inhalt landet im Textfeld, "Wörter übernehmen"
-                             * parst ihn wie eingefuegten Text. Es gibt also
-                             * nur EINEN Parser fuer beide Wege.
+                             * Der Import passiert SOFORT, ohne Umweg ueber
+                             * das Textfeld: `dateiLesen` liest die Datei,
+                             * `dateiEinlesen` macht daraus Paare, und
+                             * `uebernehmen` stellt sie in die Liste. Der Weg
+                             * ist derselbe wie beim eingefuegten Text – es
+                             * gibt also nur EINEN Parser fuer beide Wege.
                              *
-                             * Das input ist versteckt, das label ist der
-                             * Kasten. Damit ist der ganze Kasten
-                             * anklickbar, das Feld ist trotzdem mit Tab
-                             * erreichbar, und der Screenreader liest das
-                             * echte file-input vor – nicht irgendeine
-                             * nachgebaute Rolle.
+                             * Warum kein Zwischenstopp im Textfeld: die
+                             * Zeilenliste ist die bessere Vorschau. Jede
+                             * Zeile ist einzeln editierbar und traegt ihre
+                             * eigene Fehlermeldung. Ein Textfeld voller
+                             * Rohdaten waere nur ein zweiter Ort, an dem
+                             * dieselben Daten liegen.
+                             *
+                             * Das <label> ist das richtige Element, kein
+                             * <button>: es oeffnet den Dateidialog mit einem
+                             * Klick und ohne JavaScript, und der eigentliche
+                             * <input> bleibt fuer Tastatur und Screenreader
+                             * da – nur visuell versteckt. Der Kasten reagiert
+                             * auf :focus-within, damit die Tastatur denselben
+                             * Zustand sieht wie die Maus.
                              */}
                             <div className={styles.dateiKasten}>
                                 <input
@@ -1096,6 +1106,14 @@ export default function VokabelnHinzufuegenSeite() {
                                     <IconDatei aria-hidden="true" />
                                     Datei wählen
                                 </label>
+                                {/*
+                                 * Der Hinweistext steht als <span>, nicht als
+                                 * <p>: er gehoert optisch zum Knopf und soll
+                                 * beim Tabben nicht als eigener Stopp
+                                 * auffallen. Fuer Screenreader bleibt er
+                                 * Text – der Hinweis, dass .csv erlaubt ist,
+                                 * ist nuetzlich und nicht nur Dekoration.
+                                 */}
                                 <span className={styles.dateiText}>
                                     <span className={styles.dateiTitel}>
                                         Oder eine Wortliste als Datei

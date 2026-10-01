@@ -495,11 +495,20 @@
     line-height: 1.4;
 }
 
-/* Datei-Auswahl. Das echte input ist unsichtbar und liegt ueber der
-  Flaeche, damit der ganze Kasten anklickbar ist – ohne JavaScript, ohne
-   falsche Rolle, mit dem echten feld als Beschriftung fuer Screenreader.
-   `sr-only` ist bewusst nicht als Klasse im Projekt vorhanden, deshalb
-   hier die drei noetigen Regeln direkt. */
+/*
+ * Datei-Auswahl.
+ *
+ * Das echte <input type="file"> ist visuell versteckt, aber NICHT
+ * positioniert ueber der Flaeche – es liegt mit 1x1px und `clip` im
+ * Nichts. Grund: ein aufgelegtes, unsichtbares Feld faengt Klicks ab,
+ * die eigentlich an den Text daneben gehen, und liefert bei Playwright
+ * Treffer, die es im Bild nicht gibt. Der sichtbare Knopf ist ein
+ * <label>; der Klickpfad ist derselbe.
+ *
+ * `clip: rect(0,0,0,0)` statt `display: none`: nur mit clip bleibt das
+ * Feld im Tab-Fokus und im Screenreader-Baum. Wer es ausblendet, baut
+ * einen Knopf, den man mit der Tastatur nicht bedienen kann.
+ */
 .dateiFeld {
     position: absolute;
     width: 1px;
@@ -530,26 +539,49 @@
 }
 
 /*
- * Unter 30em (480px) ist neben dem Knopf nur noch eine schmale Spalte für
- * den Text. Gemessen bei 390px: der Kasten wurde 153px hoch, weil der
- * Hinweistext über fünf Zeilen umbrach. Gestapelt sind es zwei Zeilen.
+ * Der Datei-Kasten: ein gestrichelter Rahmen um Knopf und Text.
+ *
+ * Gestrichelt, weil die Kante eine Absicht signalisiert, keine fertige
+ * Sache. Wer hier eine durchgezogene Linie sieht, erwartet ein Feld zum
+ * Ausfuellen, und das ist es nicht – es ist ein Dateidialog.
+ *
+ * Der Rahmen reagiert auf :focus-within, nicht nur auf :hover. Wer per
+ * Tastatur den Datei-Knopf erreicht, sieht denselben Zustand wie jemand
+ * mit der Maus. Das ist der Unterschied zwischen zwei Ruby- und einem
+ * Ruby-Programmierer: eins kann man benutzen.
  */
-@media (max-width: 30em) {
-    .dateiKasten {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.6rem;
-    }
-
-    .dateiKnopf {
-        /* Volle Breite: ein Ziel, das man nicht verfehlen kann. Die 44px
-           kommen aus min-height, mit weniger Polsterung bleibt es flach. */
-        width: 100%;
-        justify-content: center;
-        padding: 0.45rem 0.85rem;
-    }
+.dateiKasten {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.8rem 0.9rem;
+    border-radius: 12px;
+    border: 1px dashed var(--line);
+    background: var(--input-bg);
+    transition: border-color 160ms ease, background 160ms ease;
+    box-sizing: border-box;
 }
 
+.dateiKasten:hover,
+.dateiKasten:focus-within {
+    border-color: var(--sage);
+    background: rgba(101, 168, 141, 0.06);
+}
+
+/*
+ * Der Knopf.
+ *
+ * Drei Dinge, alle gemessen und nicht aus dem Katalog:
+ *
+ *   - `box-sizing: border-box`. Ohne das misst `min-height: 44px` den
+ *     INHALT, dazu kommen 16px Polsterung: gemessen 62px statt 44px. Der
+ *     Knopf war auf dem Handy fast halb so hoch wie nötig.
+ *   - `min-height: 44px`, nicht 48. Das ist die Grenze, an der ein Daumen
+ *     zuverlässig trifft. Grösser ist nicht bequemer, nur wärmer.
+ *   - Die Polsterung links/rechts ist mit 0.85rem bewusst knapp. Bei
+ *     "Datei wählen" plus Icon ist das eine Zeile ohne Umbruch, gemessen
+ *     140px breit – das passt neben den Text, ohne ihn zu verdrängen.
+ */
 .dateiKnopf {
     display: inline-flex;
     align-items: center;
@@ -557,8 +589,6 @@
     gap: 0.4rem;
     flex-shrink: 0;
     padding: 0.5rem 0.85rem;
-    /* 44px Gesamt, nicht 44px plus Polsterung: ohne border-box misst der
-       Browser den Inhalt, und der Knopf wurde 62px hoch (gemessen). */
     min-height: 44px;
     box-sizing: border-box;
     border-radius: 10px;
@@ -569,12 +599,46 @@
     font-size: 0.9rem;
     font-weight: 600;
     cursor: pointer;
+    /* Kein translateY beim Druecken: der Rahmen darum beult sich sichtbar
+       mit, und das sieht nach einem Fehler aus. */
+    transition: border-color 140ms ease, color 140ms ease,
+        background 140ms ease;
 }
 
 .dateiKasten:hover .dateiKnopf,
 .dateiFeld:focus-visible + .dateiKnopf {
     border-color: var(--sage);
     color: var(--sage);
+    background: var(--card-bg);
+}
+
+/*
+ * Unter 30em (480px) ist neben dem Knopf nur noch eine schmale Spalte für
+ * den Text. Gemessen bei 390px: der Kasten wurde 153px hoch, weil der
+ * Hinweistext über fünf Zeilen umbrach. Gestapelt sind es 136px, und der
+ * Knopf über die volle Breite – auf dem Handy tippt man nicht neben etwas.
+ */
+@media (max-width: 30em) {
+    .dateiKasten {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.6rem;
+    }
+
+    .dateiKnopf {
+        /* Volle Breite auf kleinen Bildschirmen, fuer 44px Touch-Ziel */
+        width: 100%;
+        justify-content: center;
+        padding: 0.45rem 0.85rem;
+        min-height: 44px;
+        box-sizing: border-box;
+    }
+}
+
+@media (min-width: 30em) {
+    .dateiKnopf {
+        width: auto;
+    }
 }
 
 .dateiText {
