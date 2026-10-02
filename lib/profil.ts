@@ -29,7 +29,10 @@
  * zeigt.
  */
 export function xpFuerAufstieg(zuLevel: number): number {
-    const n = Math.max(1, Math.floor(zuLevel));
+    // `Number.isFinite` zuerst, weil `Math.max(1, Math.floor(NaN))` NaN
+    // ergibt und nicht 1 – die Wache vor 0 und negativen Zahlen allein
+    // laesst NaN durch. Von hier wanderte ein NaN in den Fortschrittsbalken.
+    const n = Number.isFinite(zuLevel) ? Math.max(1, Math.floor(zuLevel)) : 1;
     return Math.round((1000 * Math.pow(1.1, n - 1)) / 10) * 10;
 }
 

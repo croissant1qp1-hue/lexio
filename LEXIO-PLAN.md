@@ -724,8 +724,29 @@ bisher nur auf dem eigenen Rechner läuft. Abos liegen in
 **3.2 Level-Kurve.** `lib/profil.ts:14` — Kurve statt 1500 flach, mit
 Lücken-Balken bei 50 % / 80 % / 100 %.
 
+> **Erledigt.** Commit `7b0c1e4`. Jeder Aufstieg kostet 10 % mehr als der
+> letzte, Basis 1000, auf volle Zehn gerundet: Stufe 2 braucht 1100, Stufe 3
+> 1210, Stufe 12 2850. Flach 1500 hätte 187 perfekte Antworten je Stufe
+> verlangt, egal ob seit einer Woche oder seit einem Jahr. Die Kerben sitzen
+> bei 50 % und 80 %; 100 % ist der Balken selbst. Der Deckel liegt bei 120.
+>
+> Nachgetragen am 2026-10-02: 19 Tests in `tests/profil.test.ts`, weil diese
+> Formel als einzige Logik im Projekt ohne Regressionstest dastand — und
+> `levelAusXp` sowie `levelInfo` je eine eigene Schleife über dieselbe
+> Tabelle haben. Ein Test fand sofort einen echten Fehler:
+> `Math.max(1, Math.floor(NaN))` ist `NaN`, nicht 1. Die Wache vor 0 und
+> negativen Stufennummern ließ NaN durch, und ein NaN wanderte in den
+> Fortschrittsbalken.
+
 **3.3 Tagesziel ehrlich.** 20 XP ist im RPC fest verdrahtet (`003:637`).
 Entweder konfigurierbar oder aus der realen Rundenzahl abgeleitet.
+
+> **Erledigt.** Commit `a2522bf`, Migration 013. 100 XP, also eine Lernrunde
+> pro Tag (5 XP je Karte × 20 Karten). Die 20 waren absurd wenig: eine
+> halbe Runde mit „gut" gefüllt den ganzen Balken. Das Ziel steht als
+> `TAGESZIEL_XP` in `lib/profil.ts` und wird von Route, Statistik und
+> RPC-Bindung geteilt — vorher stand dieselbe Zahl an drei Stellen, was der
+> eigentliche Fehler war.
 
 **3.4 `sets_gelernt` reparieren.** `003:486` zusammen mit dem Upsert
 `003:638-640`.
