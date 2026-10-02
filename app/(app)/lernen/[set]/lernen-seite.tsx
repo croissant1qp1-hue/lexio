@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
 import { schwerChance } from "@/lib/reihenfolge";
@@ -10,6 +10,8 @@ import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import { spreche, stimmen, stoppe, tonVerfuegbar } from "@/lib/sprachausgabe";
 import { LAUTSTÄRKE_VOLUMEN, liesTon, TON_SPEICHER } from "@/lib/ton";
+import { beobachteZeichen, liesZeichenAn, zeichenVorgabe } from "@/lib/kartenzeichen-ein";
+import Kartenzeichen from "@/components/kartenzeichen";
 import { IconLeererStapel, IconSterne, IconTasse, IconZielfahne } from "@/components/icone";
 import styles from "./lernen.module.css";
 
@@ -235,10 +237,35 @@ export default function LernenSeite({
      */
     const [tonStand, setTonStand] = useState(() => liesTon());
 
+    /*
+     * Die Kartenzeichen kommen aus derselben Art von Geraete-Einstellung, mit
+     * demselben `storage`-Hoecher. Gefuellt ist der Stand per Vorgabe, und die
+     * Zeichen selbst entstehen in `components/kartenzeichen.tsx` aus der
+     * Karten-ID – es gibt keine Liste, die hier geladen werden muesste und
+     * auch fuer eigene Sets nichts zu pflegen.
+     *
+     * `useSyncExternalStore` statt `useState(() => liesZeichen())`: im
+     * Zustands-Initializer liest man localStorage, und der erste
+     * Client-Render ist dann der mit dem gespeicherten Stand, waehrend der
+     * Server mangels `window` den Vorgabe-Stand gerendert hat. Bei
+     * ausgeschalteten Zeichen sieht der Server das Zeichen und der Browser
+     * nicht – React meldet genau das als Hydration-Fehler #418. Im Audit
+     * sichtbar. Der dritte Parameter ist der Server-Stand, derselbe Wert, den
+     * auch der erste Client-Render annimmt.
+     */
+    const zeichenAn = useSyncExternalStore(beobachteZeichen, liesZeichenAn, zeichenVorgabe);
+
     useEffect(() => {
         const beiAenderung = (e: StorageEvent) => {
-            const istTon = e.storageArea === window.localStorage && (e.key === null || e.key === TON_SPEICHER);
-            if (!istTon) return;
+            if (e.storageArea !== window.localStorage) return;
+            // `e.key === null` heisst: der ganze Speicher wurde von aussen
+            // geleert. Dann trifft es beide Einstellungen, und nach dem
+            // Standard (Zeichen an) zuruecklesen ist das Richtige.
+            if (e.key === null) {
+                setTonStand(liesTon());
+                return;
+            }
+            if (e.key !== TON_SPEICHER) return;
             const frisch = liesTon();
             if (!frisch.an) {
                 // Töne aus: das laufende Sprechen stoppen. Ein laufender
@@ -1171,6 +1198,31 @@ if (karten.length === 0) {
                                             </span>
                                         )}
                                     </>
+                                )}
+
+                                {/*
+                                 * Das Zeichen der Karte, unten rechts – auf
+                                 * beiden Seiten.
+                                 *
+                                 * Bewusst AUSSERHALB der
+                                 * `aufgedeckt ? ... : ...`-Verzweigung
+                                 * darüber. Es stand zuerst innerhalb des
+                                 * Zweigs und war damit nur auf der
+                                 * Rueckseite zu sehen; das ist an der
+                                 * Anforderung "auf beiden Seiten" im
+                                 * Audit aufgefallen. Jetzt gibt es eine
+                                 * Stelle im DOM, und beide Seiten
+                                 * bekommen es, ohne dass es zweimal
+                                 * geschrieben werden muss.
+                                 *
+                                 * Die Groesse ist der Vorgabewert der
+                                 * Komponente (32px) und steht hier nicht
+                                 * noch einmal: eine zweite Zahl waere eine
+                                 * Gelegenheit, die beiden auseinanderlaufen
+                                 * zu lassen.
+                                 */}
+                                {zeichenAn && (
+                                    <Kartenzeichen karteId={karte.id} className={styles.karteMarke} />
                                 )}
                             </span>
                         </span>

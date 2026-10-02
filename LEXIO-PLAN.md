@@ -1130,20 +1130,27 @@ Phase 0  (Sprach-Code, Kartenspalten)
    └──> Phase 2  (Wortlisten müssen sauber einsortiert werden)
 Phase 1  ──> Phase 2   (Lerneffekt zuerst, wie entschieden)
 Phase 2  ──> Phase 3   (Content, bevor Reichweite)
-Phase 2  ──> Phase 6   (Icons brauchen echten Inhalt, nicht Platzhalter)
 Phase 3  ──> Phase 4
 Phase 4  ──> Phase 5
-Phase 5  ──> Phase 6   (Icons auf dem Handy prüfen)
-Phase 6  ──> Phase 7   (Icon-System wandert in die App)
+Phase 5  ──> Phase 6   (Kartenzeichen auf dem Handy prüfen)
+Phase 6  ──> Phase 7   (Zeichenberechnung wandert in die App)
 ```
+
+**Phase 6 ist erledigt (2026-10-02)** und zwar entgegen der ursprünglichen
+Abhängigkeit: Die Zeichen entstehen aus der Karten-ID statt aus einer
+Zuordnungstabelle, also brauchen sie keine Wortlisten und keinen echten
+Inhalt. Damit ist genau die Bedingung entfallen, an der die Phase in der
+ursprünglichen Planung hing.
 
 Phase 0 ist trotz „klingt nach nichts" die teuerste Code-Änderung: 12
 Dateien, 134 Treffer, plus Migration. Sie ist trotzdem Voraussetzung für
 alles Weitere.
 
-Phase 6 und Phase 7 sind ausdrücklich nachrangig. Sie stehen hier, damit
-sie nicht verloren gehen — nicht damit sie jetzt gemacht werden. Siehe
+Phase 7 ist ausdrücklich nachrangig. Sie steht hier, damit sie nicht verloren
+geht — nicht damit sie jetzt gemacht wird. Siehe
 [Nachtrag](#nachtrag-vom-2026-09-27--react-native-app-und-karten-icons).
+Phase 6 ist dagegen umgesetzt; siehe die Phase selbst für den Nutzerentscheid,
+der die semantische Zuordnungstabelle ersetzt hat.
 
 ---
 
@@ -1208,56 +1215,99 @@ Zwei Vorhaben, die nach der Nutzerentscheidung vom 2026-09-27 dazukommen.
 Beide stehen **nach** Phase 5. Sie sind hier festgehalten, damit sie nicht
 vergessen werden — sie sind kein Grund, eine Phase vorzuziehen.
 
-### Phase 6 — Karten-Icons als Wiedererkennungsmerkmal
+### Phase 6 — Kartenzeichen (umgesetzt)
 
-**Der Wunsch.** Jede Karte soll ein kleines, eigenes, gut merkbares Zeichen
-bekommen, das man beim Wort sofort wiedererkennt. Also ein Lernanker:
-Wort → Bild → Wort, ohne den Text zu lesen.
+**Der Wunsch, unverändert.** Jede Karte bekommt ein kleines, eigenes Zeichen,
+das man beim Wort wiedererkennt.
 
-**Warum das nicht 2.000 gezeichnete Logos sind.** Der teure Weg wäre ein Logo
-pro Karte. Bei 1.500–2.000 Karten heißt das: 2.000 Bilder, jeder seine eigene
-Gestaltung, eigene Datei, eigener Speicherplatz. Das ist nicht bezahlbar und
-nicht wartbar. Noch teurer: 2.000 per KI erzeugte Bilder — langsam, teuer, und
-im Stil jedes Mal ein anderes. Eine uneinheitliche Icon-Fläche auf 2.000
-Karten sieht schlechter aus als gar keine.
+**Der Nutzerentscheid, der die Umsetzung geändert hat.** Nach dem ersten
+Stand — unten links, 26 px, Deckkraft 0,3 bis 0,58 — kam zurück: *rechts
+unten, auf beiden Seiten der Karte, etwas auffälliger und etwas größer*.
+Umsetzung: unten rechts, 32 px, Deckkraft 0,6 bis 1,0, und es steht jetzt
+**außerhalb** der Vorder-/Rückseiten-Verzweigung, damit beide Seiten es
+bekommen.
 
-**Der Weg, der funktioniert.** Ein *eigenes Zeichen pro Karte* ist nicht nötig,
-wenn das Zeichen aus einer **konsistenten, kleinen Menge stammt** und die
-Zuordnung *offensichtlich* ist. Also:
+Damit fällt die ursprüngliche Planung dieser Phase ersetzt: eine
+*semantische* Zuordnung Wort → Icon aus einem lizenzfreien Satz (Lucide,
+Phosphor) mit 2.000 bewussten Entscheidungen. Der Nutzer wollte keine
+Bedeutung im Zeichen, sondern ein unterscheidbares. Und die Datenlage sagt
+dasselbe: von den NGSL-Wörtern des Demovets hat **1 von 100** ein direkt
+passendes Icon. Eine Tabelle, die für 99 von 100 Wörtern etwas Falsches oder
+Abstraktes einträgt, ist schlechter als keine — sie sitzt als Lärm im Bild.
 
-- Ein Icon-Satz mit einem einheitlichen Stil, etwa 150–400 Zeichen. Nicht
-  selbst gezeichnet, sondern lizenzfrei (z. B. Lucide oder Phosphor, beide MIT
-  und in Next.js gut tree-shakable).
-- Eine **Zuordnungstabelle Wort → Icon**. Für "apple" das Apfel-Icon, für
-  "dog" das Hund-Icon, für "doctor" das Arzt-Icon. Nicht "apple" → Obst-Symbol,
-  denn das ist zu grob: dann teilen sich 200 Obstwörter dasselbe Zeichen.
-- Für jedes Wort zusätzlich die **Sprach-Akzentfarbe** aus `sprachen`
-  (`005-sprachen-und-beisatz.sql`) und womöglich eine von wenigen
-  Formvarianten. Zusammen ergibt das genug optische Vielfalt, ohne 2.000
-  Bilder zu pflegen.
-- Die **Zuordnung ist das teure Stück**, nicht die Technik: rund 2.000
-  bewusste Entscheidungen, wie man sie beim Erzeugen der Wortlisten in
-  Stapeln macht und prüft. Einmalig, danach Teil der Wortlisten-Generierung.
+**Der Weg, der gebaut wurde.** Kein Icon-Satz, keine Zuordnungstabelle, keine
+Migration. Die Zeichen entstehen **aus der Karten-ID**:
 
-**Was den Nutzen ausmacht.** Der Lerneffekt kommt nicht davon, dass ein Bild
-einmalig ist, sondern dass Bild und Wort **sichtbar gekoppelt** sind. Ein
-konsistenter Satz, richtig zugeordnet, wirkt stärker als 2.000 bunte
-Eigenkreationen. Umgekehrt gilt: ein *falsches* oder *abstraktes* Icon ist
-schlechter als keines, weil es als Lärm im Bild sitzt.
+- `lib/kartenzeichen.ts` — FNV-1a über die UUID, daraus mit `mulberry32`
+  Form, Eckenzahl, Drehung, Radius, Ringzahl, Innenmotiv, Spiegelung,
+  Strichstärke und Deckkraft. Rund 2.903.040 Kombinationen. Reine Funktion,
+  kein Zustand, kein Bild, keine Datei.
+- `components/kartenzeichen.tsx` — setzt die Pfade als Inline-SVG in ein
+  festes 24er-`viewBox`, `aria-hidden`, `pointer-events: none`.
+- `lib/kartenzeichen-ein.ts` — die Sichtbarkeit als Geräteeinstellung im
+  `localStorage`, gelesen über `useSyncExternalStore`.
 
-**Warum es warten kann, ohne Schaden.** Icons sind reine Zusatzinformation auf
-der Kartenfläche. TTS (1.3), Beispielsatz (1.4), Nochmal-Requeue (1.1) und
-die ehrlichen Fortschrittsbalken (1.5) funktionieren ohne Icons und stehen
-zuerst. Icons sind das letzte, was jemandem auffällt, wenn es fehlt.
+**Warum die UUID und nicht ein Datenbankfeld.** Eine neue Spalte plus Backfill
+für jede Karte wäre der übliche Weg — und er wäre hier falsch. Der Nutzer
+sollte nie ein Zeichen sehen, das fehlt, weil die Zeile nicht zurückgespielt
+wurde. Aus der UUID ist das Zeichen mit dem Moment vorhanden, in dem die Karte
+existiert: für Bestandskarten, für neue Karten, für Karten aus einem
+Textblock-Import und für eigene Karten. Es gibt keinen Importpfad, der etwas
+nachziehen müsste, und keine Zeile, die verloren gehen kann.
 
-**Was ausdrücklich nicht passiert.** Kein halbes Icon-Set. Wenn nur 40 von 2.000
-Karten ein Zeichen haben, ist die *Abwesenheit* das Signal, und die Fläche
-sieht kaputt aus. Lieber Phase 6 komplett verschieben, bis die echten Wortlisten
-aus Phase 2 stehen — Platzhalter symolisieren wäre weggeworfene Arbeit.
+**Ehrlich zur Eindeutigkeit.** Die Parameter sind quantisiert, es gibt also
+endlich viele mögliche Zeichen, und bei endlich vielen Kombinationen sind
+Zusammenfälle nicht ausgeschlossen. Gemessen, nicht geschätzt:
 
-**Abnahme:** 20 zufällige Karten, bei denen das Icon ohne Kontext und auf
-360 px dennoch das richtige Wort erraten lässt. Wenn das bei 20 nicht
-trägt, ist die Kategorie zu grob und wird nachgeschärft.
+| Karten | verschiedene Zeichen | Zusammenfälle |
+|---:|---:|---:|
+| 100 | 100 | 0 |
+| 2.000 | 2.000 | **0** |
+| 5.000 | 4.992 | 8 (0,16 %) |
+
+Diese Zahlen stehen als feste Erwartung in `tests/kartenzeichen.test.ts`,
+damit ein Umbau, der die Verteilung verschlechtert, im Test auffällt.
+
+**Farbe.** Bewusst keine eigene Farbauswahl. Die Kartenfläche ist in beiden
+Designs dieselbe mittelhelle Sprachfarbe; jede Farbvariation müsste gegen
+zwoelf Hintergründe einzeln beweisen, dass sie lesbar bleibt. Das Zeichen
+erbt `currentColor` und setzt nur Deckkraft und Strichstärke. Die Unterschiede
+trägt die Geometrie — 3 bis 9 Ecken, 60 Drehungen, 12 Innenmotive.
+
+**Zwei Fehler, die erst das Messen gefunden hat.** Beide standen in einem
+`useState(() => liesZeichen())`, demselben Muster wie `lib/ton.ts`:
+
+1. `localStorage` im Zustands-Initializer zu lesen ergibt einen
+   Hydration-Fehler (#418). Der Server hat kein `window`, rendert den
+   Vorgabe-Stand, der erste Client-Render den gespeicherten. Behoben über
+   `useSyncExternalStore` mit ausdrücklichem Server-Snapshot.
+2. Der erste Test meldete 1.120 „Kollisionen" unter 5.000 Karten. Ursache war
+   der **Test-Generator**: er lieferte nur 3.887 verschiedene UUIDs für 5.000
+   Nummern. Ein Test, der einen echten Fehler versteckt, ist schlimmer als
+   kein Test — deshalb prüft `tests/kartenzeichen.test.ts` jetzt zuerst, ob
+   seine eigenen Eingaben überhaupt verschieden sind.
+
+**Bekannt und nicht Teil dieser Phase.** Auf `/einstellungen` wirft React
+einen Hydration-Fehler #418, und zwar an der **unveränderten** Seite
+(gegengemessen mit `git checkout` auf den Basisstand: dort kommt er genauso).
+Ursache ist `pushUnterstuetzt` in Zeile 84, das im Zustands-Initializer
+`typeof window` prüft — dieselbe Fehlerklasse, andere Stelle. Gehört in die
+Foundation, nicht hierher.
+
+**Abnahme, gemessen mit `scripts/zeichen-audit.mjs`** (Produktions-Build, Wegwerf-Konto):
+
+- 0 Fehler, 24 Messungen.
+- Zeichen 32 × 32 px und quadratisch auf 320, 360, 414 px hoch, 740 px quer
+  und 1280 px — **auf beiden Seiten** der Karte, je 10 Prüfungen.
+- Einzug rechts 13,6 px und unten 13,6 px: unten rechts, wie bestellt.
+- Kein Überdecken von `.karteTipp` und keines von `.karteZeichen`.
+- Klick auf das Zeichen deckt die Karte auf (`look` → `scheinen`): es fängt
+  keinen Klick ab.
+- 6 Karten durchlaufen, 6 verschiedene Zeichenformen.
+- Schalter schreibt `{"v":1,"an":false}`, das Zeichen verschwindet aus dem
+  DOM, übersteht das Neuladen und kommt beim Wiedereinschalten zurück.
+- Eigenes Set über `POST /api/sets`, zwei eigene Karten über `POST /api/karten`,
+  beide Seiten zeigen ein Zeichen.
 
 ### Phase 7 — React Native App
 

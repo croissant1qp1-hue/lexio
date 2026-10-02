@@ -1,13 +1,13 @@
 'use client';
 
-import { useState } from "react";
-import { useEffect } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useDesign } from "@/components/design/design-anbieter";
 import { liesStand, setzeMerken, vergissAnmeldung } from "@/lib/geraet";
 import { liesTon, setzeTon, type TonStand } from "@/lib/ton";
+import { beobachteZeichen, liesZeichenAn, setzeZeichen, zeichenVorgabe } from "@/lib/kartenzeichen-ein";
 import { holeAbo, pushAn, pushAus } from "@/lib/push-client";
 import { setzeSessionDauer } from "@/lib/supabase/session-dauer";
 import "./einstellung.css";
@@ -43,6 +43,23 @@ export default function Einstellungen() {
 
     const [merken, setMerken] = useState(() => liesStand().merken);
     const [ton, setTon] = useState(() => liesTon());
+    /*
+     * Kartenzeichen. Wie beim Ton eine Geraete-Einstellung aus dem localStorage
+     * und ohne Serverrunde: die Zeichen entstehen aus der Karten-ID, es gibt
+     * also nichts zu speichern, was in der Datenbank waere.
+     *
+     * `useSyncExternalStore` statt `useState(() => liesZeichen())`: im
+     * Zustands-Initializer liest man localStorage, und der erste
+     * Client-Render ist dann der mit dem gespeicherten Stand, waehrend der
+     * Server den Vorgabe-Stand gerendert hat – bei ausgeschaltetem Zeichen
+     * meldet React das als Hydration-Fehler #418.
+     */
+    const zeichenAn = useSyncExternalStore(beobachteZeichen, liesZeichenAn, zeichenVorgabe);
+
+    function zeichenUmschalten(an: boolean) {
+        setzeZeichen({ v: 1, an });
+    }
+
     const [passwort, setPasswort] = useState("");
     const [wiederholung, setWiederholung] = useState("");
     const [passwortLaeuft, setPasswortLaeuft] = useState(false);
@@ -236,6 +253,28 @@ export default function Einstellungen() {
                         <option value="normal">Normal</option>
                         <option value="laut">Laut</option>
                     </select>
+                    <p className="unterüberschrift-töne">
+                        Gilt sofort im Lernmodus und bleibt auf diesem Gerät erhalten.
+                    </p>
+
+                    <p className="überschrift-töne">Karten</p>
+                    <div className="töne">
+                        <div>
+                            <p className="unterüberschrift-töne">
+                                Jede Karte bekommt unten links ein eigenes Zeichen. Es zeigt
+                                nichts über das Wort an, es hilft nur, eine Karte wiederzuerkennen.
+                            </p>
+                        </div>
+                        <label className="switch2">
+                            <input
+                                id="zeichenAn"
+                                type="checkbox"
+                                checked={zeichenAn}
+                                onChange={(e) => zeichenUmschalten(e.target.checked)}
+                            />
+                            <span className="slider" />
+                        </label>
+                    </div>
                     <p className="unterüberschrift-töne">
                         Gilt sofort im Lernmodus und bleibt auf diesem Gerät erhalten.
                     </p>

@@ -508,6 +508,31 @@
 
 /* Sprachzeichen. Liegt in .kartenSeite, dreht sich also mit – und steht nach
    dem Umdrehen auf der Rueckseite unten links, wie es hingehört. */
+/* Das Zeichen der Karte: unten rechts, auf beiden Seiten.
+ *
+ * Nutzerentscheid Phase 6 – zuerst war es unten links, zusammen mit der
+ * Sprachpille in einer Zeile (.kartenFuss). Beides an dieselbe Kante zu legen
+ * hat die Kante zweistufig gemacht, und der Wunsch ging dann ausdruecklich nach
+ * rechts. Damit hat die Sprachpille ihre linke Ecke wieder allein fuer sich.
+ *
+ * Der Einzug von 0.85rem ist derselbe wie bei der Pille, damit beide Ecken
+ * dieselbe Kante der Karte benutzen und nicht versehentlich versetzt wirken.
+ * Was dort noch liegt, ist die Papierecke aus `.kartenSeite::after`: ein
+ * 20x20px-Verlauf mit 0.05 bis 0.18 Alpha. Das Zeichen liegt darauf, nicht
+ * darunter – so wie ein Aufkleber auf einer Falte, und nicht wie ein Fleck
+ * darunter.
+ *
+ * `pointer-events: none`, weil das Zeichen innerhalb des Karten-<button>
+ * liegt: es darf den Klick nicht abfangen, der die Karte aufdeckt. */
+.karteMarke {
+    position: absolute;
+    right: 0.85rem;
+    bottom: 0.85rem;
+    pointer-events: none;
+}
+
+/* Die Sprachpille wieder dort, wo sie vor dem Zeichen-Einbau war: unten links,
+ * absolut. */
 .karteZeichen {
     position: absolute;
     bottom: 0.85rem;
