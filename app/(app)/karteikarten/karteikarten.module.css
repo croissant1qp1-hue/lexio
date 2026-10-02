@@ -110,6 +110,9 @@
 .suchfeld input {
     flex: 1;
     min-width: 0;
+    /* Abnahme Phase 5: derselbe Fall wie im Wortschatz – der Kasten misst 46px,
+       das Feld darin 21px, und getroffen werden muss genau das Feld. */
+    min-height: 44px;
     border: none;
     background: transparent;
     color: var(--text-primary);
@@ -202,6 +205,17 @@
  * abgenommen statt im Markup unterdrueckt.
  */
 .name {
+    /*
+     * Abnahme Phase 5: gemessen 19px hoch. Der Set-Name ist der Hauptlink der
+     * Zeile – er fuehrt zum Lernen. `display: inline-flex` plus `min-height`
+     * vergrösser die Zielflaeche, ohne die Zeile zu strecken: der Text bleibt
+     * oben, die unsichtbare Trefferflaeche liegt darum herum. Deshalb keine
+     * Polsterung, die den Abstand zwischen Name und Metazeile veraendern
+     * wuerde, sondern eine Hoehe mit `align-items: center`.
+     */
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     font-weight: 600;
     color: var(--text-primary);
     text-decoration: none;
@@ -237,8 +251,10 @@
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    /* Abnahme Phase 5: gemessen 17px hoch und 13px Schrift. */
+    min-height: 44px;
     margin-top: 0.3rem;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-decoration: none;

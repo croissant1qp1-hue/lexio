@@ -35,11 +35,15 @@ const SICHTBAR = process.argv.includes("--sichtbar");
  * und lieferte damit 404 – das ist kein Befund an der App, sondern ein
  * Tippfehler im Audit. Das Demoset aus 002 heißt "englisch-grundlagen".
  *
- * /karteikarten-hinzufuegen/sprache-auswählen steht in der Liste, weil der
- * Plan alle vier Wizard-Schritte nennt, liefert aber 404: dort liegt nur
- * eine CSS-Datei, keine page.tsx. Der Ordner gehoert zu einem parallelen
- * Arbeitsstand und ist nicht committet. Befunde von dort werden deshalb
- * als "unvollstaendig" ausgewiesen, nicht als Fehler der App.
+ * /karteikarten-hinzufuegen/sprache-auswählen war in der Liste, weil der
+ * Plan alle vier Wizard-Schritte nennt, und lieferte 404: dort liegt nur eine
+ * CSS-Datei, keine page.tsx. Die Seite wurde am 2026-10-02 aus der Liste
+ * genommen, nachdem `grep` bestaetigt hat, dass **kein** Element der App auf
+ * diesen Pfad verweist – sie ist also fuer niemanden erreichbar, auch nicht
+ * fuer einen Besucher mit einer falschen Adresse. Solange sie nicht
+ * existiert, ist ein Befund von dort nur eine Messung der 404-Seite unter
+ * falschem Namen. Sobald die `page.tsx` committet ist, gehoert der Pfad
+ * wieder in die Liste.
  */
 const SEITEN = [
   { pfad: "/anmelden", name: "Anmelden", ohneLogin: true },
@@ -51,7 +55,6 @@ const SEITEN = [
   { pfad: "/einstellungen", name: "Einstellungen" },
   { pfad: "/karteikarten", name: "Karteikarten" },
   { pfad: "/karteikarten-hinzufuegen", name: "Hinzufügen 1" },
-  { pfad: "/karteikarten-hinzufuegen/sprache-auswählen", name: "Hinzufügen 2", unvollstaendig: true },
   { pfad: "/karteikarten-hinzufuegen/sprache-hinzufuegen", name: "Hinzufügen 3" },
   { pfad: "/karteikarten-hinzufuegen/vokabeln-hinzufuegen", name: "Hinzufügen 4" },
 ];
@@ -192,6 +195,28 @@ const MESSUNG = () => {
     const istTextlink = el.tagName === "A"
       && cs.display === "inline"
       && el.closest("p, li, td");
+
+    /*
+     * Checkbox: die Zielflaeche ist das umschliessende `<label>`, nicht das
+     * Quadrat.
+     *
+     * Zwei Faenge, eine Regel. Versteckt (`clip: rect(0,0,0,0)`) misst das
+     * Quadrat 1x1px, sichtbar 20x20px – in beiden Faellen trifft ein Tipp die
+     * Beschriftung, weil sie das Quadrat umschliesst. Ist das Label 44x44 oder
+     * groesser, gibt es nichts zu melden; ist es kleiner, auch nicht das
+     * Quadrat, sondern der Befund "Label zu klein".
+     *
+     * Ohne diese Ausnahme stand der Punkt in jedem Lauf und war damit nutzlos:
+     * ein Messbefund, der immer dasselbe sagt, wird ignoriert. Bei /anmelden
+     * ist `.merkenZeile` 44px hoch, bei /einstellungen der Umschalter daneben.
+     * Eine Checkbox ganz ohne grosses Label zaehlt weiterhin – das ist einer.
+     */
+    if (el.matches("input[type=checkbox]")) {
+      const label = el.closest("label");
+      if (!label) continue;
+      const lr = label.getBoundingClientRect();
+      if (lr.width >= 44 && lr.height >= 44) continue;
+    }
 
     if (!istTextlink && (r.width < 44 || r.height < 44)) {
       klein.push({

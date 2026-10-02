@@ -78,6 +78,13 @@
 .suchfeld input {
     flex: 1;
     min-width: 0;
+    /*
+     * Abnahme Phase 5: der umschliessende Kasten misst 46px, das Eingabefeld
+     * darin aber nur 21px – getroffen werden muss genau das Feld, ein Klick
+     * neben den Text tat nichts. Der Kasten sieht also gross genug aus und ist
+     * es nicht.
+     */
+    min-height: 44px;
     border: none;
     background: transparent;
     color: var(--text-primary);
@@ -172,7 +179,11 @@
 }
 
 .setName {
-    display: block;
+    display: flex;
+    /* Abnahme Phase 5: gemessen 17px hoch. Siehe .name in der
+       Set-Uebersicht – gleiche Beweisung, gleiche Loesung. */
+    min-height: 44px;
+    align-items: center;
     max-width: 190px;
     margin-top: 0.35rem;
     font-size: 0.875rem;

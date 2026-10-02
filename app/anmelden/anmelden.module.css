@@ -148,6 +148,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Abnahme Phase 5: gemessen waren 36,6px. Der Reiter ist der
+       Umschalter zwischen Anmelden und Konto erstellen – einer der beiden wird
+       auf dem Telefon zuerst getroffen, und 37px sind unter der 44px-Grenze. */
+    min-height: 44px;
     padding: 0.55rem 0.75rem;
     margin: 0;
     border: 1px solid transparent;
@@ -364,8 +368,23 @@
     margin: -0.2rem 0 0;
     cursor: pointer;
     color: var(--text-secondary);
-    font-size: 0.85rem;
+    /* 0.875rem = 14px, die Grenze der Abnahme Phase 5. Vorher 0.85rem. */
+    font-size: 0.875rem;
     line-height: 1.35;
+}
+
+/*
+ * Der Zusatz unter der Checkbox-Beschriftung.
+ *
+ * Ein `<small>` erbt nicht die 14px, sondern die Browser-Vorgabe von 0.8em –
+ * gemessen waren 11,3px. Das `<small>` steht hier nicht fuer "weniger
+ * wichtig", sondern fuer eine andere Aussage ("was mit der Sitzung passiert").
+ * Die Hierarchie kommt jetzt aus der Farbe, nicht aus der Groesse; die
+ * opacity: 0.75 steckt im Markup und wird hier nicht gebraucht.
+ */
+.merkenZeile small {
+    font-size: 0.875rem;
+    color: var(--text-muted);
 }
 
 .merkenZeile input {
@@ -493,6 +512,12 @@
 
 .textKnopf {
     align-self: center;
+    display: inline-flex;
+    align-items: center;
+    /* Abnahme Phase 5: gemessen 27px hoch. "Passwort vergessen?" ist der
+       einzige Weg aus einer vergessenen Kennung heraus – der Knopf darf nicht
+       kleiner sein als die Felder daneben. */
+    min-height: 44px;
     margin-top: 1.1rem;
     padding: 0.3rem 0.5rem;
     border: none;

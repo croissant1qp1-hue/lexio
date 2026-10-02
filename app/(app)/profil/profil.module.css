@@ -274,6 +274,8 @@
     /* min-width: 0 und die Flex-Wrap oben: zwei nebeneinander werden auf
        dem Telefon zu zweizeiligen Knoepfen, statt ueber den Rand zu ragen. */
     min-width: 0;
+    /* Abnahme Phase 5: gemessen 38px hoch. */
+    min-height: 44px;
     padding: 0.6rem 0.95rem;
     font-size: 0.875rem;
     font-weight: 500;

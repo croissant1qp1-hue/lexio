@@ -389,6 +389,9 @@
     min-height: var(--touch);
     padding: 0.5rem 1rem;
     font-family: var(--normal);
+    /* Abnahme Phase 5: gemessen 13,3px. Auch das der Chrome-Standard für
+       `button` – zusammen mit der falschen Schrift, siehe global.css. */
+    font-size: 0.875rem;
     font-weight: 600;
     background-color: var(--bg-elevated);
     border-radius: 0.6rem;

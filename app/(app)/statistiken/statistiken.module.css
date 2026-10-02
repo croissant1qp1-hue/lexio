@@ -229,6 +229,10 @@
     background: none;
     color: inherit;
     font-family: inherit;
+    /* Abnahme Phase 5: gemessen 13,3px – Chrome-Standard für `button`, weil
+       hier nie eine font-size stand. Die Zeile ist der Weg zu den
+       Sprachdetails und damit ein Knopf, kein Text. */
+    font-size: 0.875rem;
     cursor: pointer;
     text-align: left;
 }

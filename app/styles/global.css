@@ -199,6 +199,33 @@ html {
     text-size-adjust: 100%;
 }
 
+/*
+ * Formularelemente erben die Schrift.
+ *
+ * Ohne diese Regel greift fuer `button`, `select` und `textarea` der
+ * Browser-Standard, nicht die Seite: Chrome setzt **Arial 13,3333px**. Das war
+ * im Responsive-Audit (Phase 5) als zwei Befunde sichtbar geworden –
+ * "Speichern"/"Abmelden" auf /einstellungen und die Sprachzeilen auf
+ * /statistiken standen bei 13,3 px, unter der 14px-Grenze der Abnahme.
+ *
+ * Der Befund war die Spitze: dieselben Knöpfe waren in Arial gesetzt, waehrend
+ * die ganze Oberflaeche eine andere Schrift benutzt. Das faellt im Bild nicht
+ * auf – Arial ist eine halbwegs gewoehnliche Schrift – faellt aber beim
+ * Vergleichen zweier nebeneinander stehender Knoepfe.
+ *
+ * Bewusst KEIN `font: inherit` fuer die Groesse: damit wuerde auch jedes
+ * Element ohne eigene `font-size` auf 16px springen, und die Abnahme verlangt
+ * nur "nicht kleiner als 14px". Die Familie wandert deshalb global, die
+ * Groesse bleibt bei den Stellen, die die Messung gefunden hat. Eigene
+ * `font-size`-Angaben in Modulen sind Klassenselektoren und gewinnen gegen
+ * diesen Typselektor ohnehin.
+ */
+button,
+select,
+textarea {
+    font-family: inherit;
+}
+
 body {
     margin: 0;
     padding: 0;
@@ -286,7 +313,10 @@ p {
     border: 1px solid rgba(231, 177, 74, 0.35);
     border-radius: 999px;
     padding: 0.5rem 0.9rem;
-    font-size: 0.8rem;
+    /* Abnahme Phase 5: 0.8rem waren 12,8px. Die 404-Seite steht nicht in der
+       Abnahmeliste, ist aber die erste Seite, die ein Besucher mit einer
+       falschen Adresse sieht. */
+    font-size: 0.875rem;
     font-weight: 700;
     letter-spacing: 0.08em;
     text-transform: uppercase;

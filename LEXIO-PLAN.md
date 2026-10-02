@@ -984,6 +984,89 @@ in keinem Durchlauf ein Befund.
   (360 × 420 ist kein Querformat).
 - Screenshots und der Blick auf die gerenderte Oberfläche fehlen noch.
 
+#### Nachtrag vom 2026-10-02 — gegen den Produktions-Build, Ergebnis null
+
+Der erste Durchlauf stand gegen `npm run dev`. Das Skript sagt ausdrücklich,
+für den Produktionsstand `npm run start` zu verwenden — die Vorgabe war nicht
+befolgt, und der Unterschied ist nicht kosmetisch: **im Entwicklungsbetrieb
+zeigt `/anmelden` einen Setup-Hinweis, den es in Produktion nicht gibt.** Die
+gemeldeten Textbefunde mit 13,6 px waren dessen Eintragstitel, nicht die
+Checkbox-Beschriftung der App. Ein Audit gegen die falsche Oberfläche
+misst die falsche Seite.
+
+Gegen `npm run build && npm run start`: **66 Durchläufe, 0 Befunde.**
+Kein waagerechter Bildlauf, kein verdeckter Inhalt, keine Bewegung trotz
+`prefers-reduced-motion`, kein Text unter 14 px, kein Bedienelement unter
+44 × 44 px. (66 statt 72, weil ein Wizard-Schritt aus der Liste fliegt, siehe
+unten.)
+
+**Was die 13 eindeutigen Fundstellen waren — und was sie waren:**
+
+| Seite | Fundstelle | vorher | Ursache |
+|---|---|---|---|
+| Einstellungen | Speichern, Abmelden | 13,3 px | Chrome-UA für `button` |
+| Statistiken | Sprachzeile | 13,3 px | dieselbe Ursache |
+| Anmelden | Reiter Anmelden / Konto erstellen | 149 × 37 | keine `min-height` |
+| Anmelden | Passwort vergessen? | 157 × 27 | dito |
+| Anmelden | Checkbox-Beschriftung | 13,6 px | `0.85rem` |
+| Anmelden | `<small>` darunter | 11,3 px | `<small>` erbt 0.8em |
+| Karteikarten | Set-Name (Link) | 336 × 19 | keine Höhe, reiner Textlink |
+| Karteikarten | „Vokabeln ansehen" | 336 × 17 | dito, dazu 13 px Schrift |
+| Karteikarten | Suchfeld | 663 × 21 | siehe Kasten unten |
+| Wortschatz | Suchfeld | 277 × 21 | dito |
+| Wortschatz | Set-Name (Link) | 265 × 17 | keine Höhe |
+| Profil | Einstellungen, Passwort ändern | 147 × 38 | `padding` statt `min-height` |
+| Karteikarten-404 | „404 Error" | 12,8 px | `0.8rem` |
+
+Der interessanteste Fund war nicht in der Liste, sondern ihre Ursache.
+
+**Die Knöpfe standen in Arial.** Bei `button`, `select` und `textarea` stand
+nirgends eine `font-family`, also griff der Browser-Standard: Chrome setzt
+**Arial 13,3333px**. Zwei der sieben Textbefunde waren genau das, und dieselbe
+Ursache hätte die dritte Seite mitgezogen, die der Audit nicht listet. Im
+Bild faellt Arial nicht auf — es ist eine gewoehnliche Schrift —, aber zwei
+nebeneinander stehende Knöpfe aus verschiedenen Schriften sind sofort
+erkennbar. Jetzt erben die drei Elemente die Familie global (`global.css`),
+die Größe bleibt lokal: `font: inherit` hätte auch jedes Element ohne eigene
+`font-size` auf 16 px gehoben, und die Abnahme verlangt nur „nicht kleiner als
+14 px".
+
+**Zwei Suchfelder, die 46 px aussahen und 21 px waren.** Beide Felder
+(`/karteikarten`, `/wortschatz`) liegen in einem Kasten mit
+`min-height: 46px` — aber die `min-height` sass am Kasten, nicht am
+`<input>`. Getroffen werden muss genau das Eingabefeld: ein Tipp auf den
+freien Kasten daneben tat nichts, das Feld selbst war 21 px hoch. Das ist
+der eine Befund, bei dem die Oberfläche aktiv in die Irre führt.
+
+**Zwei Korrekturen am Messgerät, nicht an der App.** Sie sind getrennt
+erwähnt, weil ein Befund, der immer dasselbe sagt, ignoriert wird und dann
+den ganzen Audit entwerten würde:
+
+- **Checkboxen.** `input[type=checkbox]` misst 1 × 1 px (versteckt, mit
+  `clip`) oder 20 × 20 px (sichtbar), und damit immer zu klein. Die reale
+  Zielfläche ist das umschließende `<label>` — bei `/anmelden` 44 px hoch,
+  bei `/einstellungen` der Umschalter daneben. Das Skript misst jetzt das
+  Label und meldet nur, wenn *das* zu klein ist. Eine Checkbox ohne großes
+  Label zählt weiterhin, das wäre einer.
+- **Ein Wizard-Schritt fliegt aus der Liste.**
+  `/karteikarten-hinzufuegen/sprache-auswählen` liefert 404, weil dort nur
+  eine CSS-Datei liegt. Ein `grep` über alle Komponenten bestätigt: **kein
+  Element verweist auf diesen Pfad**, er ist also für niemanden erreichbar.
+  Solange die `page.tsx` nicht existiert, misst ein Durchlauf dort nur die
+  404-Seite unter falschem Namen.
+
+**Was damit gemessen ist — und was nicht.** Gemessen sind die fünf Regeln,
+die das Skript prüft: Textgröße, Zielfläche, untere Leiste, waagerechter
+Bildlauf, reduzierte Bewegung. **Nicht** gemessen und weiterhin offen ist die
+optische Beurteilung: ob die vier Bewertungsknöpfe auf 360 px lesbar *und*
+die 3D-Karte beim Drehen keinen Text überdeckt, sieht man nur mit eigenen
+Augen. Die „quer"-Viewports sind 360 × 420 px — kurzes Hochformat, **kein**
+echtes Querformat (ein Telefon im Querformat ist etwa 740 × 360). Screenshots
+aller acht Seiten bei 360 px liegen in `/tmp/phase5/`; sie sind nicht
+committet. Diese Phase ist damit **gemessen abgeschlossen, optisch nicht
+abgenommen** — und ein Plan, der beides gleichsetzt, ist der Fehler, den er
+sich selbst vorwirft.
+
 #### Zwei Punkte aus der Abnahme, vom Nutzer gemeldet
 
 Beide Punkte sind erledigt. Sie standen hier zuerst nur als Meldung, weil sie
