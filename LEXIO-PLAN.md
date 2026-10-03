@@ -1132,11 +1132,58 @@ Zwei Schlüsse, und sie sind verschieden:
    `lernen-seite.tsx`, `einstellungen/page.tsx` und die Zeichenmodule an.
    `kachelLoeschen` und `spracheKopf` liegen auf Übersicht und Statistiken —
    Seiten, die in keinem dieser Commits vorkommen. Das ist gemessen.
-2. **Phase 5 ist nicht sauber abgenommen.** Drei Fundstellen stehen gegen das
+2. ~~**Phase 5 ist nicht sauber abgenommen.**~~ Erledigt am 2026-10-03:
+   alle drei Fundstellen behoben, 72 Durchläufe ohne Befund (siehe Phase 5).
+   Es standen drei Fundstellen gegen das
    eigene Abnahmekriterium „kein Text unter 14 px, kein Bedienelement unter
    44 × 44 px". Warum sie am 2026-10-02 nicht auftauchten, ist offen; beide
    Messungen liefen mit frischen Audit-Konten. Bis dahin gilt die Phase als
    **gemessen, nicht bestanden**.
+
+#### Nachtrag vom 2026-10-03 — die drei Fundstellen sind behoben
+
+Alle drei Stellen sind weg, und diesmal wurde gegen das Konto gemessen, das
+die Befunde überhaupt erzeugt: eigenes Set vorhanden, XP vorhanden.
+
+| Fundstelle | vorher | jetzt |
+|---|---|---|
+| `…kachelLoeschen` | 88 × 34 px, 11,52 px Schrift | 44 × 44 px, kein Text |
+| `statistiken…spracheKopf` | 18 px hoch | 44 px hoch, volle Zeilenbreite |
+| `statistiken…tagXp` | 9,6 px | 0,875rem (14 px) |
+
+**Der Lösch-Knopf hat dabei sein Wort verloren, und das war die eigentliche
+Rechnung.** Der Knopf liegt unten rechts auf der Kachel, die Fortschrittszeile
+liegt unten links. Bei 360 px Viewport ist die Kachel 174 px breit und die
+Fortschrittszeile darin 142 px. Ein Knopf mit dem Wort „Löschen" ist 110 px
+breit — er lag damit über **74 % der Fortschrittszeile** (vor der Korrektur
+62 %, das Problem war also nicht neu, es war nur kleiner). Der Knopf ist
+jetzt ein 44 × 44 px großer Symbolknopf mit `aria-label`; die Überdeckung ist
+gemessen **0 px** bei 360 px und bei 414 px, ohne dass die Kachel überläuft.
+Worüber gelöscht wird, entscheidet ohnehin erst der Bestätigungsdialog.
+
+Das ist die dritte Lektion in diesem Audit, und sie ist dieselbe wie bei den
+Suchfeldern: **Ein Bedienelement kann alle eigenen Regeln erfüllen und
+trotzdem im Weg stehen.** Der Knopf hatte nie eine eigene CSS-Regel verletzt,
+bevor Phase 5 ihn geprüft hat — er lag einfach auf dem Text daneben.
+
+**Abnahme.** `npm run build && npm run start`, dann
+`node --env-file=.env scripts/responsive-audit.mjs` mit einem Konto, das ein
+eigenes Set hat:
+
+- **72 Durchläufe, 0 Befunde, 0 Fehler.** Waagerechter Bildlauf, Textgröße,
+  Zielfläche, untere Leiste, reduzierte Bewegung — alle Regeln ohne Treffer.
+- 72 statt 66 Durchläufe, weil die Startseite als eigene Seite dazugekommen
+  ist und die Übersicht nun unter `/uebersicht` liegt.
+- 6 der 72 Läufe landen auf `/karteikarten-hinzufuegen/vokabeln-hinzufuegen`
+  und werden umgeleitet: Das Audit-Konto hat die drei Wörter schon im eigenen
+  Set, es gibt dort nichts hinzuzufügen. Das Skript zählt eine Weiterleitung
+  wie einen Befund, deshalb stehen diese sechs Zeilen im Bericht — sie sind
+  **keine** Beanstandung, sondern der Normalfall für ein Konto mit eigenem Set.
+- `node --env-file=.env scripts/zeichen-audit.mjs`: 0 Fehler, 0 Hinweise.
+
+Damit ist Phase 5 **gemessen bestanden** — mit derselben Einschränkung wie
+oben: Die optische Beurteilung (Bewertungsknöpfe auf 360 px, 3D-Karte beim
+Drehen) ist damit nicht erledigt.
 
 #### Nachtrag vom 2026-10-03 — Hydration-Fehler auf `/einstellungen` behoben
 

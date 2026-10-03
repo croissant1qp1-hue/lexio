@@ -343,7 +343,22 @@
 /* Loeschen sichtbar (nicht erst bei Hover) – der Knopf ist die einzige
    Loeschmoeglichkeit einer Kachel, und ein Ziel, das man erst suchen muss,
    ist kein Ziel. Er bleibt bewusst dezent: die Kachel ist die Lernflaeche,
-   das Loeschen die Ausnahme. */
+   das Loeschen die Ausnahme.
+
+   Dezent heisst aber nicht klein. Gemessen waren 34 px Hoehe und 11,52 px
+   Schrift – unter beidem liegt die eigene Abnahmegrenze (44 px, 14 px). Die
+   Optik bleibt die eines ruhigen Knopfes: kein Gold, nur die Linienfarbe des
+   Rests. Was sich aendert, ist die Trefferflaeche, nicht die Aufmerksamkeit.
+   Genau dieser Knopf erscheint nur bei eigenen Sets, also bei den Nutzern,
+   die schon mehr als eine Runde gemacht haben.
+
+   Und er hat keinen Text mehr, nur das Symbol. Grund ist ein Messwert, keine
+   Aenderung des Geschmacks: die Kachel ist bei 360 px Viewportbreite 174 px
+   breit, die Fortschrittszeile "0/5 gelernt" darin 142 px. Ein Knopf mit Wort
+   ist 110 px breit – er hat 74 % der Fortschrittszeile zugedeckt (vorher
+   62 %, das Problem ist also nicht neu, es war nur kleiner). Ohne Text wird
+   der Knopf 44 px breit und laesst die Zeile frei. Ueber die Flaeche entscheidet
+   ohnehin erst der Bestaetigungsdialog, und `aria-label` benennt die Aktion. */
 .kachelLoeschen {
     position: absolute;
     bottom: 0.6rem;
@@ -351,14 +366,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
-    min-height: 34px;
-    padding: 0 0.6rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
     border: 1px solid var(--line);
     border-radius: 999px;
     background: rgba(14, 12, 9, 0.72);
     color: var(--paper-text-soft);
-    font-size: 0.72rem;
+    /* 1rem, nicht 0,72rem: das Symbol ist jetzt der ganze Knopf und muss
+       lesbar sein, nicht nur vorhanden. */
+    font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
     transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease,

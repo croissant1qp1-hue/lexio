@@ -292,6 +292,9 @@ export default function Uebersicht() {
                       disabled={loescht === set.id}
                       aria-label={`Set ${set.name} loeschen`}
                     >
+                      {/* Ohne Wort: der Knopf ist 44x44 px gross und legt
+                          sich sonst ueber die Fortschrittszeile. Ueber die
+                          Aktion entscheidet der Bestaetigungsdialog. */}
                       <i
                         className={
                           loescht === set.id
@@ -300,7 +303,6 @@ export default function Uebersicht() {
                         }
                         aria-hidden="true"
                       />
-                      Löschen
                     </button>
                   )}
                 </div>
