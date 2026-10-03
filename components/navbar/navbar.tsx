@@ -145,7 +145,7 @@ export default async function Navbar() {
     return (
         <nav className="side-bar" aria-label="Hauptnavigation">
             <div className="logo-title">
-                <Link href="/" className="logo-link" aria-label="Lexio – zur Übersicht">
+                <Link href="/uebersicht" className="logo-link" aria-label="Lexio – zur Übersicht">
                     <Image
                         alt=""
                         className="logo"

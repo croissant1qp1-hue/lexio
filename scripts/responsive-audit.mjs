@@ -47,7 +47,8 @@ const SICHTBAR = process.argv.includes("--sichtbar");
  */
 const SEITEN = [
   { pfad: "/anmelden", name: "Anmelden", ohneLogin: true },
-  { pfad: "/", name: "Übersicht" },
+  { pfad: "/", name: "Startseite", ohneLogin: true },
+  { pfad: "/uebersicht", name: "Übersicht" },
   { pfad: "/wortschatz", name: "Wortschatz" },
   { pfad: "/lernen/englisch-grundlagen", name: "Lernansicht" },
   { pfad: "/statistiken", name: "Statistiken" },

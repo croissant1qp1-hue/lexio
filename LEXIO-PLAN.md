@@ -925,9 +925,35 @@ von selbst weg.
 >   Text-/XML-Antworten ist sinnlos.
 > - Geprüft: Build, Lint, Live-Checks (`curl` auf robots/Sitemap/head).
 >
-> **Teil 2 (Landing-Page) offen:** ohne öffentliche Seite bleibt die Sitemap leer
-> und Google hat nichts Nützliches zu indexieren. Landing-Page konzipieren und
-> dann `sitemap.ts` füllen.
+> **Teil 2 (Landing-Page) ist erledigt (2026-10-03).** `/` ist jetzt die
+> öffentliche Seite: Titel, Beschreibung, OG-Tags, `robots: index, follow`, und
+> `sitemap.ts` führt genau diese eine Route. Die App-Übersicht ist von `/` nach
+> **`/uebersicht`** umgezogen; wer angemeldet auf `/` landet, wird umgeleitet,
+> damit alte Lesezeichen, geteilte Links und der Nach-dem-Login-Sprung
+> (`weiter` bleibt `/`) unverändert funktionieren.
+>
+> **Warum die Übersicht überhaupt wandern musste.** Die Seite konnte nicht
+> einfach zusätzlich liegen bleiben: der gesamte `(app)`-Bereich trägt zentral
+> `robots: { index: false }`. Eine Landing-Page *innerhalb* dieser Gruppe wäre
+> eine Seite, die Google nicht aufnimmt — der Auftritt hätte sich erledigt und
+> es hätte ausgesehen, als wäre nichts passiert.
+>
+> **Der Umgang mit dem Ausfall-Fall.** `holeUser` unterscheidet drei Fälle, und
+> der dritte entscheidet: ist Supabase gerade nicht erreichbar, ist die Sitzung
+> *unklar*, nicht *weg*. Die Startseite leitet in diesem Fall **nicht** um. Ein
+> Ausfall von fünf Sekunden darf niemanden aus der App in ein Anmeldeformular
+> werfen — dieselbe Sorge, aus der `lib/supabase/user.ts` entstanden ist.
+>
+> **Was auf der Seite steht und was nicht.** Drei echte Karten aus dem
+> Starter-Set, die Wiederholungsabstände als Zahl aus `lib/lernlogik.ts` statt
+> als abgetippte Werbung, die Import-Formate, die es wirklich gibt (`.txt`,
+> `.csv`, `.tsv` — **kein** PDF), und eine Datumsangabe ohne Anmeldung. Keine
+> Nutzerzahl, keine Bewertung, kein Testimonials: nichts davon existiert.
+>
+> **Geprüft.** Anonym `/` → Startseite mit drei Beispielkarten, kein
+> waagerechter Bildlauf bei 360 px, keine Konsolenfehler. Angemeldet `/` →
+> `/uebersicht`. Anonym `/uebersicht` → `/anmelden`. Responsive-Audit: **72
+> Durchläufe**, die Startseite in allen sechs Viewports ohne Befund.
 
 ### Phase 5 — Responsive-Audit
 
@@ -1082,11 +1108,23 @@ durch Raten:
 
 Die Fundstellen sind in beiden Läufen **identisch**:
 
-| Fundstelle | gemessener Wert | Läufe |
-|---|---|---:|
-| `uebersicht…kachelLoeschen` („Löschen") | 11,52 px Schrift, 88 × 34 px | 6 |
-| `statistiken…spracheKopf` (Sprachzeile) | 18 px hoch, 305–691 px breit | 6 |
-| `statistiken…tagXp` (XP-Anzeige) | 9,6 px | 6 |
+| Fundstelle | gemessener Wert | Läufe | wann |
+|---|---|---:|---|
+| `…kachelLoeschen` („Löschen") | 11,52 px Schrift, 88 × 34 px | 24 | nur mit eigenem Set |
+| `statistiken…spracheKopf` (Sprachzeile) | 18 px hoch, 305–691 px breit | 6 | immer |
+| `statistiken…tagXp` (XP-Anzeige) | 9,6 px | 6 | nur mit XP |
+
+**Und hier ist der wahrscheinlichere Grund für die alte 0.** Zwei der drei
+Fundstellen sind **datenabhängig**: `kachelLoeschen` erscheint nur, wenn das
+Konto ein eigenes Set hat, `tagXp` nur, wenn XP da ist. Gemessen wurde
+beide Male mit einem frischen Audit-Konto — aber eines ohne eigenes Set, weil
+das Zeichen-Audit nicht vorher gelaufen war. Ein neuer Nutzer sieht diese
+Stellen also nicht. **Genau die Nutzer, die bleiben, sehen sie**: wer ein
+eigenes Set angelegt hat, arbeitet auf genau diesen Bildschirmen.
+
+Damit ist die alte Abnahme nicht falsch, aber sie hat den **falschen Zustand
+gemessen**: den ersten Aufruf, nicht den wiederkehrenden. Ein Audit über einen
+frischen Account prüft den Bestandsnutzer nicht.
 
 Zwei Schlüsse, und sie sind verschieden:
 

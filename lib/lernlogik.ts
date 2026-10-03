@@ -25,11 +25,15 @@ export const LEECH_FEHLER = 8;
 
 /**
  * Abstand in Tagen, bis eine Karte mit der aktuellen Stufe wieder faellig wird.
+ *
+ * Exportiert, weil die oeffentliche Startseite dieselben Zahlen nennt. Eine
+ * zweite Liste im Text waere eine, die irgendwann falsch wird – und niemand
+ * faellt auf, weil beide Zahlen plausibel aussehen.
  * Bewusst flach: eine Karte, die auf Stufe 6 sitzt, wartet 60 Tage. Wer eine
  * Karte 60 Tage nicht sieht, hat sie entweder vergessen oder braucht sie nicht
  * mehr. Beides ist ein guter Grund, sie seltener zu zeigen.
  */
-const INTERVALLE = [0, 1, 3, 7, 16, 35, 60];
+export const INTERVALLE = [0, 1, 3, 7, 16, 35, 60];
 
 export function intervallFuerStufe(stufe: number): number {
   if (stufe < 0) return 0;
