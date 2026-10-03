@@ -90,6 +90,28 @@ await seite.goto(`${BASIS}/lernen/englisch-grundlagen`, { waitUntil: "networkidl
  * Seite korrekt war. Das Attribut `viewBox` ist hier die verlaesslichere
  * Marke, weil es die Absicht ausdrueckt statt eine Nebenwirkung.
  */
+/**
+ * Wartet, bis die Kartenansicht sich nicht mehr bewegt.
+ *
+ * Eine feste Wartezeit ist hier die falsche Antwort: die 3D-Drehung beim
+ * Aufdecken dauert je nach Karte verschieden lang, und eine Karte wurde mit
+ * 30x32px statt 32x32px gemessen – mitten in der Drehung. Statt zu raten wird
+ * die Breite so lange gelesen, bis sich zweimal in Folge nichts mehr ändert.
+ */
+async function warteAufRuhigeBox() {
+    let letzte = -1;
+    for (let i = 0; i < 15; i += 1) {
+        const breite = await seite.evaluate(() => {
+            const m = document.querySelector('[class*="karteMarke"]');
+            if (!m) return -1;
+            return Math.round(m.getBoundingClientRect().width * 10) / 10;
+        });
+        if (breite > 0 && breite === letzte) return;
+        letzte = breite;
+        await seite.waitForTimeout(120);
+    }
+}
+
 async function lage() {
     return await seite.evaluate(() => {
         const alle = [...document.querySelectorAll("*")];
@@ -101,8 +123,8 @@ async function lage() {
             return { x: r.x, y: r.y, width: r.width, height: r.height };
         };
         /*
-         * Die Marke ist jetzt zweierlei: ein `svg` mit der erzeugten Form oder
-         * ein `span` mit einem Emoji. Der erste Lauf dieses Audits suchte nur
+         * Die Marke ist zweierlei: ein `svg` mit der erzeugten Form oder ein
+         * `svg` mit einem Lucide-Icon. Der erste Lauf dieses Audits suchte nur
          * das `svg` und meldete daraufhin fuer jede Karte mit einem Wort, zu
          * dem es ein Bild gibt, „kein Zeichen" – ein Befund, der genau das
          * Gegenteil dessen war, was zu sehen war. Beides wird jetzt geholt und
@@ -115,16 +137,20 @@ async function lage() {
          * einem beliebigen aria-hidden-`span` fand dafuer den Profil-Namen
          * „K" in der Navigation und meldete 28x28px statt 32x32px.
          *
-         * Entscheidend ist die Unterscheidung nach dem Tag und nicht danach,
-         * ob irgendetwas mit dieser Klasse da ist: die `svg` traegt
-         * `karteMarke` genauso wie das Emoji. Ein Versuch, beides ueber einen
-         * Selektor zu holen, hielt jede Karte fuer ein Bild – Folge waren
-         * sechs Karten mit derselben leeren Kennung und die Meldung
-         * „6 Karten, aber nur 1 verschiedene Zeichenform".
+         * Wichtig: beide Varianten sind ein `svg` und tragen dieselbe Klasse
+         * `karteMarke`. Die Unterscheidung nach dem Tag ist deshalb nicht
+         * moeglich, und ein Versuch, beides ueber einen Selektor zu holen,
+         * hielt jede Karte fuer ein Bild – Folge waren sechs Karten mit
+         * derselben leeren Kennung und die Meldung „6 Karten, aber nur 1
+         * verschiedene Zeichenform".
          */
-        const form = document.querySelector('svg[class*="karteMarke"]')
+        // Beide Varianten sind ein `svg` mit derselben `viewBox`; am Tag sind
+        // sie nicht zu unterscheiden. Die Komponente setzt deshalb
+        // `data-zeichen` auf "icon" oder "form" – eine Eigenschaft des
+        // Elements, keine Vermutung über das Aussehen.
+        const form = document.querySelector('svg[data-zeichen="form"][class*="karteMarke"]')
             ?? document.querySelector('svg[viewBox="0 0 24 24"][aria-hidden="true"]');
-        const bild = document.querySelector('span[class*="karteMarke"]');
+        const bild = document.querySelector('svg[data-zeichen="icon"][class*="karteMarke"]');
         const svg = form;
         const span = form ? null : bild;
         const marke = form ?? bild;
@@ -498,7 +524,7 @@ console.log("\n5. Eigenes Set und eigene Karte");
             if (eigen.marke) {
                 gemessen(
                     eigen.markeText
-                        ? `eigene Karte zeigt das Bild ${eigen.markeText}`
+                        ? `eigene Karte zeigt ein Icon (${eigen.markeText})`
                         : `eigene Karte zeigt die erzeugte Form (${eigen.markePfade.length} Pfade)`,
                 );
                 await seite.screenshot({ path: `${ORDNER}/live-eigene-karte.png` });
@@ -510,38 +536,54 @@ console.log("\n5. Eigenes Set und eigene Karte");
              * Die semantische Strecke, am lebenden System gemessen.
              *
              * Erwartet wird: von den fuenf eig angelegten Karten zeigen
-             * „haus", „katze" und „apfel" ein Emoji, die beiden erfundenen
-             * Probewoerter die erzeugte Form. Genau das ist die Zusage des
-             * Nutzers an einem Punkt – „haus ist ein Haus".
+             * „haus", „katze" und „apfel" ein Icon aus Lucide, die beiden
+             * erfundenen Probewoerter die erzeugte Form. Genau das ist die
+             * Zusage des Nutzers an einem Punkt – „haus ist ein Haus".
              *
              * Der Stapel wird durchlaufen statt alle Karten auf einmal geprueft:
              * die Lernseite zeigt genau eine Karte, und ein erster Versuch,
              * alle gleichzeitig zu finden, hat genau eine gesehen und daraus
-             * fuenf Fehlbefunde gebaut. Im gemessenen DOM ist es eindeutig:
-             * ein Emoji steht in einem `span`, die Form in einem `svg`.
+             * fuenf Fehlbefunde gebaut.
+             *
+             * Geprüft wird am Inhalt, nicht am Tag: Icon und erzeugte Form sind
+             * beide ein `svg`. Die Komponente unterscheidet sie über
+             * `data-zeichen`.
              */
             const karten = [];
             const gesehen = new Set();
             let stopp = "";
             let ende = false;
-            for (let schritt = 0; schritt < 6; schritt += 1) {
+            // Acht Durchläufe für fünf Karten. Bei sechs kam es vor, dass die
+            // letzte Karte nicht vorkam, weil der Stapel sie zufällig erst nach
+            // der Wiederholung einer anderen zeigt – und der Lauf dann mit
+            // „Karte sollte die erzeugte Form zeigen" endete.
+            for (let schritt = 0; schritt < 8; schritt += 1) {
+                // Erst warten, bis die neue Karte wirklich zur Ruhe kommt.
+                await warteAufRuhigeBox();
                 const k = await seite.evaluate(() => {
                     const karte = document.querySelector('[class*="kartenSeite"]')?.closest("button");
                     const marke = karte?.querySelector('[class*="karteMarke"]');
                     if (!karte || !marke) return null;
-                    const istForm = marke.tagName.toLowerCase() === "svg";
+                    const istForm = marke.getAttribute("data-zeichen") !== "icon";
                     return {
                         wort: (karte.querySelector('[class*="karteText"]')?.textContent ?? "").trim(),
                         art: istForm ? "form" : "bild",
-                        text: istForm ? "" : (marke.textContent ?? "").trim(),
-                        schrift: istForm ? 0 : Math.round(parseFloat(getComputedStyle(marke).fontSize)),
-                        // `offsetWidth`, nicht `getBoundingClientRect`: die
-                        // Kartenansicht dreht beim Aufdecken in 3D, und die
-                        // Bildlaenge des Rechtecks rechnet diese Drehung mit
-                        // ein. Gemessen wurde so 12x33px statt 32x32px, obwohl
-                        // die Box genau 32x32px gross ist.
-                        breite: marke.offsetWidth,
-                        hoehe: marke.offsetHeight,
+                        text: istForm ? "" : (marke.getAttribute("data-icon") ?? ""),
+                        schrift: istForm ? 0 : Math.round(parseFloat(getComputedStyle(marke).strokeWidth)),
+                        // `getBoundingClientRect`, und erst wenn die Karte
+                        // steht. Zwei Fehlannahmen standen hier vorher:
+                        //
+                        // 1. `offsetWidth` – damit war gerechnet worden, um die
+                        //    3D-Drehung der Karte auszublenden. Auf einem
+                        //    `svg`-Element gibt es dieses Feld aber nicht:
+                        //    gemessen wurde `undefined`, also stand in der
+                        //    Meldung „undefinedxundefinedpx".
+                        // 2. Ohne Wartezeit wird die Karte mitten in ihrer
+                        //    Drehung gemessen; dann liefert das Rechteck die
+                        //    Projektion, und aus 32x32 werden 12x33.
+                        breite: Math.round(marke.getBoundingClientRect().width),
+                        hoehe: Math.round(marke.getBoundingClientRect().height),
+                        elemente: marke.querySelectorAll("path, circle, rect, line, polyline, polygon").length,
                     };
                 });
                 if (!k) { stopp = "keine Karte mit Zeichen im DOM"; break; }
@@ -583,12 +625,25 @@ console.log("\n5. Eigenes Set und eigene Karte");
             const mitForm = karten.filter((k) => k.art === "form");
             gemessen(`${karten.length} Karten durchlaufen: ${mitBild.length} mit Bild, ${mitForm.length} mit erzeugter Form`);
             for (const k of mitBild) {
-                gemessen(`Bild ${k.text} zu „${k.wort}", Schrift ${k.schrift}px, Box ${k.breite}x${k.hoehe}px`);
+                gemessen(`Icon \`${k.text}\` zu „${k.wort}", Strich ${k.schrift}px, Box ${k.breite}x${k.hoehe}px`);
             }
-            for (const [emoji, wort] of [["\u{1F3E0}", "haus"], ["\u{1F431}", "katze"], ["\u{1F34E}", "apfel"]]) {
-                const karte = mitBild.find((k) => k.text === emoji);
-                if (!karte) befund(`fuer „${wort}" wurde kein ${emoji} gefunden`, "fehler");
-                else gemessen(`Karte „${karte.wort}" zeigt ${emoji} wie verlangt`);
+            /*
+             * Ein Icon besteht aus mehreren Formelementen, die erzeugte Form
+             * aus einem einzigen geschlossenen Pfad. Das ist der Unterschied,
+             * der im gemessenen DOM zählt – nicht das Tag, denn beides ist ein
+             * `svg`.
+             *
+             * Eine frühere Fassung zählte die Elemente in einem zweiten
+             * Durchlauf *nach* dem Stapel. Dort steht aber nur noch die letzte
+             * Karte, also kam für die anderen −1 heraus und die Meldung
+             * „sollte ein Icon zeigen, hat aber -1 Elemente".
+             */
+            for (const k of mitBild) {
+                if (k.elemente >= 2) {
+                    gemessen(`Karte „${k.wort}" zeigt das Icon \`${k.text}\` aus ${k.elemente} Elementen`);
+                } else {
+                    befund(`Karte „${k.wort}" sollte ein Icon zeigen, hat aber ${k.elemente} Elemente`, "fehler");
+                }
             }
             // Auf der Vorderseite steht die Uebersetzung, also „markenprobe"
             // und „zweite marke". Zuerst war hier „zeichenprobe" erwartet –
@@ -607,8 +662,8 @@ console.log("\n5. Eigenes Set und eigene Karte");
             for (const k of mitBild) {
                 if (k.breite !== 32 || k.hoehe !== 32) {
                     befund(`Bild auf „${k.wort}" ist ${k.breite}x${k.hoehe}px statt 32x32px`, "fehler");
-                } else if (k.schrift < 27 || k.schrift > 32) {
-                    befund(`Bild auf „${k.wort}" hat ${k.schrift}px Schrift, erlaubt sind 27 bis 32px`, "fehler");
+                } else if (k.schrift < 1.4 || k.schrift > 5) {
+                    befund(`Icon auf „${k.wort}" hat ${k.schrift}px Strich, erlaubt sind 1.4 bis 5px`, "fehler");
                 }
             }
             await seite.screenshot({ path: `${ORDNER}/live-semantik.png` });

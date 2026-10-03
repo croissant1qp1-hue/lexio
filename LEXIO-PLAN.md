@@ -1255,31 +1255,46 @@ Migration. Die Zeichen entstehen **aus der Karten-ID**:
 
 **Der Nachtrag: semantisch, aber nur wo es eindeutig ist.**
 
-- `lib/kartenzeichen-semantik.ts` — kuratierte Wort → Emoji-Tabelle für
+Der erste Versuch stand unter dem Vorbehalt „Emoji". Der Nutzer hat das
+abgelehnt: **SVG, keine Emoji.** Die Zuordnungstabelle ist deshalb auf einen
+echten Icon-Satz umgestellt.
+
+- `lib/kartenzeichen-semantik.ts` — kuratierte Wort → Icon-Tabelle für
   Deutsch und Englisch, mit Normalisierung (`ä` → `ae`, `ß` → `ss`) und
-  einer Sperre für die Homographen `see` und `gift`.
-- Bewusst **kein** Icon-Satz. FontAwesome Free ist lokal vorhanden und
-  bringt 1.992 Icons mit, deckt aber genau die Wörter nicht ab, um die es
-  geht: `bird`, `bear`, `elephant`, `tomato`, `flower` und `grass` fehlen.
-  Für Deutsch ist der Satz von vornherein der falsche.
-- `scripts/emoji-woerter.mjs` — liest `/usr/share/unicode/emoji/emoji-test.txt`
-  und schlägt Kandidaten vor. Nur ein Werkzeug für Menschen, **kein**
-  Laufzeitcode. Die vollautomatische Namenssuche traf `but` als 😥, `from` als
-  😤, `or` als ⏯️ und `die` als 🎲 — deshalb entscheidet die Handtabelle und
-  nicht die Zeichenkette.
-- `components/kartenzeichen.tsx` — bei einem Treffer ein `span` mit dem
-  Emoji statt des `svg`. Schriftgröße und Versatz schwanken aus derselben
-  UUID wie die Geometrie, damit nicht jede Karte denselben Abdruck hat.
-- Keine Anmeldung, kein Schlüssel, kein Netz. Eine KI-API, die das Gleiche
-  könnte, wäre mit Konto, Kosten und einer Übermittlung aller Lernwörter an
-  einen Dritten verbunden — dafür ist der Nutzer nicht erreichbar.
+  einer Sperre für die Homographen `see` und `gift`. 559 Zuordnungen auf 202
+  verschiedene Icons.
+- `lucide-static` 1.51.0 als npm-Paket — 2.130 Icons, Lizenz ISC. Die Wahl
+  fiel gegen FontAwesome Free (lokal vorhanden, aber CC BY 4.0 mit
+  Namensnennung und geringerer Abdeckung) und gegen eine KI-API (Konto,
+  Kosten, Übermittlung aller Lernwörter an einen Dritten).
+- `scripts/icons-einlesen.mjs` — liest die benötigten SVGs aus
+  `node_modules/lucide-static` und schreibt sie als Markup nach
+  `lib/kartenzeichen-svg.generated.ts`. Diese Datei ist eingecheckt: ein
+  Build darf sie nicht erst erzeugen müssen. Neu erzeugen mit
+  `node --import tsx scripts/icons-einlesen.mjs --schreiben`.
+- `components/kartenzeichen.tsx` — bei einem Treffer das Lucide-SVG in
+  `currentColor`, 2px-Strich im selben 24er-`viewBox`. Die Deckkraft kommt
+  weiter aus derselben UUID wie die Geometrie, damit nicht jede Karte
+  denselben Abdruck hat. Steht ein Wort in der Tabelle, fehlt aber sein
+  Icon, gewinnt die erzeugte Form — die Karte darf nicht verloren gehen.
+- `data-zeichen` und `data-icon` stehen im DOM, damit `scripts/zeichen-audit.mjs`
+  Icon und Form unterscheiden kann. Beide sind ein `svg`; am Tag sind sie
+  nicht zu unterscheiden.
+- Die Grundregel von oben gilt unverändert: nur eindeutige Zuordnungen.
+  Farben und schwache Näherungen sind draußen, auch wenn die Tabelle dadurch
+  kleiner wird.
 
 **Ehrlich zur Reichweite.** Gemessen mit `scripts/zeichen-reichweite.mjs`:
 
 | Wortliste | Karten | mit Bild |
 |---|---:|---:|
 | NGSL top 100, das Demovet, viele Funktionswörter | 100 | **17 (17 %)** |
-| Sachwörter, stellvertretende Auswahl | 187 | 187 (100 %) |
+| Sachwörter, stellvertretende Auswahl | 187 | **177 (95 %)** |
+
+Die zehn fehlenden Wörter dieser Liste haben kein ehrliches Piktogramm. Sie
+bekommen die erzeugte Form, und zwar ohne Beanstandung: `schuh` und `tuer`
+lassen sich als Strichbild nicht von ihrem Wort unterscheiden, und ein Icon
+dafür wäre eine Lüge in Linienform.
 
 Die 17 Prozent sind weder ein Misserfolg noch eine Täuschung. Die übrigen
 83 Prozent sind Funktionswörter und Abstrakta wie *der*, *werden*,

@@ -44,5 +44,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# Arbeitsmittel des Emoji-Generators, nicht Anwendungscode
-scripts/emoji-woerter.generated.ts
+# `lib/kartenzeichen-svg.generated.ts` ist absichtlich NICHT hier: die Datei
+# wird eingecheckt, weil ein Build sie braucht und nicht erst erzeugen darf.
+# Neu erzeugen: `node --import tsx scripts/icons-einlesen.mjs --schreiben`

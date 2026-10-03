@@ -74,7 +74,7 @@ const sache = misse(
 
 console.log("\nmit Bild (Demowortliste):");
 for (const t of demo.treffer) {
-    console.log(`  ${t.emoji}  ${t.frage} / ${t.antwort}   [über ${t.quelle}]`);
+    console.log(`  ${t.icon.padEnd(14)}  ${t.frage} / ${t.antwort}   [über ${t.quelle}]`);
 }
 
 console.log("\nohne Bild (bekommen das erzeugte Zeichen):");

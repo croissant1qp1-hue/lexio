@@ -4,7 +4,7 @@
  * Der Schwerpunkt liegt nicht auf „funktioniert es bei Haus“, sondern auf den
  * drei Fehlern, die beim Bauen tatsächlich aufgetreten sind und die alle
  * dasselbe Ergebnis hatten: eine Karte bekam ein falsches Bild und niemand
- * bemerkte es, weil ein Emoji nun mal keine Fehlermeldung wirft. Sie stehen
+ * bemerkte es, weil ein unbekannter Iconname keine Fehlermeldung wirft. Sie stehen
  * deshalb einzeln und mit Begründung, damit sie nicht wieder auftritt.
  */
 import test from "node:test";
@@ -14,13 +14,14 @@ import {
     normiere,
     semantischesZeichen,
     tabellenGroesse,
-    alleWortEmoji,
+    alleWortIcon,
 } from "../lib/kartenzeichen-semantik.ts";
+import { ICON_RUMPF } from "../lib/kartenzeichen-svg.generated.ts";
 
 test("das Beispiel des Nutzers: haus ist ein Haus", () => {
     const treffer = semantischesZeichen("haus", "house");
     assert.ok(treffer, "haus muss ein Bild bekommen");
-    assert.equal(treffer.emoji, "🏠");
+    assert.equal(treffer.icon, "house");
     assert.equal(treffer.quelle, "begriff");
 });
 
@@ -28,7 +29,7 @@ test("auch über die Übersetzung, wenn der Begriff nichts hergibt", () => {
     // „Fahrstuhl" steht nicht in der Tabelle, „elevator" schon.
     const treffer = semantischesZeichen("Fahrstuhl", "elevator");
     assert.ok(treffer, "die Übersetzung muss einspringen");
-    assert.equal(treffer.emoji, "🛗");
+    assert.equal(treffer.icon, "chevrons-up");
     assert.equal(treffer.quelle, "uebersetzung");
 });
 
@@ -78,10 +79,10 @@ test("REGRESSION: „ein“ darf nicht zu „ei“ werden", () => {
 
 test("Homographen sind auf der Übersetzungsseite gesperrt", () => {
     // „see“ ist auf Deutsch der See und auf Englisch „sehen“.
-    assert.equal(semantischesZeichen("See", "lake")?.emoji, "🏞️");
+    assert.equal(semantischesZeichen("See", "lake")?.icon, "waves");
     assert.equal(semantischesZeichen("verstehen", "see"), null);
     // „gift“ ist auf Deutsch Gift und auf Englisch ein Geschenk.
-    assert.equal(semantischesZeichen("Gift", "poison")?.emoji, "☠️");
+    assert.equal(semantischesZeichen("Gift", "poison")?.icon, "skull");
     assert.equal(semantischesZeichen("Vergiftung", "gift"), null);
 });
 
@@ -100,7 +101,7 @@ test("Funktionswörter bekommen grundsätzlich nichts", () => {
     const faelsch = [];
     for (const wort of funktionswoerter) {
         const treffer = semantischesZeichen(wort, "");
-        if (treffer) faelsch.push(`${wort} → ${treffer.emoji}`);
+        if (treffer) faelsch.push(`${wort} → ${treffer.icon}`);
     }
     assert.deepEqual(faelsch, [], `Funktionswörter ohne Bild erwartet, aber gefunden: ${faelsch.join(", ")}`);
 });
@@ -110,51 +111,84 @@ test("jeder Tabellenschlüssel ist auch erreichbar", () => {
     // Normalisierung nie erzeugt, ist toter Code: er zählt in der
     // Selbstauskunft mit und liefert nie ein Bild.
     const unerreichbar = [];
-    for (const schluessel of Object.keys(alleWortEmoji())) {
+    for (const schluessel of Object.keys(alleWortIcon())) {
         const treffer = semantischesZeichen(schluessel, "");
         if (!treffer) unerreichbar.push(schluessel);
     }
     assert.deepEqual(unerreichbar, [], `Nie erreichbare Schlüssel: ${unerreichbar.join(", ")}`);
 });
 
-test("in der Tabelle stehen keine Wörter, sondern Zeichen", () => {
-    const verdächtig = [];
-    for (const [wort, zeichen] of Object.entries(alleWortEmoji())) {
-        if (/[A-Za-z]/.test(zeichen)) verdächtig.push(`${wort} = ${zeichen}`);
-        if (!/[^\x00-\x7F]/.test(zeichen)) verdächtig.push(`${wort} = ${zeichen} (nicht darstellbar)`);
+test("jedes Icon in der Tabelle hat auch wirklich Markup", () => {
+    // Der Fehler, den nur diese Tabelle haben kann: ein Eintrag, dessen Icon
+    // `lib/kartenzeichen-svg.generated.ts` nicht kennt. Die Komponente fällt
+    // dann still auf die erzeugte Form zurück, die Karte sieht plötzlich aus
+    // wie zufällig – und kein Fehler wird geworfen. Deshalb wird hier jeder
+    // Eintag einzeln geprüft.
+    const ohneMarkup = [];
+    for (const [wort, icon] of Object.entries(alleWortIcon())) {
+        if (!ICON_RUMPF[icon]) ohneMarkup.push(`${wort} = ${icon}`);
     }
-    assert.deepEqual(verdächtig, []);
+    assert.deepEqual(ohneMarkup, [], `Icons ohne Markup: ${ohneMarkup.join(", ")}`);
+    // Und die Gegenrichtung: kein ungenutztes Markup, das nur die Datei aufbläht.
+    const ungenutzt = Object.keys(ICON_RUMPF).filter(
+        (icon) => !Object.values(alleWortIcon()).includes(icon),
+    );
+    assert.deepEqual(ungenutzt, [], `Markup ohne Tabelleneintrag: ${ungenutzt.join(", ")}`);
+});
+
+test("das Markup kann nichts anderes als eine Zeichnung", () => {
+    // Das Markup wird mit `dangerouslySetInnerHTML` gesetzt. Das ist die
+    // einzige Stelle im Projekt, an der das passiert, und deshalb lohnt die
+    // Prüfung: der Rumpf darf nur Formelemente enthalten. Kein `<svg>` als
+    // Ausbruch aus der 24er-Box, kein `<script>`, keine Ereignishandler.
+    //
+    // Der erste Versuch prüfte stattdessen die Zahlen im Pfad auf 24 und
+    // meldete „apple: 648" – das ist ein Bogenparameter, keine Koordinate.
+    // Die Prüfung bewertete ihren Befund als Fehler des Produkts, obwohl sie
+    // die falsche Frage stellte.
+    const verboten = /<\s*(script|svg|image|foreignObject|style|iframe)\b|\son[a-z]+\s*=|javascript:/i;
+    const schuldig = [];
+    for (const [icon, rumpf] of Object.entries(ICON_RUMPF)) {
+        if (verboten.test(rumpf)) schuldig.push(icon);
+    }
+    assert.deepEqual(schuldig, [], `Markup mit mehr als Zeichnung: ${schuldig.join(", ")}`);
+    // Und es besteht überhaupt aus etwas: ein leeres Icon wäre unsichtbar.
+    const leer = Object.entries(ICON_RUMPF).filter(([, r]) => !r.trim());
+    assert.deepEqual(leer.map(([i]) => i), []);
 });
 
 test("dieselbe Karte ergibt immer dasselbe Zeichen", () => {
     const einmal = semantischesZeichen("katze", "cat");
     const zweimal = semantischesZeichen("katze", "cat");
     assert.deepEqual(einmal, zweimal);
-    assert.equal(einmal?.emoji, "🐱");
+    assert.equal(einmal?.icon, "cat");
 });
 
 test("gängige Sachwörter haben ein Bild", () => {
     const erwartet: Record<string, string> = {
-        haus: "🏠",
-        hund: "🐶",
-        katze: "🐱",
-        auto: "🚗",
-        baum: "🌳",
-        brot: "🍞",
-        milch: "🥛",
-        schule: "🏫",
-        buch: "📕",
-        tisch: "🪑",
-        wasser: "💧",
-        sonne: "☀️",
-        mond: "🌙",
-        vogel: "🐦",
-        schmetterling: "🦋",
-        elefant: "🐘",
-        apfel: "🍎",
+        haus: "house",
+        hund: "dog",
+        katze: "cat",
+        auto: "car",
+        baum: "tree-deciduous",
+        brot: "croissant",
+        milch: "milk",
+        schule: "school",
+        buch: "book",
+        tisch: "armchair",
+        wasser: "droplet",
+        sonne: "sun",
+        mond: "moon",
+        vogel: "bird",
+        apfel: "apple",
+        fahrrad: "bike",
+        stern: "star",
+        regen: "cloud-rain",
+        schnee: "snowflake",
+        uhr: "clock",
     };
-    for (const [wort, emoji] of Object.entries(erwartet)) {
-        assert.equal(semantischesZeichen(wort, "")?.emoji, emoji, `${wort} sollte ${emoji} sein`);
+    for (const [wort, icon] of Object.entries(erwartet)) {
+        assert.equal(semantischesZeichen(wort, "")?.icon, icon, `${wort} sollte ${icon} sein`);
     }
 });
 
