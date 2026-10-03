@@ -1,6 +1,6 @@
 [
   {
-    "frage": "der",
+    "frage": "der, die, das",
     "antwort": "the",
     "beispielsatz": "I was in the mountains.",
     "beispiel_uebersetzung": "Ich war in den Bergen."
@@ -9,7 +9,7 @@
     "frage": "sein",
     "antwort": "be",
     "beispielsatz": "I will be back soon.",
-    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+    "beispiel_uebersetzung": "Ich komme bald wieder zurück."
   },
   {
     "frage": "und",
@@ -45,7 +45,7 @@
     "frage": "haben",
     "antwort": "have",
     "beispielsatz": "I shouldn't have logged off.",
-    "beispiel_uebersetzung": "Es war eine schlechte Idee, sich abzumelden."
+    "beispiel_uebersetzung": "Ich hätte mich nicht abmelden sollen."
   },
   {
     "frage": "es",
@@ -63,13 +63,13 @@
     "frage": "er",
     "antwort": "he",
     "beispielsatz": "Do whatever he tells you.",
-    "beispiel_uebersetzung": "Tu, was auch immer er dir befiehlt."
+    "beispiel_uebersetzung": "Mache alles, was er sagt."
   },
   {
     "frage": "für",
     "antwort": "for",
     "beispielsatz": "She's asking for the impossible.",
-    "beispiel_uebersetzung": "Sie fordert das Unmögliche."
+    "beispiel_uebersetzung": "Sie verlangt das Unmögliche."
   },
   {
     "frage": "sie",
@@ -81,13 +81,13 @@
     "frage": "nicht",
     "antwort": "not",
     "beispielsatz": "No I'm not; you are!",
-    "beispiel_uebersetzung": "Nein, ich bin es nicht, du bist es!"
+    "beispiel_uebersetzung": "Nein, bin ich nicht; sondern du!"
   },
   {
     "frage": "das, dass",
     "antwort": "that",
     "beispielsatz": "That was an evil bunny.",
-    "beispiel_uebersetzung": "Das war ein böses Kaninchen."
+    "beispiel_uebersetzung": "Das war ein böses Häschen."
   },
   {
     "frage": "wir",
@@ -99,7 +99,7 @@
     "frage": "an, auf",
     "antwort": "on",
     "beispielsatz": "It depends on the context.",
-    "beispiel_uebersetzung": "Das kommt auf den Zusammenhang an."
+    "beispiel_uebersetzung": "Das hängt vom Kontext ab."
   },
   {
     "frage": "mit",
@@ -117,7 +117,7 @@
     "frage": "ich",
     "antwort": "I",
     "beispielsatz": "I will be back soon.",
-    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+    "beispiel_uebersetzung": "Ich komme bald wieder zurück."
   },
   {
     "frage": "machen, tun",
@@ -126,7 +126,7 @@
     "beispiel_uebersetzung": "Wie schreibt man \"pretty\"?"
   },
   {
-    "frage": "als",
+    "frage": "als, wie",
     "antwort": "as",
     "beispielsatz": "The list is as follows.",
     "beispiel_uebersetzung": "Die Liste ist wie folgt."
@@ -150,13 +150,13 @@
     "beispiel_uebersetzung": "Aber die Möglichkeit scheint unwahrscheinlich."
   },
   {
-    "frage": "von",
+    "frage": "von, aus",
     "antwort": "from",
     "beispielsatz": "People from Madrid are weird.",
     "beispiel_uebersetzung": "Leute aus Madrid sind merkwürdig."
   },
   {
-    "frage": "bei",
+    "frage": "von, durch, bei, mit",
     "antwort": "by",
     "beispielsatz": "You'd better go by bus.",
     "beispiel_uebersetzung": "Du solltest besser mit dem Bus fahren."
@@ -165,7 +165,7 @@
     "frage": "werden",
     "antwort": "will",
     "beispielsatz": "I will be back soon.",
-    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+    "beispiel_uebersetzung": "Ich komme bald wieder zurück."
   },
   {
     "frage": "oder",
@@ -192,19 +192,19 @@
     "beispiel_uebersetzung": "Du bist so ungeduldig mit mir."
   },
   {
-    "frage": "all",
+    "frage": "alle",
     "antwort": "all",
     "beispielsatz": "Are they all the same?",
     "beispiel_uebersetzung": "Sind sie alle gleich?"
   },
   {
-    "frage": "wenn",
+    "frage": "wenn, falls",
     "antwort": "if",
     "beispielsatz": "Telephone me if it rains.",
     "beispiel_uebersetzung": "Rufen Sie mich bitte an, falls es regnet."
   },
   {
-    "frage": "eins",
+    "frage": "eins, eine",
     "antwort": "one",
     "beispielsatz": "One can always find time.",
     "beispiel_uebersetzung": "Man kann immer Zeit finden."
@@ -216,7 +216,7 @@
     "beispiel_uebersetzung": "Würdest du gerne kommen?"
   },
   {
-    "frage": "über",
+    "frage": "über, von",
     "antwort": "about",
     "beispielsatz": "You'll forget about me someday.",
     "beispiel_uebersetzung": "Du wirst mich eines Tages vergessen."
@@ -228,7 +228,7 @@
     "beispiel_uebersetzung": "Man kann immer Zeit finden."
   },
   {
-    "frage": "welcher",
+    "frage": "welche, welcher",
     "antwort": "which",
     "beispielsatz": "Which one do you take?",
     "beispiel_uebersetzung": "Welches nimmst du?"
@@ -240,7 +240,7 @@
     "beispiel_uebersetzung": "Dann haben wir ein Problem..."
   },
   {
-    "frage": "wissen",
+    "frage": "wissen, kennen",
     "antwort": "know",
     "beispielsatz": "Who doesn't know this problem?!",
     "beispiel_uebersetzung": "Wer kennt dieses Problem nicht?!"
@@ -252,7 +252,7 @@
     "beispiel_uebersetzung": "Du solltest besonnener handeln."
   },
   {
-    "frage": "bekommen",
+    "frage": "bekommen, holen",
     "antwort": "get",
     "beispielsatz": "I managed to get in.",
     "beispiel_uebersetzung": "Es gelang mir hineinzukommen."
@@ -276,7 +276,7 @@
     "beispiel_uebersetzung": "Wann warst du damit fertig?"
   },
   {
-    "frage": "nachdenken",
+    "frage": "denken",
     "antwort": "think",
     "beispielsatz": "Most people think I'm crazy.",
     "beispiel_uebersetzung": "Die meisten Leute denken, ich sei verrückt."
@@ -294,7 +294,7 @@
     "beispiel_uebersetzung": "Man kann immer Zeit finden."
   },
   {
-    "frage": "verstehen",
+    "frage": "sehen",
     "antwort": "see",
     "beispielsatz": "I'm anxious to see you.",
     "beispiel_uebersetzung": "Ich bin gespannt dich zu sehen."
@@ -303,16 +303,16 @@
     "frage": "was",
     "antwort": "what",
     "beispielsatz": "What are you talking about?",
-    "beispiel_uebersetzung": "Von was redest du?"
+    "beispiel_uebersetzung": "Worüber sprichst du?"
   },
   {
-    "frage": "nach oben",
+    "frage": "auf, hoch",
     "antwort": "up",
     "beispielsatz": "You should give up drinking.",
     "beispiel_uebersetzung": "Du solltest mit dem Trinken aufhören."
   },
   {
-    "frage": "einige",
+    "frage": "einige, manche",
     "antwort": "some",
     "beispielsatz": "Who wants some hot chocolate?",
     "beispiel_uebersetzung": "Wer will heiße Schokolade?"
@@ -321,13 +321,13 @@
     "frage": "andere",
     "antwort": "other",
     "beispielsatz": "Write on every other line.",
-    "beispiel_uebersetzung": "Schreibt auf jede zweite Zeile."
+    "beispiel_uebersetzung": "Beim Schreiben immer eine Zeile freilassen."
   },
   {
-    "frage": "heraus",
+    "frage": "aus, heraus",
     "antwort": "out",
     "beispielsatz": "I'm running out of ideas.",
-    "beispiel_uebersetzung": "Ich habe keine Ideen mehr."
+    "beispiel_uebersetzung": "Mir gehen die Ideen aus."
   },
   {
     "frage": "gut",
@@ -345,19 +345,19 @@
     "frage": "Jahr",
     "antwort": "year",
     "beispielsatz": "Everybody had a good year.",
-    "beispiel_uebersetzung": "Jeder hatte ein gutes Jahr."
+    "beispiel_uebersetzung": "Alle hatten ein gutes Jahr."
   },
   {
-    "frage": "einnehmen",
+    "frage": "nehmen",
     "antwort": "take",
     "beispielsatz": "Take good care of yourself.",
     "beispiel_uebersetzung": "Pass gut auf dich auf."
   },
   {
-    "frage": "kein",
+    "frage": "nein, kein",
     "antwort": "no",
     "beispielsatz": "No I'm not; you are!",
-    "beispiel_uebersetzung": "Nein, ich bin es nicht, du bist es!"
+    "beispiel_uebersetzung": "Nein, bin ich nicht; sondern du!"
   },
   {
     "frage": "gut",
@@ -396,16 +396,16 @@
     "beispiel_uebersetzung": "Könnten Sie das bitte wiederholen?"
   },
   {
-    "frage": "Arbeit",
+    "frage": "arbeiten, Arbeit",
     "antwort": "work",
     "beispielsatz": "I work even on Sunday.",
     "beispiel_uebersetzung": "Ich arbeite sogar sonntags."
   },
   {
-    "frage": "Benutzung",
+    "frage": "benutzen, verwenden",
     "antwort": "use",
     "beispielsatz": "You can use this car.",
-    "beispiel_uebersetzung": "Du kannst diesen Wagen benutzen."
+    "beispiel_uebersetzung": "Du kannst diesen Wagen nehmen."
   },
   {
     "frage": "als",
@@ -444,7 +444,7 @@
     "beispiel_uebersetzung": "Nur du hast die Frage beantwortet."
   },
   {
-    "frage": "scheinen",
+    "frage": "sehen, aussehen",
     "antwort": "look",
     "beispielsatz": "Hey, look, a three-headed monkey!",
     "beispiel_uebersetzung": "Hey, schau' mal, ein Affe mit drei Köpfen!"
@@ -453,7 +453,7 @@
     "frage": "wollen",
     "antwort": "want",
     "beispielsatz": "I want an MP3 player!",
-    "beispiel_uebersetzung": "Ich will einen MP3-Player!"
+    "beispiel_uebersetzung": "Ich will einen MP3-Spieler!"
   },
   {
     "frage": "geben",
@@ -462,7 +462,7 @@
     "beispiel_uebersetzung": "Ich gebe dir mein Wort."
   },
   {
-    "frage": "erster",
+    "frage": "erste, zuerst",
     "antwort": "first",
     "beispielsatz": "We are getting on first-rate.",
     "beispiel_uebersetzung": "Wir verstehen uns sehr gut."
@@ -486,7 +486,7 @@
     "beispiel_uebersetzung": "Man kann immer Zeit finden."
   },
   {
-    "frage": "über",
+    "frage": "über, vorbei",
     "antwort": "over",
     "beispielsatz": "The vacation is over now.",
     "beispiel_uebersetzung": "Die Ferien sind jetzt vorbei."
@@ -516,7 +516,7 @@
     "beispiel_uebersetzung": "Wo sind bitte die Eier?"
   },
   {
-    "frage": "Ding",
+    "frage": "Ding, Sache",
     "antwort": "thing",
     "beispielsatz": "Innocence is a beautiful thing.",
     "beispiel_uebersetzung": "Unschuld ist eine schöne Sache."
@@ -528,7 +528,7 @@
     "beispiel_uebersetzung": "Die meisten Leute denken, ich sei verrückt."
   },
   {
-    "frage": "dürfen",
+    "frage": "sollen",
     "antwort": "should",
     "beispielsatz": "You should give up drinking.",
     "beispiel_uebersetzung": "Du solltest mit dem Trinken aufhören."
@@ -543,10 +543,10 @@
     "frage": "viel",
     "antwort": "much",
     "beispielsatz": "I like it very much.",
-    "beispiel_uebersetzung": "Es gefällt mir sehr gut."
+    "beispiel_uebersetzung": "Ich mag es wirklich sehr."
   },
   {
-    "frage": "recht",
+    "frage": "richtig, rechts",
     "antwort": "right",
     "beispielsatz": "Turn right at the crossroad.",
     "beispiel_uebersetzung": "Biegen Sie an der Kreuzung rechts ab."
@@ -561,13 +561,13 @@
     "frage": "hinterer",
     "antwort": "back",
     "beispielsatz": "I will be back soon.",
-    "beispiel_uebersetzung": "Ich werde bald zurück sein."
+    "beispiel_uebersetzung": "Ich komme bald wieder zurück."
   },
   {
     "frage": "bedeuten",
     "antwort": "mean",
     "beispielsatz": "I know what you mean.",
-    "beispiel_uebersetzung": "Ich weiß, was du meinst."
+    "beispiel_uebersetzung": "Ich weiß, was ihr meint."
   },
   {
     "frage": "sogar",
@@ -576,7 +576,7 @@
     "beispiel_uebersetzung": "Sie wissen nicht einmal, wieso."
   },
   {
-    "frage": "dürfen",
+    "frage": "können, mögen",
     "antwort": "may",
     "beispielsatz": "It may freeze next week.",
     "beispiel_uebersetzung": "Nächste Woche wird es vielleicht Frost geben."

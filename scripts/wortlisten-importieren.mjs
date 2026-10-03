@@ -164,12 +164,66 @@ from (
     ${kartenSql}
 ) as v(frage, antwort, beispielsatz, beispiel_uebersetzung)
 left join public.karteikarten_sets s on s.slug = '${sqlEscape(cfg.slug)}'
+/*
+ * Der Schluessel ist die englische Seite, nicht das Paar aus beiden Seiten.
+ *
+ * Nach dem ersten Lauf mit dem korrigierten Generator ist das nicht mehr
+ * theoretisch: 27 Karten bekamen eine bessere Uebersetzung, die Dubletten-
+ * pruefung auf (frage, antwort) erkannte sie nicht als vorhanden, und das
+ * Set wuchs von 100 auf 127 Karten – jede doppelt, mit veralteter
+ * Uebersetzung daneben. Der Fortschritt blieb erhalten, weil er an der
+ * Karten-Id haengt, aber ein Set mit Doppelkarten ist ein Fehler, kein
+ * Nebeneffekt. Die Datei enthaelt zu jedem Wort genau eine Karte; also ist
+ * die englische Seite der Schluessel.
+ */
 where not exists (
   select 1 from public.karten k
   where k.set_id = s.id
-    and k.frage = v.frage
-    and k.antwort = v.antwort
+    and lower(k.antwort) = lower(v.antwort)
 );
+
+/*
+ * Zweiter Schritt: Karten, die es schon gibt, deren Text aber nicht mehr
+ * stimmt, werden auf den Stand der Datei gebracht.
+ *
+ * Warum das noetig ist und nicht nur "fehlende ergaenzt": der Generator hat
+ * die Bedeutungswahl des Wortes an den Beispielsatz gebunden. Dadurch
+ * ändert sich bei vorhandenen Karten der Text – etwa "use" von "Benutzung"
+ * auf "benutzen, verwenden", weil der Beispielsatz die Verbform zeigt.
+ *
+ * Der Fortschritt liegt in public.karten_fortschritt und verweigt über
+ * karte_id. Ein UPDATE der Karte lässt ihn unberührt – anders als ein
+ * DELETE, das per on delete cascade alles mitnimmt. Genau deshalb wird hier
+ * aktualisiert und nicht ersetzt.
+ *
+ * Zuordnung ueber die englische Seite (antwort): die Datei enthaelt zu
+ * jedem Wort genau eine Karte, und die englische Seite ist damit der
+ * Schluessel. Der NOT EXISTS-Block verhindert, dass durch die Aenderung
+ * zwei Karten mit identischem Paar im selben Set entstehen.
+ */
+update public.karten k
+set
+  frage = v.frage,
+  beispielsatz = v.beispielsatz,
+  beispiel_uebersetzung = v.beispiel_uebersetzung
+from (
+  values
+    ${kartenSql}
+) as v(frage, antwort, beispielsatz, beispiel_uebersetzung),
+  public.karteikarten_sets s
+where s.slug = '${sqlEscape(cfg.slug)}'
+  and k.set_id = s.id
+  and lower(k.antwort) = lower(v.antwort)
+  and (k.frage is distinct from v.frage
+    or k.beispielsatz is distinct from v.beispielsatz
+    or k.beispiel_uebersetzung is distinct from v.beispiel_uebersetzung)
+  and not exists (
+    select 1 from public.karten k2
+    where k2.set_id = k.set_id
+      and k2.frage = v.frage
+      and k2.antwort = v.antwort
+      and k2.id <> k.id
+  );
 
 update public.karteikarten_sets s
 set anzahl_karten = (select count(*) from public.karten k where k.set_id = s.id)

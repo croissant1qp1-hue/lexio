@@ -261,14 +261,29 @@ Deutsch statt Englisch, aber die Architektur ist dieselbe.
 
 NGSL und Kaikki/wordhoard stehen unter **CC-BY-SA**. Für die eigene App
 unkritisch. Wird Lexio je öffentlich mit den Listen verteilt, braucht es
-Quellenangabe und Share-Alike. Das ist der einzige Punkt mit echtem Aufwand
-und muss vor einer Veröffentlichung entschieden werden.
+Quellenangabe und Share-Alike.
+
+> **Erledigt (2026-10-03).** Der Satz "muss vor einer Veröffentlichung
+> entschieden werden" ist überholt: die Listen sind seit dem Import der
+> 1.482 neuen Karten öffentlich in der Produktivdatenbank, also war die
+> Entscheidung fällig. Umsetzung: die öffentliche Seite **`/quellen`**
+> (`app/quellen/page.tsx`) nennt alle drei Quellen mit Bereich, Lizenz und
+> Link, steht im Fuß der Startseite und in der Sitemap. Share-Alike wird
+> wahrgenommen: die englische Originalwortliste wird unter CC BY-SA 4.0
+> weitergegeben. Die Seite sagt außerdem offen, dass die Listen nach
+> **Worthäufigkeit** und nicht nach Lernniveau sortiert sind — das stand
+> vorher nirgends und wäre der erste Vorwurf, den ein Nutzer mitbringt,
+> wenn „Ausbau II" zu schwer ist.
 
 ### Erwartungszahl
 
 Nicht jedes NGSL-Wort hat eine brauchbare deutsche Übersetzung **und** einen
 Tatoeba-Beispielsatz. Realistisch sind das **1.500–2.000 vollständige
 Karten**, nicht 2.809. Diese Zahl vor der Planung kennen, nicht danach.
+
+> **Bestätigt (2026-10-03): 1.582 vollständige Karten von 2.809 NGSL-Wörtern**
+> (56 %) — in der Mitte der vorab geschätzten Spanne. Die Karten sind auf vier
+> Sets verteilt, Details unter Phase 2.2.
 
 ### Satzspiegel
 
@@ -469,6 +484,70 @@ Laufzeit** — das ist Absicht, es hält die App schlank und kostenlos.
 > `englisch-grundlagen` „Englisch Grundlagen", 100 Karten, für alle sichtbar.
 > Roh-Quellen liegen bewusst außerhalb des Repos (`/scripts/quellen/` ist
 > gitignored); der Generator erwartet sie dort oder unter `--quellen`.
+
+**2.2b Die englischen Sets von 100 auf 1.582 Karten erweitern.** Der
+Generator aus 2.2 kannte nur die NGSL-Top-100. Das war die erste von zwei
+Fehlerquellen, die zusammen das Ergebnis beschädigten.
+
+> **Fehlerquelle 1 — die erste Kaikki-Bedeutung.** Das Skript nahm für ein
+> Wort den ersten Wiktionary-Eintrag, dessen erste deutsche Übersetzung
+> vorhanden war. Bei `bill` ist das „Gesetzentwurf", bei `paragraph` „Absatz",
+> bei `digital` „Finger-". Fünf von 100 Karten waren so falsch, dass sie im
+> Unterricht aufgefallen wären. Eine Karte, die falsch lernt, ist schlimmer
+> als eine, die fehlt.
+>
+> **Fehlerquelle 2 — Satz ohne Bezug zur Karte.** Tatoeba wurde über die
+> Übersetzung gespiegelt: erst eine Übersetzung, dann *irgendein* Satz mit
+> dieser Übersetzung. Ergebnis war unter anderem `outside` = „draußen" mit
+> dem Beispielsatz „She likes being outside of the house." Die Übersetzung
+> stimmte, der Satz nicht.
+>
+> **Lösung, in dieser Reihenfolge gebaut:**
+> 1. Die **deutsche Übersetzung muss zum deutschen Satz passen**, nicht nur
+>    zum Wort. Das filterte 2.700 Karten auf 1.215.
+> 2. Wenn das Wort mehrere Bedeutungen hat, entscheidet die **Überlappung der
+>    Inhaltswörter** zwischen den englischen Wiktionary-Beispielen der
+>    Bedeutung und dem englischen Tatoeba-Satz (Schwelle 0.34). Kein Treffer
+>    ⇒ keine Karte. Ergebnis: 1.554.
+> 3. **64 handkuratierte Sonderfälle** für Funktionswörter und die früher
+>    falschen Karten. Ergebnis: **1.582 von 2.809** (56 %).
+>
+> **Verteilung, live in der Produktivdatenbank (5 globale Sets):**
+>
+> | Set | Karten | NGSL-Rang |
+> |---|---|---|
+> | Englisch Grundlagen | 100 | 1–100 |
+> | Englisch Alltag I | 239 | 101–500 |
+> | Englisch Alltag II | 286 | 501–1000 |
+> | Englisch Ausbau I | 436 | 1001–1800 |
+> | Englisch Ausbau II | 521 | 1801–2809 |
+> | **Summe** | **1.582** | |
+>
+> Die Namen folgen der Worthäufigkeit, nicht einer Lernstufe. NGSL kennt
+> keine CEFR-Stufen, und die Setnamen behaupten deshalb auch keine.
+>
+> **Ein Fehler beim Import, der hier stehen muss, weil er passiert ist:**
+> Der Import erkannte vorhandene Karten am Paar `(frage, antwort)`. Beim
+> erneuten Import des korrigierten Starter-Sets passte für 27 Wörter nur die
+> **englische** Seite, nicht das Paar — also hielt der Import sie für neu und
+> fügte sie ein. Das Set wuchs von 100 auf 127 Karten, jede Übersetzung doppelt,
+> die alte daneben. Die Bedingung in der Anweisung selbst stand jetzt auf
+> `lower(k.antwort) = lower(v.antwort)`; **die englische Seite ist der
+> Schlüssel**, weil die Datei zu jedem Wort genau eine Karte enthält. Die 27
+> Dubletten wurden entfernt (Gegenprobe vor dem `DELETE`: keine davon hatte
+> eine Zeile in `karten_fortschritt`), danach die Reparatur erneut gefahren.
+> Bilanz danach: 100 Karten, 4 Fortschrittszeilen, 1 Nutzer — unverändert.
+>
+> **Der Importer kann Karten reparieren.** Vor dem Einfügen gibt es ein
+> `UPDATE` auf vorhandene Karten, abgesichert mit `NOT EXISTS` gegen
+> `v.frage || v.antwort`, damit zwei Karten mit gleichem Text nicht
+> entstehen. Der Fortschritt hängt an `karte_id`, nicht am Text — ein
+> `UPDATE` lässt ihn unberührt, ein `DELETE` würde ihn per `ON DELETE
+> CASCADE` mitnehmen. Karten werden deshalb repariert, nie gelöscht.
+>
+> **Live geprüft:** Übersicht zeigt alle 5 Sets mit richtiger Kartenzahl,
+> Lernansicht liefert Karten inklusive Beispielsatz, keine Dubletten in
+> `englisch-grundlagen`, keine Sammlung in den 1.482 neuen Karten.
 
 **2.3 Textblock-Import.** Neuer Schritt im Wizard: ein `<textarea>`,
 Trennzeichen-Erkennung, dann **Vorschau mit Editierfeld je Zeile**, erst
@@ -954,6 +1033,8 @@ von selbst weg.
 > waagerechter Bildlauf bei 360 px, keine Konsolenfehler. Angemeldet `/` →
 > `/uebersicht`. Anonym `/uebersicht` → `/anmelden`. Responsive-Audit: **72
 > Durchläufe**, die Startseite in allen sechs Viewports ohne Befund.
+
+
 
 ### Phase 5 — Responsive-Audit
 

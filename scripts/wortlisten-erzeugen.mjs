@@ -146,10 +146,10 @@ async function kaikkiUebersetzungen(quellen, ziele, worte) {
     if (!zielZuLemma.has(wort)) return;
     if (ergebnis.has(wort)) return;
 
-    const uebersetzung = leseErsteUebersetzung(eintrag, wort);
-    if (!uebersetzung) return;
+    const kandidaten = leseKandidaten(eintrag, wort);
+    if (!kandidaten.length) return;
 
-    ergebnis.set(wort, { lemma: zielZuLemma.get(wort), uebersetzung });
+    ergebnis.set(wort, { lemma: zielZuLemma.get(wort), kandidaten });
   });
 
   // Sonderfaelle anwenden: vorhandene Uebersetzungen korrigieren UND fehlende
@@ -158,7 +158,11 @@ async function kaikkiUebersetzungen(quellen, ziele, worte) {
   for (const [wort, uebersetzung] of Object.entries(SONDERFAELLE)) {
     const schluessel = wort.toLowerCase();
     if (!zielZuLemma.has(schluessel)) continue;
-    ergebnis.set(schluessel, { lemma: zielZuLemma.get(schluessel), uebersetzung });
+    ergebnis.set(schluessel, {
+      lemma: zielZuLemma.get(schluessel),
+      kandidaten: [{ wort: uebersetzung, beispiele: [] }],
+      gesetzt: true,
+    });
   }
 
   ausgabe(`  ${ergebnis.size} deutsche Uebersetzungen, davon ${Object.keys(SONDERFAELLE).filter(w => zielZuLemma.has(w.toLowerCase())).length} Sonderfaelle`);
@@ -206,6 +210,64 @@ const SONDERFAELLE = {
   is: "ist",
   be: "sein",
   on: "an, auf",
+
+  /*
+   * Zweite Runde, aus demselben Grund wie oben – aber discovered an den
+   * Karten, die die satzbezogene Auswahl jetzt verwirft. Bei
+   * Funktionswoertern ist die strenge Pruefung falsch: "Ich war in den
+   * Bergen" enthaelt "der" nicht, und doch ist "der" die richtige Antwort
+   * auf "the". Sie zu verwerfen heisst, haeufige Woerter zu verlieren.
+   *
+   * Und beim Nachsehen der alten Top-100 standen dort vier falsche Karten,
+   * die derselbe Fehler eingebaut hat, den diese Auswahl jetzt behebt:
+   *
+   *   use   -> "Benutzung" bei "Du kannst diesen Wagen benutzen."
+   *   work  -> "Arbeit"     bei "Ich arbeite sogar sonntags."
+   *   see   -> "verstehen"  bei "Ich bin gespannt dich zu sehen."
+   *   take  -> "einnehmen"  bei "Pass gut auf dich auf."
+   *
+   * Eine falsche Karte ist schlimmer als keine: sie wird als richtig
+   * gelernt. Diese Liste ist deshalb von Hand geschrieben und deckt genau
+   * die Woerter ab, bei denen sich die Automatik nicht vertrauen laesst.
+   */
+  the: "der, die, das",
+  of: "von",
+  to: "zu",
+  have: "haben",
+  as: "als, wie",
+  by: "von, durch, bei, mit",
+  if: "wenn, falls",
+  one: "eins, eine",
+  about: "über, von",
+  know: "wissen, kennen",
+  more: "mehr",
+  see: "sehen",
+  what: "was",
+  up: "auf, hoch",
+  some: "einige, manche",
+  other: "andere",
+  take: "nehmen",
+  no: "nein, kein",
+  because: "weil",
+  work: "arbeiten, Arbeit",
+  use: "benutzen, verwenden",
+  first: "erste, zuerst",
+  new: "neu",
+  over: "über, vorbei",
+  should: "sollen",
+  much: "viel",
+  may: "können, mögen",
+  such: "solch",
+  from: "von, aus",
+  say: "sagen",
+  all: "alle",
+  which: "welche, welcher",
+  get: "bekommen, holen",
+  think: "denken",
+  out: "aus, heraus",
+  look: "sehen, aussehen",
+  thing: "Ding, Sache",
+  right: "richtig, rechts",
 };
 
 /**
@@ -223,8 +285,18 @@ const SONDERFAELLE = {
  * 3. Verwerfen, was die Buchstabensense ist: ein einzelnes Zeichen, das
  *    identisch mit dem Eintrag ist ("a" -> "A").
  */
-function leseErsteUebersetzung(eintrag, wort) {
+function leseKandidaten(eintrag, wort) {
+  const raus = [];
+  const gesehen = new Set();
   for (const sinn of eintrag.senses || []) {
+    // Die Beispiele der Bedeutung sind der zweite Weg zur Auswahl: sie sind
+    // englisch, also direkt mit dem Tatoeba-Satz vergleichbar.
+    // Kaikki liefert Beispiele als Objekte (`{text, bold_text_offsets, type}`),
+    // nicht als Strings. Wer auf typeof "string" filtert, bekommt keine – und
+    // wundert sich ueber eine Auswahl, die gar nicht stattfindet.
+    const beispiele = (sinn.examples || [])
+      .map(e => (typeof e === "string" ? e : e && typeof e.text === "string" ? e.text : ""))
+      .filter(t => t.trim().length > 3);
     for (const t of sinn.translations || []) {
       if (t.code !== "de" || typeof t.word !== "string") continue;
       const text = t.word.trim();
@@ -232,10 +304,105 @@ function leseErsteUebersetzung(eintrag, wort) {
       if (text.length > 60 || /[.!?;|]/.test(text)) continue;
       if (text.split(/\s+/).length > 2) continue;
       if (wort.length <= 1 && text.toLowerCase() === wort) continue;
-      return text;
+      const schluessel = text.toLowerCase();
+      if (gesehen.has(schluessel)) continue;
+      gesehen.add(schluessel);
+      raus.push({ wort: text, beispiele: beispiele.slice(0, 3) });
+      if (raus.length >= 6) return raus;
     }
   }
+  return raus;
+}
+
+/* Woerter, die in fast jedem Satz stehen und darum nichts ueber die
+   Bedeutung verraten. */
+const STOPPWOERTER = new Set(("a an and are as at be but by for from had has have he her his i if in into is it its me my no not of on or our out she so than that the their them then there these they this to was we were what when where which who will with would you your"
+).split(" "));
+
+function inhalt(satz) {
+  return new Set(
+    (String(satz).toLowerCase().match(/[a-z']+/g) || []).filter(w => w.length > 2 && !STOPPWOERTER.has(w))
+  );
+}
+
+/**
+ * Welche Bedeutung meint der Satz? Zwei Wege, in dieser Reihenfolge:
+ *
+ *  1. Die deutsche Uebersetzung steht in der deutschen Satzuebersetzung.
+ *     Das ist ein Treffer ohne Interpretation.
+ *  2. Die Beispiele der Wiktionary-Bedeutung haben mit dem englischen
+ *     Tatoeba-Satz mehrere Inhaltswoerter gemeinsam. Auch das ist ein
+ *     Treffer, nur ein weicherer – deshalb der Schwellwert.
+ *
+ * Findet sich keiner von beiden, wird die Karte verworfen. Das ist
+ * ausdruecklich so gewollt: eine fehlende Karte faellt nicht auf, eine
+ * falsche dagegen sehr.
+ */
+function waehleBedeutung(kandidaten, sa) {
+  for (const k of kandidaten) {
+    if (passtZuSatz(k.wort, sa.deu)) return k.wort;
+  }
+  const satzWorte = inhalt(sa.eng);
+  if (satzWorte.size < 2) return null;
+  let bester = null;
+  let besteQuote = 0;
+  for (const k of kandidaten) {
+    if (!k.beispiele.length) continue;
+    const menge = new Set();
+    for (const b of k.beispiele) for (const w of inhalt(b)) menge.add(w);
+    let treffer = 0;
+    for (const w of satzWorte) if (menge.has(w)) treffer++;
+    const quote = treffer / satzWorte.size;
+    if (quote > besteQuote) {
+      besteQuote = quote;
+      bester = k;
+    }
+  }
+  if (bester && besteQuote >= 0.34) return bester.wort;
   return null;
+}
+
+/*
+ * Passt eine deutsche Uebersetzung zur deutschen Uebersetzung des Satzes?
+ *
+ * Das ist der ganze Trick dieser Korrektur. Wiktionary fuehrt zu einem Wort
+ * mehrere Bedeutungen, und die Beispielsatz stammt aus einem anderen Korpus
+ * als die Wiktionary-Bedeutung. Nimmt man blind die erste, bekommt man
+ * "bill -> Gesetzentwurf" und dazu den Satz "Give me the bill, please." mit
+ * "Rechnung". Solche Karten lernen falsch – sie sind schlimmer als keine
+ * Karte, weil der Lernende sie fuer richtig haelt.
+ *
+ * Also wird nicht die Bedeutung geraten, sondern geprueft: steht das deutsche
+ * Wort in der deutschen Satzuebersetzung, dann ist es die Bedeutung, die der
+ * Satz meint. Findet sich keine, faellt die Karte weg.
+ */
+function passtZuSatz(kandidat, satz) {
+  const ziel = normalisiere(kandidat);
+  if (!ziel) return false;
+  const n = normalisiereSatz(satz);
+  if (!n) return false;
+  if (n.includes(` ${ziel} `) || n.startsWith(`${ziel} `)) return true;
+  // Einfache Beugung mitnehmen: Woche -> Wochen, Hund -> Hunde, Kind -> Kinder.
+  if (ziel.length >= 5) {
+    for (const endung of ["en", "e", "er", "es", "em", "n"]) {
+      if (ziel.length - endung.length < 4) continue;
+      const stamm = ziel.slice(0, ziel.length - endung.length);
+      if (n.includes(` ${stamm} `) || n.endsWith(` ${stamm}`)) return true;
+    }
+  }
+  return false;
+}
+
+function normalisiere(wort) {
+  return String(wort || "")
+    .toLowerCase()
+    .replace(/[^a-zäöüß\s-]/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function normalisiereSatz(satz) {
+  return ` ${normalisiere(satz).replace(/\s+/g, " ")} `;
 }
 
 /** Gibt gunzipte Zeilen zeilenweise weiter. */
@@ -320,22 +487,43 @@ async function main() {
   const ziele = zielSet(worte);
 
   const links = baueLinks(a.quellen);
-  const uebersetzungen = await kaikkiUebersetzungen(a.quellen, ziele, worte);
+
+  // Reihenfolge mit Grund: die Uebersetzung wird nach dem Beispielsatz
+  // ausgewaehlt, also braucht sie den Satz. Vorher standen die Schritte in
+  // der umgekehrten Reihenfolge und die Bedeutung wurde ohne Kenntnis des
+  // Satzes festgelegt – daher die Karten, die richtig aussehen und falsch
+  // gemeint sind.
   const saetze = beispielSaetze(a.quellen, ziele, links);
+  const uebersetzungen = await kaikkiUebersetzungen(a.quellen, ziele, worte);
 
   const karten = [];
+  let ohnePassendeBedeutung = 0;
   for (const w of worte) {
     const wort = w.Lemma.toLowerCase();
     const ka = uebersetzungen.get(wort);
     const sa = saetze.get(wort);
     if (!ka || !sa) continue;
+
+    let uebersetzung = null;
+    if (ka.gesetzt) {
+      // Von Hand gesetzt (Funktionswoerter) – die passen ohne Pruefung.
+      uebersetzung = ka.kandidaten[0].wort;
+    } else {
+      uebersetzung = waehleBedeutung(ka.kandidaten, sa);
+    }
+    if (!uebersetzung) {
+      ohnePassendeBedeutung++;
+      continue;
+    }
+
     karten.push({
-      frage: ka.uebersetzung,
+      frage: uebersetzung,
       antwort: w.Lemma,
       beispielsatz: sa.eng,
       beispiel_uebersetzung: sa.deu,
     });
   }
+  ausgabe(`  ${ohnePassendeBedeutung} Worte ohne zur deutschen Satzuebersetzung passende Bedeutung`);
 
   if (!fs.existsSync(a.ausgabe)) fs.mkdirSync(a.ausgabe, { recursive: true });
 

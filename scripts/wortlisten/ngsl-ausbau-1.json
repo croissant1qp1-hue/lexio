@@ -1,0 +1,2618 @@
+[
+  {
+    "frage": "Schwierigkeit",
+    "antwort": "difficulty",
+    "beispielsatz": "One difficulty after another arose.",
+    "beispiel_uebersetzung": "Es kam zu einer Schwierigkeit nach der anderen."
+  },
+  {
+    "frage": "Einkauf",
+    "antwort": "purchase",
+    "beispielsatz": "Thank you for your purchase!",
+    "beispiel_uebersetzung": "Vielen Dank für Ihren Einkauf!"
+  },
+  {
+    "frage": "bekanntgeben",
+    "antwort": "announce",
+    "beispielsatz": "They'll announce the winner tomorrow.",
+    "beispiel_uebersetzung": "Morgen werden sie den Gewinner bekanntgeben."
+  },
+  {
+    "frage": "unabhängig",
+    "antwort": "independent",
+    "beispielsatz": "Kenya became independent in 1963.",
+    "beispiel_uebersetzung": "Kenia wurde 1963 unabhängig."
+  },
+  {
+    "frage": "empfehlen",
+    "antwort": "recommend",
+    "beispielsatz": "I can recommend this restaurant.",
+    "beispiel_uebersetzung": "Ich kann dieses Restaurant empfehlen."
+  },
+  {
+    "frage": "Umfrage",
+    "antwort": "survey",
+    "beispielsatz": "A survey shows that many businessmen skip lunch.",
+    "beispiel_uebersetzung": "Eine Umfrage hat ergeben, dass viele Geschäftsleute das Mittagessen auslassen."
+  },
+  {
+    "frage": "Mehrheit",
+    "antwort": "majority",
+    "beispielsatz": "Protestants were in the majority.",
+    "beispiel_uebersetzung": "Die Protestanten waren in der Überzahl."
+  },
+  {
+    "frage": "Wind",
+    "antwort": "wind",
+    "beispielsatz": "The wind blew in gusts.",
+    "beispiel_uebersetzung": "Der Wind wehte in Böen."
+  },
+  {
+    "frage": "Austausch",
+    "antwort": "exchange",
+    "beispielsatz": "What is the exchange rate?",
+    "beispiel_uebersetzung": "Wie ist der Wechselkurs?"
+  },
+  {
+    "frage": "Budget",
+    "antwort": "budget",
+    "beispielsatz": "The budget must be balanced.",
+    "beispiel_uebersetzung": "Das Budget muss ausgeglichen sein."
+  },
+  {
+    "frage": "Blut",
+    "antwort": "blood",
+    "beispielsatz": "Blood ran from his wound.",
+    "beispiel_uebersetzung": "Blut floss aus seiner Wunde."
+  },
+  {
+    "frage": "Block",
+    "antwort": "block",
+    "beispielsatz": "They live in our block.",
+    "beispiel_uebersetzung": "Sie wohnen im gleichen Block wie wir."
+  },
+  {
+    "frage": "zählen",
+    "antwort": "count",
+    "beispielsatz": "I count on your help.",
+    "beispiel_uebersetzung": "Ich zähle auf deine Hilfe."
+  },
+  {
+    "frage": "Szene",
+    "antwort": "scene",
+    "beispielsatz": "That was a fearful scene.",
+    "beispiel_uebersetzung": "Es war ein schrecklicher Anblick."
+  },
+  {
+    "frage": "Schriftsteller",
+    "antwort": "writer",
+    "beispielsatz": "He is a good writer.",
+    "beispiel_uebersetzung": "Er schreibt gut."
+  },
+  {
+    "frage": "zufrieden",
+    "antwort": "content",
+    "beispielsatz": "I'm content with my salary.",
+    "beispiel_uebersetzung": "Ich bin mit meinem Gehalt zufrieden."
+  },
+  {
+    "frage": "sicher",
+    "antwort": "safe",
+    "beispielsatz": "I am playing it safe.",
+    "beispiel_uebersetzung": "Ich gehe auf Nummer sicher."
+  },
+  {
+    "frage": "einladen",
+    "antwort": "invite",
+    "beispielsatz": "I wonder who to invite.",
+    "beispiel_uebersetzung": "Ich frage mich, wen ich einladen soll."
+  },
+  {
+    "frage": "mischen",
+    "antwort": "mix",
+    "beispielsatz": "Oil and water don't mix.",
+    "beispiel_uebersetzung": "Öl und Wasser mischen sich nicht."
+  },
+  {
+    "frage": "Element",
+    "antwort": "element",
+    "beispielsatz": "Magnesium is a chemical element.",
+    "beispiel_uebersetzung": "Magnesium ist ein chemisches Element."
+  },
+  {
+    "frage": "effektiv",
+    "antwort": "effective",
+    "beispielsatz": "How effective is this method?",
+    "beispiel_uebersetzung": "Wie effektiv ist diese Methode?"
+  },
+  {
+    "frage": "korrekt",
+    "antwort": "correct",
+    "beispielsatz": "This sentence is grammatically correct.",
+    "beispiel_uebersetzung": "Dieser Satz ist grammatikalisch korrekt."
+  },
+  {
+    "frage": "medizinisch",
+    "antwort": "medical",
+    "beispielsatz": "Do you have medical insurance?",
+    "beispiel_uebersetzung": "Haben Sie eine Krankenversicherung?"
+  },
+  {
+    "frage": "Telefon",
+    "antwort": "telephone",
+    "beispielsatz": "You need not telephone me.",
+    "beispiel_uebersetzung": "Du brauchst mich nicht anzurufen."
+  },
+  {
+    "frage": "Komitee",
+    "antwort": "committee",
+    "beispielsatz": "Are you on the committee?",
+    "beispiel_uebersetzung": "Sind Sie im Komitee?"
+  },
+  {
+    "frage": "bewusst",
+    "antwort": "aware",
+    "beispielsatz": "I'm aware you've already finished.",
+    "beispiel_uebersetzung": "Ich bin mir bewusst, dass du bereits fertig bist."
+  },
+  {
+    "frage": "Rat",
+    "antwort": "advice",
+    "beispielsatz": "You've given me good advice.",
+    "beispiel_uebersetzung": "Du hast mir einen guten Rat erteilt."
+  },
+  {
+    "frage": "Glas",
+    "antwort": "glass",
+    "beispielsatz": "I found the glass empty.",
+    "beispiel_uebersetzung": "Ich habe das Glas leer vorgefunden."
+  },
+  {
+    "frage": "Stress",
+    "antwort": "stress",
+    "beispielsatz": "How do you handle stress?",
+    "beispiel_uebersetzung": "Wie gehst du mit Stress um?"
+  },
+  {
+    "frage": "Radio",
+    "antwort": "radio",
+    "beispielsatz": "I'm listening to the radio.",
+    "beispiel_uebersetzung": "Ich höre Radio."
+  },
+  {
+    "frage": "kompliziert",
+    "antwort": "complex",
+    "beispielsatz": "He has an inferiority complex.",
+    "beispiel_uebersetzung": "Er hat einen Minderwertigkeitskomplex."
+  },
+  {
+    "frage": "Text",
+    "antwort": "text",
+    "beispielsatz": "The text is too long.",
+    "beispiel_uebersetzung": "Der Text ist zu lang."
+  },
+  {
+    "frage": "Kontext",
+    "antwort": "context",
+    "beispielsatz": "It depends on the context.",
+    "beispiel_uebersetzung": "Das hängt vom Kontext ab."
+  },
+  {
+    "frage": "reiten",
+    "antwort": "ride",
+    "beispielsatz": "Can you ride a horse?",
+    "beispiel_uebersetzung": "Kannst du reiten?"
+  },
+  {
+    "frage": "direkt",
+    "antwort": "directly",
+    "beispielsatz": "I could ask him directly.",
+    "beispiel_uebersetzung": "Ich könnte ihn direkt fragen."
+  },
+  {
+    "frage": "Titel",
+    "antwort": "title",
+    "beispielsatz": "He got a shameful title.",
+    "beispiel_uebersetzung": "Er bekam einen unehrenhaften Titel."
+  },
+  {
+    "frage": "zusätzlich",
+    "antwort": "extra",
+    "beispielsatz": "They have an extra bed.",
+    "beispiel_uebersetzung": "Es gibt ein Gästebett."
+  },
+  {
+    "frage": "Stuhl",
+    "antwort": "chair",
+    "beispielsatz": "It is under the chair.",
+    "beispiel_uebersetzung": "Es ist unter dem Stuhl."
+  },
+  {
+    "frage": "teuer",
+    "antwort": "expensive",
+    "beispielsatz": "These shoes are too expensive.",
+    "beispiel_uebersetzung": "Diese Schuhe sind zu teuer."
+  },
+  {
+    "frage": "Muster",
+    "antwort": "sample",
+    "beispielsatz": "This is a free sample.",
+    "beispiel_uebersetzung": "Das ist ein freies Muster."
+  },
+  {
+    "frage": "liefern",
+    "antwort": "deliver",
+    "beispielsatz": "Do you deliver on Sundays?",
+    "beispiel_uebersetzung": "Liefert ihr sonntags?"
+  },
+  {
+    "frage": "Wetter",
+    "antwort": "weather",
+    "beispielsatz": "The sky promises fair weather.",
+    "beispiel_uebersetzung": "Der Himmel verspricht schönes Wetter."
+  },
+  {
+    "frage": "sammeln",
+    "antwort": "collect",
+    "beispielsatz": "I love to collect stamps.",
+    "beispiel_uebersetzung": "Ich liebe es, Briefmarken zu sammeln."
+  },
+  {
+    "frage": "Prinzip",
+    "antwort": "principle",
+    "beispielsatz": "In principle, I'm with you.",
+    "beispiel_uebersetzung": "Im Prinzip bin ich mit Ihnen einverstanden."
+  },
+  {
+    "frage": "Berufung",
+    "antwort": "appeal",
+    "beispielsatz": "Tom will appeal the ruling.",
+    "beispiel_uebersetzung": "Tom wird gegen das Urteil Berufung einlegen."
+  },
+  {
+    "frage": "Vertrauen",
+    "antwort": "trust",
+    "beispielsatz": "I don't necessarily trust translations.",
+    "beispiel_uebersetzung": "Ich vertraue Übersetzungen nicht unbedingt."
+  },
+  {
+    "frage": "glatt",
+    "antwort": "flat",
+    "beispielsatz": "I have a flat tire.",
+    "beispiel_uebersetzung": "Ich habe einen Platten."
+  },
+  {
+    "frage": "Bauernhof",
+    "antwort": "farm",
+    "beispielsatz": "This is Uncle Tom's farm.",
+    "beispiel_uebersetzung": "Das hier ist Onkel Toms Bauernhof."
+  },
+  {
+    "frage": "Sammlung",
+    "antwort": "collection",
+    "beispielsatz": "The summer collection has arrived.",
+    "beispiel_uebersetzung": "Die Sommerkollektion ist da."
+  },
+  {
+    "frage": "Band",
+    "antwort": "band",
+    "beispielsatz": "I play in a band.",
+    "beispiel_uebersetzung": "Ich spiele in einer Band."
+  },
+  {
+    "frage": "alternativ",
+    "antwort": "alternative",
+    "beispielsatz": "This is the only alternative.",
+    "beispiel_uebersetzung": "Das ist die einzige Alternative."
+  },
+  {
+    "frage": "Software",
+    "antwort": "software",
+    "beispielsatz": "They deal in software products.",
+    "beispiel_uebersetzung": "Sie handeln mit Software."
+  },
+  {
+    "frage": "Paar",
+    "antwort": "pair",
+    "beispielsatz": "They make an odd pair.",
+    "beispiel_uebersetzung": "Die sind schon ein seltsames Paar."
+  },
+  {
+    "frage": "Schiff",
+    "antwort": "ship",
+    "beispielsatz": "Rats leave a sinking ship.",
+    "beispiel_uebersetzung": "Die Ratten verlassen das sinkende Schiff."
+  },
+  {
+    "frage": "Einstellung",
+    "antwort": "attitude",
+    "beispielsatz": "My attitude towards him changed.",
+    "beispiel_uebersetzung": "Meine Einstellung ihm gegenüber hat sich geändert."
+  },
+  {
+    "frage": "doppel-",
+    "antwort": "double",
+    "beispielsatz": "I'd like a double room.",
+    "beispiel_uebersetzung": "Ich möchte ein Doppelzimmer."
+  },
+  {
+    "frage": "Bein",
+    "antwort": "leg",
+    "beispielsatz": "I broke my right leg.",
+    "beispiel_uebersetzung": "Ich habe mir das rechte Bein gebrochen."
+  },
+  {
+    "frage": "Satz",
+    "antwort": "sentence",
+    "beispielsatz": "Put this sentence into English.",
+    "beispiel_uebersetzung": "Übersetzt diesen Satz ins Englische."
+  },
+  {
+    "frage": "ausdrucken",
+    "antwort": "print",
+    "beispielsatz": "Can you print it out?",
+    "beispiel_uebersetzung": "Können Sie es ausdrucken?"
+  },
+  {
+    "frage": "Fortschritt",
+    "antwort": "progress",
+    "beispielsatz": "The student's progress is satisfactory.",
+    "beispiel_uebersetzung": "Der Fortschritt des Schülers ist zufriedenstellend."
+  },
+  {
+    "frage": "Wahrheit",
+    "antwort": "truth",
+    "beispielsatz": "Please tell me the truth.",
+    "beispiel_uebersetzung": "Bitte sag mir die Wahrheit."
+  },
+  {
+    "frage": "Niemand",
+    "antwort": "nobody",
+    "beispielsatz": "Nobody can foresee what'll happen.",
+    "beispiel_uebersetzung": "Niemand kann voraussehen, was geschehen wird."
+  },
+  {
+    "frage": "untersuchen",
+    "antwort": "examine",
+    "beispielsatz": "I have to examine you.",
+    "beispiel_uebersetzung": "Ich muss Sie untersuchen."
+  },
+  {
+    "frage": "legen",
+    "antwort": "lay",
+    "beispielsatz": "He lay on the bed.",
+    "beispiel_uebersetzung": "Er lag auf dem Bett."
+  },
+  {
+    "frage": "Politik",
+    "antwort": "politics",
+    "beispielsatz": "Are you concerned with politics?",
+    "beispiel_uebersetzung": "Interessierst du dich für Politik?"
+  },
+  {
+    "frage": "antworten",
+    "antwort": "reply",
+    "beispielsatz": "He made a rude reply.",
+    "beispiel_uebersetzung": "Er gab eine unhöfliche Antwort."
+  },
+  {
+    "frage": "Display",
+    "antwort": "display",
+    "beispielsatz": "My camera's display is defective.",
+    "beispiel_uebersetzung": "Das Display meines Fotoapparats ist defekt."
+  },
+  {
+    "frage": "Benutzer",
+    "antwort": "user",
+    "beispielsatz": "Hello! I'm a new user.",
+    "beispiel_uebersetzung": "Hallo! Ich bin ein neuer Benutzer."
+  },
+  {
+    "frage": "langsam",
+    "antwort": "slow",
+    "beispielsatz": "He is slow of understanding.",
+    "beispiel_uebersetzung": "Er ist schwer von Begriff."
+  },
+  {
+    "frage": "normal",
+    "antwort": "regular",
+    "beispielsatz": "Fill it with regular, please.",
+    "beispiel_uebersetzung": "Bitte füllen Sie den Tank mit Normal."
+  },
+  {
+    "frage": "physisch",
+    "antwort": "physical",
+    "beispielsatz": "I had a physical checkup.",
+    "beispiel_uebersetzung": "Ich wurde medizinisch untersucht."
+  },
+  {
+    "frage": "getrennt",
+    "antwort": "apart",
+    "beispielsatz": "He stood apart from us.",
+    "beispiel_uebersetzung": "Er stand abseits von uns."
+  },
+  {
+    "frage": "Kriminalität",
+    "antwort": "crime",
+    "beispielsatz": "Crime is on the increase.",
+    "beispiel_uebersetzung": "Die Kriminalität steigt."
+  },
+  {
+    "frage": "Abnahme",
+    "antwort": "decline",
+    "beispielsatz": "His health continued to decline.",
+    "beispiel_uebersetzung": "Seine Gesundheit verschlimmerte sich immer mehr."
+  },
+  {
+    "frage": "Jahrzehnt",
+    "antwort": "decade",
+    "beispielsatz": "That was over a decade ago.",
+    "beispiel_uebersetzung": "Das war vor über einem Jahrzehnt."
+  },
+  {
+    "frage": "warnen",
+    "antwort": "warn",
+    "beispielsatz": "We have to warn him.",
+    "beispiel_uebersetzung": "Wir müssen ihn warnen."
+  },
+  {
+    "frage": "Gefallen",
+    "antwort": "favor",
+    "beispielsatz": "I did you a favor.",
+    "beispiel_uebersetzung": "Ich habe dir einen Gefallen getan."
+  },
+  {
+    "frage": "Gesellschafter",
+    "antwort": "partner",
+    "beispielsatz": "Who is your dance partner?",
+    "beispiel_uebersetzung": "Wer ist dein Tanzpartner?"
+  },
+  {
+    "frage": "Schärfe",
+    "antwort": "heat",
+    "beispielsatz": "Could you heat this dish?",
+    "beispiel_uebersetzung": "Könnten Sie dieses Gericht aufwärmen?"
+  },
+  {
+    "frage": "Führer",
+    "antwort": "guide",
+    "beispielsatz": "He acted as our guide.",
+    "beispiel_uebersetzung": "Er spielte unseren Führer."
+  },
+  {
+    "frage": "Taxi",
+    "antwort": "taxi",
+    "beispielsatz": "Tom found me a taxi.",
+    "beispiel_uebersetzung": "Tom suchte mir ein Taxi."
+  },
+  {
+    "frage": "ernähren",
+    "antwort": "feed",
+    "beispielsatz": "Pandas feed on bamboo grass.",
+    "beispiel_uebersetzung": "Pandas ernähren sich mit Bambusblättern."
+  },
+  {
+    "frage": "fehlen",
+    "antwort": "mistake",
+    "beispielsatz": "Anybody can make a mistake.",
+    "beispiel_uebersetzung": "Jedem kann ein Fehler passieren."
+  },
+  {
+    "frage": "Chef",
+    "antwort": "chief",
+    "beispielsatz": "The problem tortured the chief.",
+    "beispiel_uebersetzung": "Das Problem quälte den Chef."
+  },
+  {
+    "frage": "kühl",
+    "antwort": "cool",
+    "beispielsatz": "The soup is not cool.",
+    "beispiel_uebersetzung": "Die Suppe ist nicht erkaltet."
+  },
+  {
+    "frage": "Oberfläche",
+    "antwort": "surface",
+    "beispielsatz": "This table's surface is smooth.",
+    "beispiel_uebersetzung": "Dieser Tisch hat eine glatte Oberfläche."
+  },
+  {
+    "frage": "Bibliothek",
+    "antwort": "library",
+    "beispielsatz": "The library has many books.",
+    "beispiel_uebersetzung": "In dieser Bibliothek gibt es viele Bücher."
+  },
+  {
+    "frage": "Rand",
+    "antwort": "edge",
+    "beispielsatz": "Don't go near the edge.",
+    "beispiel_uebersetzung": "Gehen Sie nicht zu nahe an den Rand."
+  },
+  {
+    "frage": "Publikum",
+    "antwort": "audience",
+    "beispielsatz": "The audience applauded the actress.",
+    "beispiel_uebersetzung": "Das Publikum applaudierte der Schauspielerin."
+  },
+  {
+    "frage": "Verfahren",
+    "antwort": "procedure",
+    "beispielsatz": "I explained the procedure to him.",
+    "beispiel_uebersetzung": "Ich erklärte ihm die Verfahren."
+  },
+  {
+    "frage": "E-Mail",
+    "antwort": "email",
+    "beispielsatz": "Can I email from here?",
+    "beispiel_uebersetzung": "Kann ich eine E-Mail von hier verschicken?"
+  },
+  {
+    "frage": "werben",
+    "antwort": "advertise",
+    "beispielsatz": "We need to advertise on television.",
+    "beispiel_uebersetzung": "Wir müssen im Fernsehen werben."
+  },
+  {
+    "frage": "Fluss",
+    "antwort": "river",
+    "beispielsatz": "The river has dried up.",
+    "beispiel_uebersetzung": "Der Fluss ist ausgetrocknet."
+  },
+  {
+    "frage": "Gegensatz",
+    "antwort": "contrast",
+    "beispielsatz": "She seemed happy in contrast to the man.",
+    "beispiel_uebersetzung": "Im Gegensatz zu dem Mann schien sie glücklich zu sein."
+  },
+  {
+    "frage": "Realität",
+    "antwort": "reality",
+    "beispielsatz": "It's time you faced reality.",
+    "beispiel_uebersetzung": "Es ist an der Zeit, dass du der Realität ins Auge siehst."
+  },
+  {
+    "frage": "Foto",
+    "antwort": "photograph",
+    "beispielsatz": "Let's get our photograph taken.",
+    "beispiel_uebersetzung": "Lasst uns ein Foto machen."
+  },
+  {
+    "frage": "Künstler",
+    "antwort": "artist",
+    "beispielsatz": "Picasso is a famous artist.",
+    "beispiel_uebersetzung": "Picasso ist ein berühmter Künstler."
+  },
+  {
+    "frage": "Anwesenheit",
+    "antwort": "presence",
+    "beispielsatz": "She gave us a presence.",
+    "beispiel_uebersetzung": "Sie gab uns eine Gegenwart."
+  },
+  {
+    "frage": "Ecke",
+    "antwort": "corner",
+    "beispielsatz": "Turn left at the corner.",
+    "beispiel_uebersetzung": "Geh an der Ecke nach links."
+  },
+  {
+    "frage": "Kategorie",
+    "antwort": "category",
+    "beispielsatz": "They don't belong under that category.",
+    "beispiel_uebersetzung": "Sie fallen nicht unter diese Kategorie."
+  },
+  {
+    "frage": "Sekretärin",
+    "antwort": "secretary",
+    "beispielsatz": "I made Ann my secretary.",
+    "beispiel_uebersetzung": "Ich machte Ann zu meiner Sekretärin."
+  },
+  {
+    "frage": "Skala",
+    "antwort": "scale",
+    "beispielsatz": "The pH scale is logarithmic.",
+    "beispiel_uebersetzung": "Die pH-Skala ist logarithmisch."
+  },
+  {
+    "frage": "Fahrer",
+    "antwort": "driver",
+    "beispielsatz": "He is a bus driver.",
+    "beispiel_uebersetzung": "Er ist Busfahrer."
+  },
+  {
+    "frage": "weinen",
+    "antwort": "cry",
+    "beispielsatz": "Tomoko almost started to cry.",
+    "beispiel_uebersetzung": "Tomoko hätte fast angefangen zu weinen."
+  },
+  {
+    "frage": "Vorstellung",
+    "antwort": "introduction",
+    "beispielsatz": "Our guest needs no introduction.",
+    "beispiel_uebersetzung": "Unser Gast bedarf keiner Vorstellung."
+  },
+  {
+    "frage": "bestätigen",
+    "antwort": "confirm",
+    "beispielsatz": "Confirm your reservation in advance.",
+    "beispiel_uebersetzung": "Bestätigen Sie Ihre Reservierung im Voraus."
+  },
+  {
+    "frage": "älter",
+    "antwort": "senior",
+    "beispielsatz": "John is senior to Robert.",
+    "beispiel_uebersetzung": "Johannes ist älter als Robert."
+  },
+  {
+    "frage": "Landkarte",
+    "antwort": "map",
+    "beispielsatz": "This is a road map.",
+    "beispiel_uebersetzung": "Das ist eine Straßenkarte."
+  },
+  {
+    "frage": "Konzept",
+    "antwort": "concept",
+    "beispielsatz": "Existence is a meaningless concept.",
+    "beispiel_uebersetzung": "Die Existenz ist ein unwichtiges Konzept."
+  },
+  {
+    "frage": "Insel",
+    "antwort": "island",
+    "beispielsatz": "The island abounds with rivers.",
+    "beispiel_uebersetzung": "Es gibt zahlreiche Flüsse auf der Insel."
+  },
+  {
+    "frage": "weder",
+    "antwort": "neither",
+    "beispielsatz": "I neither drink nor smoke.",
+    "beispiel_uebersetzung": "Weder trinke ich, noch rauche ich."
+  },
+  {
+    "frage": "Fußball",
+    "antwort": "football",
+    "beispielsatz": "Football is an old game.",
+    "beispiel_uebersetzung": "Fußball ist ein altes Spiel."
+  },
+  {
+    "frage": "überleben",
+    "antwort": "survive",
+    "beispielsatz": "Not many survive this disease.",
+    "beispiel_uebersetzung": "Diese Krankheit überleben viele nicht."
+  },
+  {
+    "frage": "Flug",
+    "antwort": "flight",
+    "beispielsatz": "The Germans took to flight.",
+    "beispiel_uebersetzung": "Die Deutschen ergriffen die Flucht."
+  },
+  {
+    "frage": "lösen",
+    "antwort": "solve",
+    "beispielsatz": "Could you solve the problem?",
+    "beispiel_uebersetzung": "Konntest du das Problem lösen?"
+  },
+  {
+    "frage": "Hintergrund",
+    "antwort": "background",
+    "beispielsatz": "That shows his theoretical background.",
+    "beispiel_uebersetzung": "Das zeigt seinen theoretischen Hintergrund."
+  },
+  {
+    "frage": "Werkzeug",
+    "antwort": "tool",
+    "beispielsatz": "He handled the tool skillfully.",
+    "beispiel_uebersetzung": "Er handhabte das Werkzeug gekonnt."
+  },
+  {
+    "frage": "Rauch",
+    "antwort": "smoke",
+    "beispielsatz": "I forbid you to smoke.",
+    "beispiel_uebersetzung": "Ich verbiete dir zu rauchen."
+  },
+  {
+    "frage": "besetzt",
+    "antwort": "busy",
+    "beispielsatz": "The line is busy again.",
+    "beispiel_uebersetzung": "Es ist wieder besetzt."
+  },
+  {
+    "frage": "beitragen",
+    "antwort": "contribute",
+    "beispielsatz": "Everyone is free to contribute.",
+    "beispiel_uebersetzung": "Jeder darf etwas beitragen."
+  },
+  {
+    "frage": "Berg",
+    "antwort": "mountain",
+    "beispielsatz": "How high is the mountain?",
+    "beispiel_uebersetzung": "Wie hoch ist der Berg?"
+  },
+  {
+    "frage": "Exkrement",
+    "antwort": "waste",
+    "beispielsatz": "What a waste of water!",
+    "beispiel_uebersetzung": "Was für eine Wasserverschwendung!"
+  },
+  {
+    "frage": "verstecken",
+    "antwort": "hide",
+    "beispielsatz": "Let's hide behind the curtain.",
+    "beispiel_uebersetzung": "Komm, wir verstecken uns hinterm Vorhang."
+  },
+  {
+    "frage": "Ticket",
+    "antwort": "ticket",
+    "beispielsatz": "I don't have a ticket.",
+    "beispiel_uebersetzung": "Ich habe kein Ticket."
+  },
+  {
+    "frage": "Essen",
+    "antwort": "meal",
+    "beispielsatz": "The meal satisfied his hunger.",
+    "beispiel_uebersetzung": "Das Essen stillte seinen Hunger."
+  },
+  {
+    "frage": "Kollege",
+    "antwort": "colleague",
+    "beispielsatz": "This is Tom, my colleague.",
+    "beispiel_uebersetzung": "Das ist Tom, mein Kollege."
+  },
+  {
+    "frage": "wiederholen",
+    "antwort": "repeat",
+    "beispielsatz": "Could you please repeat that?",
+    "beispiel_uebersetzung": "Könnten Sie das bitte wiederholen?"
+  },
+  {
+    "frage": "gleich",
+    "antwort": "equal",
+    "beispielsatz": "All people were created equal.",
+    "beispiel_uebersetzung": "Alle Menschen wurden gleich geschaffen."
+  },
+  {
+    "frage": "Redewendung",
+    "antwort": "expression",
+    "beispielsatz": "This is a set expression.",
+    "beispiel_uebersetzung": "Das ist eine feststehende Redewendung."
+  },
+  {
+    "frage": "plus",
+    "antwort": "plus",
+    "beispielsatz": "Two plus two makes four.",
+    "beispiel_uebersetzung": "Zwei plus zwei macht vier."
+  },
+  {
+    "frage": "äußerst",
+    "antwort": "extremely",
+    "beispielsatz": "This area is extremely isolated.",
+    "beispiel_uebersetzung": "Dieses Gebiet ist äußerst abgelegen."
+  },
+  {
+    "frage": "Dame",
+    "antwort": "lady",
+    "beispielsatz": "The lady is over eighty.",
+    "beispiel_uebersetzung": "Die Dame ist über achtzig."
+  },
+  {
+    "frage": "Pflicht",
+    "antwort": "duty",
+    "beispielsatz": "You must perform your duty.",
+    "beispiel_uebersetzung": "Du musst deine Pflicht tun."
+  },
+  {
+    "frage": "verbinden",
+    "antwort": "connect",
+    "beispielsatz": "Connect the two cables together.",
+    "beispiel_uebersetzung": "Verbinde die beiden Kabel miteinander."
+  },
+  {
+    "frage": "kulturell",
+    "antwort": "cultural",
+    "beispielsatz": "It is a cultural mechanism.",
+    "beispiel_uebersetzung": "Es ist ein kultureller Mechanismus."
+  },
+  {
+    "frage": "leider",
+    "antwort": "unfortunately",
+    "beispielsatz": "Unfortunately he refused to come.",
+    "beispiel_uebersetzung": "Er weigerte sich leider zu kommen."
+  },
+  {
+    "frage": "Beitrag",
+    "antwort": "contribution",
+    "beispielsatz": "He made a substantial contribution to economics.",
+    "beispiel_uebersetzung": "Er hat einen beträchtlichen Beitrag zur Wirtschaftswissenschaft geleistet."
+  },
+  {
+    "frage": "Geheimnis",
+    "antwort": "secret",
+    "beispielsatz": "Can you keep a secret?",
+    "beispiel_uebersetzung": "Könnt ihr ein Geheimnis bewahren?"
+  },
+  {
+    "frage": "offensichtlich",
+    "antwort": "apparently",
+    "beispielsatz": "He is not coming, apparently.",
+    "beispiel_uebersetzung": "Er kommt wohl nicht."
+  },
+  {
+    "frage": "Trend",
+    "antwort": "trend",
+    "beispielsatz": "The trend is your friend.",
+    "beispiel_uebersetzung": "Der Trend ist dein Freund."
+  },
+  {
+    "frage": "Freude",
+    "antwort": "pleasure",
+    "beispielsatz": "Music affords us much pleasure.",
+    "beispiel_uebersetzung": "Musik bereitet uns viel Freude."
+  },
+  {
+    "frage": "Vorschlag",
+    "antwort": "suggestion",
+    "beispielsatz": "I'm all for your suggestion.",
+    "beispiel_uebersetzung": "Ich unterstütze Ihren Vorschlag voll und ganz."
+  },
+  {
+    "frage": "kritisch",
+    "antwort": "critical",
+    "beispielsatz": "Do not be so critical.",
+    "beispiel_uebersetzung": "Sei nicht so kritisch."
+  },
+  {
+    "frage": "sammeln",
+    "antwort": "gather",
+    "beispielsatz": "You must gather further information.",
+    "beispiel_uebersetzung": "Du musst mehr Informationen sammeln."
+  },
+  {
+    "frage": "unverzichtbar",
+    "antwort": "essential",
+    "beispielsatz": "Water is essential to life.",
+    "beispiel_uebersetzung": "Wasser ist für das Leben unverzichtbar."
+  },
+  {
+    "frage": "fördern",
+    "antwort": "promote",
+    "beispielsatz": "The government should promote common welfare.",
+    "beispiel_uebersetzung": "Die Regierung sollte das Gemeinwohl fördern."
+  },
+  {
+    "frage": "momentan",
+    "antwort": "currently",
+    "beispielsatz": "Tom isn't currently in prison.",
+    "beispiel_uebersetzung": "Tom ist momentan nicht im Gefängnis."
+  },
+  {
+    "frage": "einstellen",
+    "antwort": "employ",
+    "beispielsatz": "The company wants to employ 20 people.",
+    "beispiel_uebersetzung": "Das Unternehmen will 20 Leute einstellen."
+  },
+  {
+    "frage": "Weg",
+    "antwort": "path",
+    "beispielsatz": "Show us the straight path.",
+    "beispiel_uebersetzung": "Zeigen Sie uns den direkten Weg."
+  },
+  {
+    "frage": "Thema",
+    "antwort": "topic",
+    "beispielsatz": "The topic is worth discussing.",
+    "beispiel_uebersetzung": "Das Thema ist eine Diskussion wert."
+  },
+  {
+    "frage": "stranden",
+    "antwort": "beach",
+    "beispielsatz": "Which way is the beach?",
+    "beispiel_uebersetzung": "Wo geht es zum Strand hin?"
+  },
+  {
+    "frage": "Blume",
+    "antwort": "flower",
+    "beispielsatz": "We must water the flower.",
+    "beispiel_uebersetzung": "Wir müssen die Blume gießen."
+  },
+  {
+    "frage": "Krise",
+    "antwort": "crisis",
+    "beispielsatz": "Can the crisis be overcome?",
+    "beispiel_uebersetzung": "Ist die Krise zu überwinden?"
+  },
+  {
+    "frage": "Boot",
+    "antwort": "boat",
+    "beispielsatz": "The boat was frozen in.",
+    "beispiel_uebersetzung": "Das Boot war eingefroren."
+  },
+  {
+    "frage": "Fächer",
+    "antwort": "fan",
+    "beispielsatz": "This is a Chinese fan.",
+    "beispiel_uebersetzung": "Er ist ein chinesischer Fan."
+  },
+  {
+    "frage": "zweimal",
+    "antwort": "twice",
+    "beispielsatz": "I'd think twice about this.",
+    "beispiel_uebersetzung": "Ich würde mir das zweimal überlegen."
+  },
+  {
+    "frage": "Verspätung",
+    "antwort": "delay",
+    "beispielsatz": "That accounts for her delay.",
+    "beispiel_uebersetzung": "Das erklärt ihre Verspätung."
+  },
+  {
+    "frage": "Sicherheit",
+    "antwort": "safety",
+    "beispielsatz": "In all matters, safety first!",
+    "beispiel_uebersetzung": "In allen Dingen geht Sicherheit vor."
+  },
+  {
+    "frage": "Versicherung",
+    "antwort": "insurance",
+    "beispielsatz": "Do you have medical insurance?",
+    "beispiel_uebersetzung": "Haben Sie eine Krankenversicherung?"
+  },
+  {
+    "frage": "teilen",
+    "antwort": "divide",
+    "beispielsatz": "Divide it among the three.",
+    "beispiel_uebersetzung": "Teil es unter den Dreien auf!"
+  },
+  {
+    "frage": "Länge",
+    "antwort": "length",
+    "beispielsatz": "Can you measure the length?",
+    "beispiel_uebersetzung": "Können Sie die Länge messen?"
+  },
+  {
+    "frage": "Untersuchung",
+    "antwort": "investigation",
+    "beispielsatz": "The investigation is under way.",
+    "beispiel_uebersetzung": "Die Untersuchung ist im Gang."
+  },
+  {
+    "frage": "Paket",
+    "antwort": "package",
+    "beispielsatz": "The package was delivered yesterday.",
+    "beispiel_uebersetzung": "Das Paket wurde gestern zugestellt."
+  },
+  {
+    "frage": "irgendwo",
+    "antwort": "somewhere",
+    "beispielsatz": "I remember seeing her somewhere.",
+    "beispiel_uebersetzung": "Ich erinnere mich, sie irgendwo gesehen zu haben."
+  },
+  {
+    "frage": "expandieren",
+    "antwort": "expand",
+    "beispielsatz": "Can you expand on that?",
+    "beispiel_uebersetzung": "Könntest du dich genauer darüber auslassen?"
+  },
+  {
+    "frage": "anvertrauen",
+    "antwort": "commit",
+    "beispielsatz": "Commit this poem to memory.",
+    "beispiel_uebersetzung": "Lerne dieses Gedicht auswendig."
+  },
+  {
+    "frage": "springen",
+    "antwort": "jump",
+    "beispielsatz": "How high can you jump?",
+    "beispiel_uebersetzung": "Wie hoch können Sie springen?"
+  },
+  {
+    "frage": "relativ",
+    "antwort": "relatively",
+    "beispielsatz": "Pomegranate seeds are relatively big.",
+    "beispiel_uebersetzung": "Granatapfelkerne sind relativ groß."
+  },
+  {
+    "frage": "Gastgeber",
+    "antwort": "host",
+    "beispielsatz": "Who will host the party?",
+    "beispiel_uebersetzung": "Wer gibt die Feier?"
+  },
+  {
+    "frage": "Winter",
+    "antwort": "winter",
+    "beispielsatz": "Winter is my favorite season.",
+    "beispiel_uebersetzung": "Der Winter ist meine Lieblingsjahreszeit."
+  },
+  {
+    "frage": "Mittagessen",
+    "antwort": "lunch",
+    "beispielsatz": "I make lunch every day.",
+    "beispiel_uebersetzung": "Ich mache jeden Tag das Mittagessen."
+  },
+  {
+    "frage": "tatsächlich",
+    "antwort": "actual",
+    "beispielsatz": "That is an actual fact.",
+    "beispiel_uebersetzung": "Das ist eine konkrete Tatsache."
+  },
+  {
+    "frage": "Kampf",
+    "antwort": "battle",
+    "beispielsatz": "We will win the battle.",
+    "beispiel_uebersetzung": "Wir werden den Kampf gewinnen."
+  },
+  {
+    "frage": "Tradition",
+    "antwort": "tradition",
+    "beispielsatz": "That old tradition has disappeared.",
+    "beispiel_uebersetzung": "Diese alte Tradition ist verschwunden."
+  },
+  {
+    "frage": "Bargeld",
+    "antwort": "cash",
+    "beispielsatz": "He paid me cash down.",
+    "beispiel_uebersetzung": "Er hat bar bezahlt."
+  },
+  {
+    "frage": "kaum",
+    "antwort": "hardly",
+    "beispielsatz": "I can hardly hear you.",
+    "beispiel_uebersetzung": "Ich höre dich kaum."
+  },
+  {
+    "frage": "Preis",
+    "antwort": "award",
+    "beispielsatz": "Tom never got an award.",
+    "beispiel_uebersetzung": "Tom hat nie einen Preis bekommen."
+  },
+  {
+    "frage": "Experiment",
+    "antwort": "experiment",
+    "beispielsatz": "The experiment confirmed his theory.",
+    "beispiel_uebersetzung": "Das Experiment bestätigte seine Theorie."
+  },
+  {
+    "frage": "Vergütung",
+    "antwort": "consideration",
+    "beispielsatz": "I'll take that into consideration.",
+    "beispiel_uebersetzung": "Ich werde es in Betracht ziehen."
+  },
+  {
+    "frage": "seltsam",
+    "antwort": "strange",
+    "beispielsatz": "It's strange you say that.",
+    "beispiel_uebersetzung": "Es ist seltsam, dass du das sagst."
+  },
+  {
+    "frage": "Kodex",
+    "antwort": "code",
+    "beispielsatz": "Is there a dress code?",
+    "beispiel_uebersetzung": "Gibt es einen Dresscode?"
+  },
+  {
+    "frage": "Drohung",
+    "antwort": "threat",
+    "beispielsatz": "This is not a threat.",
+    "beispiel_uebersetzung": "Das ist keine Drohung."
+  },
+  {
+    "frage": "Unfall",
+    "antwort": "accident",
+    "beispielsatz": "I met her by accident.",
+    "beispiel_uebersetzung": "Ich habe sie zufällig getroffen."
+  },
+  {
+    "frage": "aktiv",
+    "antwort": "active",
+    "beispielsatz": "That student is very active.",
+    "beispiel_uebersetzung": "Der Student ist sehr aktiv."
+  },
+  {
+    "frage": "Krebs",
+    "antwort": "cancer",
+    "beispielsatz": "The man died of cancer.",
+    "beispiel_uebersetzung": "Der Mann starb an Krebs."
+  },
+  {
+    "frage": "Sonne",
+    "antwort": "sun",
+    "beispielsatz": "The clouds hid the sun.",
+    "beispiel_uebersetzung": "Die Wolken verdeckten die Sonne."
+  },
+  {
+    "frage": "gesund",
+    "antwort": "healthy",
+    "beispielsatz": "I was a healthy child.",
+    "beispiel_uebersetzung": "Ich war ein gesundes Kind."
+  },
+  {
+    "frage": "pusten",
+    "antwort": "blow",
+    "beispielsatz": "Don't blow in a beehive.",
+    "beispiel_uebersetzung": "Puste nicht in einen Bienenstock."
+  },
+  {
+    "frage": "Lautstärke",
+    "antwort": "volume",
+    "beispielsatz": "Turn down the volume, please.",
+    "beispiel_uebersetzung": "Drehe bitte die Lautstärke herunter!"
+  },
+  {
+    "frage": "Ortsbestimmung",
+    "antwort": "location",
+    "beispielsatz": "This location is in Switzerland.",
+    "beispiel_uebersetzung": "Dieser Standort ist in der Schweiz."
+  },
+  {
+    "frage": "investieren",
+    "antwort": "invest",
+    "beispielsatz": "Foreigners don't want to invest in Algeria.",
+    "beispiel_uebersetzung": "Ausländer wollen nicht in Algerien investieren."
+  },
+  {
+    "frage": "waschen",
+    "antwort": "wash",
+    "beispielsatz": "Cut, wash and dry, please.",
+    "beispiel_uebersetzung": "Schneiden, waschen und föhnen bitte."
+  },
+  {
+    "frage": "Schauspieler",
+    "antwort": "actor",
+    "beispielsatz": "The actor missed a line.",
+    "beispiel_uebersetzung": "Der Schauspieler ließ etwas von seinem Text aus."
+  },
+  {
+    "frage": "froh",
+    "antwort": "glad",
+    "beispielsatz": "I'm glad you liked it.",
+    "beispiel_uebersetzung": "Freut mich, dass es dir gefallen hat."
+  },
+  {
+    "frage": "Band",
+    "antwort": "tape",
+    "beispielsatz": "Record the broadcast on tape.",
+    "beispiel_uebersetzung": "Nimm die Sendung auf Band auf."
+  },
+  {
+    "frage": "während",
+    "antwort": "whereas",
+    "beispielsatz": "Salamanders are amphibians, whereas geckos are reptiles.",
+    "beispiel_uebersetzung": "Salamander sind Amphibien, während Geckos Reptilien sind."
+  },
+  {
+    "frage": "Stein",
+    "antwort": "stone",
+    "beispielsatz": "Help me move this stone.",
+    "beispiel_uebersetzung": "Hilf mir, diesen Stein zu versetzen."
+  },
+  {
+    "frage": "Mord",
+    "antwort": "murder",
+    "beispielsatz": "You are guilty of murder.",
+    "beispiel_uebersetzung": "Du bist des Mordes schuldig."
+  },
+  {
+    "frage": "Soldat",
+    "antwort": "soldier",
+    "beispielsatz": "The soldier gave his name.",
+    "beispiel_uebersetzung": "Der Soldat gab seinen Namen an."
+  },
+  {
+    "frage": "hassen",
+    "antwort": "hate",
+    "beispielsatz": "Most writers hate being criticized.",
+    "beispiel_uebersetzung": "Die meisten Schriftsteller hassen es, kritisiert zu werden."
+  },
+  {
+    "frage": "Ei",
+    "antwort": "egg",
+    "beispielsatz": "It looks like an egg.",
+    "beispiel_uebersetzung": "Das sieht wie ein Ei aus."
+  },
+  {
+    "frage": "Konzert",
+    "antwort": "concert",
+    "beispielsatz": "The concert was well attended.",
+    "beispiel_uebersetzung": "Das Konzert war gut besucht."
+  },
+  {
+    "frage": "Schock",
+    "antwort": "shock",
+    "beispielsatz": "Betty got over the shock.",
+    "beispiel_uebersetzung": "Betty kam über den Schock hinweg."
+  },
+  {
+    "frage": "bequem",
+    "antwort": "comfortable",
+    "beispielsatz": "This chair is very comfortable.",
+    "beispiel_uebersetzung": "Dieser Stuhl ist sehr bequem."
+  },
+  {
+    "frage": "Pack",
+    "antwort": "pack",
+    "beispielsatz": "Pack them in the box.",
+    "beispiel_uebersetzung": "Pack sie in die Kiste."
+  },
+  {
+    "frage": "Kamera",
+    "antwort": "camera",
+    "beispielsatz": "I'll give you this camera.",
+    "beispiel_uebersetzung": "Ich werde dir diese Kamera geben."
+  },
+  {
+    "frage": "schwimmen",
+    "antwort": "swim",
+    "beispielsatz": "You can swim, can't you?",
+    "beispiel_uebersetzung": "Du kannst doch schwimmen, oder?"
+  },
+  {
+    "frage": "Theater",
+    "antwort": "theater",
+    "beispielsatz": "We're going to the theater.",
+    "beispiel_uebersetzung": "Wir gehen ins Theater."
+  },
+  {
+    "frage": "Kaffee",
+    "antwort": "coffee",
+    "beispielsatz": "We import coffee from Brazil.",
+    "beispiel_uebersetzung": "Wir importieren Kaffee aus Brasilien."
+  },
+  {
+    "frage": "Museum",
+    "antwort": "museum",
+    "beispielsatz": "We went to the museum.",
+    "beispiel_uebersetzung": "Wir sind ins Museum gegangen."
+  },
+  {
+    "frage": "Gast",
+    "antwort": "visitor",
+    "beispielsatz": "The visitor sat across from me.",
+    "beispiel_uebersetzung": "Der Gast saß mir gegenüber."
+  },
+  {
+    "frage": "Freiheit",
+    "antwort": "freedom",
+    "beispielsatz": "They are struggling for freedom.",
+    "beispiel_uebersetzung": "Sie kämpfen für Freiheit."
+  },
+  {
+    "frage": "Bau",
+    "antwort": "construction",
+    "beispielsatz": "The bridge is under construction.",
+    "beispiel_uebersetzung": "Die Brücke wird gerade gebaut."
+  },
+  {
+    "frage": "Lieber",
+    "antwort": "dear",
+    "beispielsatz": "Don't confuse \"dare\" and \"dear\".",
+    "beispiel_uebersetzung": "Verwechsle nicht \"dare\" und \"dear\"."
+  },
+  {
+    "frage": "auf",
+    "antwort": "onto",
+    "beispielsatz": "Put it onto the table.",
+    "beispiel_uebersetzung": "Leg's auf den Tisch."
+  },
+  {
+    "frage": "ablehnen",
+    "antwort": "oppose",
+    "beispielsatz": "Does anyone oppose the new plan?",
+    "beispiel_uebersetzung": "Ist jemand gegen den neuen Plan?"
+  },
+  {
+    "frage": "Fahrzeug",
+    "antwort": "vehicle",
+    "beispielsatz": "Where was the vehicle damaged?",
+    "beispiel_uebersetzung": "Wo ist das Fahrzeug beschädigt worden?"
+  },
+  {
+    "frage": "Wissenschaftler",
+    "antwort": "scientist",
+    "beispielsatz": "He is a great scientist.",
+    "beispiel_uebersetzung": "Er ist ein großartiger Wissenschaftler."
+  },
+  {
+    "frage": "Route",
+    "antwort": "route",
+    "beispielsatz": "Can I change the route?",
+    "beispiel_uebersetzung": "Kann ich die Route ändern?"
+  },
+  {
+    "frage": "gehören",
+    "antwort": "belong",
+    "beispielsatz": "These boots belong to her.",
+    "beispiel_uebersetzung": "Diese Stiefel gehören ihr."
+  },
+  {
+    "frage": "Geschmack",
+    "antwort": "taste",
+    "beispielsatz": "Each has his own taste.",
+    "beispiel_uebersetzung": "Jeder hat seinen Geschmack."
+  },
+  {
+    "frage": "heute Abend",
+    "antwort": "tonight",
+    "beispielsatz": "Tonight we're going to church.",
+    "beispiel_uebersetzung": "Heute Abend gehen wir in die Kirche."
+  },
+  {
+    "frage": "Mode",
+    "antwort": "fashion",
+    "beispielsatz": "Long skirts are in fashion.",
+    "beispiel_uebersetzung": "Lange Röcke sind in Mode."
+  },
+  {
+    "frage": "Gefahr",
+    "antwort": "danger",
+    "beispielsatz": "We are free from danger.",
+    "beispiel_uebersetzung": "Wir sind außer Gefahr."
+  },
+  {
+    "frage": "verringern",
+    "antwort": "decrease",
+    "beispielsatz": "That custom is on the decrease.",
+    "beispiel_uebersetzung": "Dieser Brauch geht zurück."
+  },
+  {
+    "frage": "Redakteur",
+    "antwort": "editor",
+    "beispielsatz": "Your editor will be excited.",
+    "beispiel_uebersetzung": "Ihr Redakteur wird begeistert sein."
+  },
+  {
+    "frage": "normalerweise",
+    "antwort": "normally",
+    "beispielsatz": "I eat breakfast here normally.",
+    "beispiel_uebersetzung": "Normalerweise frühstücke ich hier."
+  },
+  {
+    "frage": "Sehenswürdigkeit",
+    "antwort": "sight",
+    "beispielsatz": "The hotel was in sight.",
+    "beispiel_uebersetzung": "Das Hotel war in Sichtweite."
+  },
+  {
+    "frage": "Geschenk",
+    "antwort": "gift",
+    "beispielsatz": "I cannot accept your gift.",
+    "beispiel_uebersetzung": "Ich kann dein Geschenk nicht annehmen."
+  },
+  {
+    "frage": "Geburt",
+    "antwort": "delivery",
+    "beispielsatz": "She had an easy delivery.",
+    "beispiel_uebersetzung": "Sie hatte eine einfache Geburt."
+  },
+  {
+    "frage": "bestreiten",
+    "antwort": "deny",
+    "beispielsatz": "No one could deny this.",
+    "beispiel_uebersetzung": "Niemand konnte das bestreiten."
+  },
+  {
+    "frage": "Gast",
+    "antwort": "guest",
+    "beispielsatz": "The maid announced each guest.",
+    "beispiel_uebersetzung": "Das Dienstmädchen kündigte jeden Gast einzeln an."
+  },
+  {
+    "frage": "Schlafzimmer",
+    "antwort": "bedroom",
+    "beispielsatz": "My bedroom is just above.",
+    "beispiel_uebersetzung": "Mein Schlafzimmer befindet sich gleich oben."
+  },
+  {
+    "frage": "klettern",
+    "antwort": "climb",
+    "beispielsatz": "Can you climb the tree?",
+    "beispiel_uebersetzung": "Kannst du auf den Baum klettern?"
+  },
+  {
+    "frage": "im Prinzip",
+    "antwort": "basically",
+    "beispielsatz": "It's basically the same thing.",
+    "beispiel_uebersetzung": "Das ist eigentlich das Gleiche."
+  },
+  {
+    "frage": "Gewalt",
+    "antwort": "violence",
+    "beispielsatz": "The situation resulted in violence.",
+    "beispiel_uebersetzung": "Die Situation artete in Gewalt aus."
+  },
+  {
+    "frage": "Minister",
+    "antwort": "minister",
+    "beispielsatz": "The minister had to resign.",
+    "beispiel_uebersetzung": "Der Minister musste zurücktreten."
+  },
+  {
+    "frage": "hauptsächlich",
+    "antwort": "mainly",
+    "beispielsatz": "They mainly live on milk.",
+    "beispiel_uebersetzung": "Sie leben hauptsächlich von Milch."
+  },
+  {
+    "frage": "Mund",
+    "antwort": "mouth",
+    "beispielsatz": "The baby opened his mouth.",
+    "beispiel_uebersetzung": "Das Baby öffnete seinen Mund."
+  },
+  {
+    "frage": "Lärm",
+    "antwort": "noise",
+    "beispielsatz": "Boys, don't make any noise.",
+    "beispiel_uebersetzung": "Jungs, macht keinen Lärm!"
+  },
+  {
+    "frage": "Weise",
+    "antwort": "manner",
+    "beispielsatz": "Do it in this manner.",
+    "beispiel_uebersetzung": "Mach es auf diese Weise!"
+  },
+  {
+    "frage": "Pistole",
+    "antwort": "gun",
+    "beispielsatz": "He laid down the gun.",
+    "beispiel_uebersetzung": "Er legte die Pistole nieder."
+  },
+  {
+    "frage": "Anlass",
+    "antwort": "occasion",
+    "beispielsatz": "This is a special occasion.",
+    "beispiel_uebersetzung": "Dies ist ein besonderer Anlass."
+  },
+  {
+    "frage": "bekannt",
+    "antwort": "familiar",
+    "beispielsatz": "He is familiar with computers.",
+    "beispiel_uebersetzung": "Er kennt sich mit Computern aus."
+  },
+  {
+    "frage": "ignorieren",
+    "antwort": "ignore",
+    "beispielsatz": "He dared ignore my advice.",
+    "beispiel_uebersetzung": "Er wagte es, meinen Rat zu ignorieren."
+  },
+  {
+    "frage": "vernichten",
+    "antwort": "destroy",
+    "beispielsatz": "We must destroy the evidence.",
+    "beispiel_uebersetzung": "Wir müssen das Beweismaterial vernichten."
+  },
+  {
+    "frage": "Angelegenheit",
+    "antwort": "affair",
+    "beispielsatz": "It was a strange affair.",
+    "beispiel_uebersetzung": "Es war eine seltsame Angelegenheit."
+  },
+  {
+    "frage": "Staatsbürger",
+    "antwort": "citizen",
+    "beispielsatz": "Are you a Japanese citizen?",
+    "beispiel_uebersetzung": "Sind Sie japanischer Staatsbürger?"
+  },
+  {
+    "frage": "Fieber",
+    "antwort": "temperature",
+    "beispielsatz": "You don't have a temperature.",
+    "beispiel_uebersetzung": "Du hast kein Fieber."
+  },
+  {
+    "frage": "Goldmünze",
+    "antwort": "gold",
+    "beispielsatz": "There is a gold coin.",
+    "beispiel_uebersetzung": "Da ist eine Goldmünze."
+  },
+  {
+    "frage": "Glauben",
+    "antwort": "belief",
+    "beispielsatz": "He has a firm belief.",
+    "beispiel_uebersetzung": "Er hat einen festen Glauben."
+  },
+  {
+    "frage": "erinnern",
+    "antwort": "remind",
+    "beispielsatz": "You remind me of someone.",
+    "beispiel_uebersetzung": "Du erinnerst mich an jemanden."
+  },
+  {
+    "frage": "Gefängnis",
+    "antwort": "prison",
+    "beispielsatz": "The prisoner escaped from prison.",
+    "beispiel_uebersetzung": "Der Gefangene ist aus dem Gefängnis geflohen."
+  },
+  {
+    "frage": "Schalter",
+    "antwort": "switch",
+    "beispielsatz": "Let me fix the switch.",
+    "beispiel_uebersetzung": "Lass mich den Schalter reparieren."
+  },
+  {
+    "frage": "Holz",
+    "antwort": "wood",
+    "beispielsatz": "Mr Wood had no sons.",
+    "beispiel_uebersetzung": "Herr Wood hatte keine Söhne."
+  },
+  {
+    "frage": "zerreißen",
+    "antwort": "tear",
+    "beispielsatz": "Your tears tear my heart!",
+    "beispiel_uebersetzung": "Deine Tränen zerreißen mein Herz!"
+  },
+  {
+    "frage": "repräsentativ",
+    "antwort": "representative",
+    "beispielsatz": "We appointed him as our representative.",
+    "beispiel_uebersetzung": "Wir ernannten ihn zu unserem Vertreter."
+  },
+  {
+    "frage": "Begutachtung",
+    "antwort": "assessment",
+    "beispielsatz": "He stands by his assessment.",
+    "beispiel_uebersetzung": "Er bleibt bei seiner Einschätzung."
+  },
+  {
+    "frage": "Gebühr",
+    "antwort": "fee",
+    "beispielsatz": "The fee was put up.",
+    "beispiel_uebersetzung": "Die Gebühr wurde höher."
+  },
+  {
+    "frage": "Halle",
+    "antwort": "hall",
+    "beispielsatz": "This hall holds 2,000 people.",
+    "beispiel_uebersetzung": "Diese Halle fasst 2.000 Personen."
+  },
+  {
+    "frage": "ausweichen",
+    "antwort": "escape",
+    "beispielsatz": "We had a narrow escape.",
+    "beispiel_uebersetzung": "Wir sind nur mit Mühe und Not entkommen."
+  },
+  {
+    "frage": "Studio",
+    "antwort": "studio",
+    "beispielsatz": "We cannot go into the studio.",
+    "beispiel_uebersetzung": "Wir können nicht ins Studio gehen."
+  },
+  {
+    "frage": "entspannen",
+    "antwort": "relax",
+    "beispielsatz": "You'd better relax a bit.",
+    "beispiel_uebersetzung": "Du solltest dich lieber etwas entspannen."
+  },
+  {
+    "frage": "Tourist",
+    "antwort": "tourist",
+    "beispielsatz": "I have a tourist visa.",
+    "beispiel_uebersetzung": "Ich habe ein Touristenvisum."
+  },
+  {
+    "frage": "sich leisten",
+    "antwort": "afford",
+    "beispielsatz": "I can't afford a car.",
+    "beispiel_uebersetzung": "Ich kann mir kein Auto leisten."
+  },
+  {
+    "frage": "Anwalt",
+    "antwort": "lawyer",
+    "beispielsatz": "He is a capable lawyer.",
+    "beispiel_uebersetzung": "Er ist ein fähiger Anwalt."
+  },
+  {
+    "frage": "Tasse",
+    "antwort": "cup",
+    "beispielsatz": "The cup has a crack.",
+    "beispiel_uebersetzung": "Die Tasse hat einen Sprung."
+  },
+  {
+    "frage": "Selbstvertrauen",
+    "antwort": "confidence",
+    "beispielsatz": "Tom lacks confidence in himself.",
+    "beispiel_uebersetzung": "Es fehlt Tom an Selbstvertrauen."
+  },
+  {
+    "frage": "industriell",
+    "antwort": "industrial",
+    "beispielsatz": "Japan is an industrial nation.",
+    "beispiel_uebersetzung": "Japan ist ein Industrieland."
+  },
+  {
+    "frage": "sich beschweren",
+    "antwort": "complain",
+    "beispielsatz": "They do nothing but complain.",
+    "beispiel_uebersetzung": "Sie tun nichts anderes als sich zu beschweren."
+  },
+  {
+    "frage": "Perspektive",
+    "antwort": "perspective",
+    "beispielsatz": "Considered from this perspective, it makes no difference.",
+    "beispiel_uebersetzung": "Aus dieser Perspektive betrachtet, macht das keinen Unterschied."
+  },
+  {
+    "frage": "Fehler",
+    "antwort": "error",
+    "beispielsatz": "Everybody laughed at his error.",
+    "beispiel_uebersetzung": "Sie machten sich alle über seinen Fehler lustig."
+  },
+  {
+    "frage": "einschätzen",
+    "antwort": "assess",
+    "beispielsatz": "You must assess the situation and act accordingly.",
+    "beispiel_uebersetzung": "Du mußt die Situation einschätzen und entsprechend handeln."
+  },
+  {
+    "frage": "fingern",
+    "antwort": "finger",
+    "beispielsatz": "My little finger is swollen.",
+    "beispiel_uebersetzung": "Mein kleiner Finger ist geschwollen."
+  },
+  {
+    "frage": "Führung",
+    "antwort": "leadership",
+    "beispielsatz": "He took the leadership of the party.",
+    "beispiel_uebersetzung": "Er übernahm die Führung der Partei."
+  },
+  {
+    "frage": "Engagement",
+    "antwort": "commitment",
+    "beispielsatz": "You want commitment, don't you?",
+    "beispiel_uebersetzung": "Sie wollen Engagement, nicht wahr?"
+  },
+  {
+    "frage": "unbedingt",
+    "antwort": "necessarily",
+    "beispielsatz": "I don't necessarily trust translations.",
+    "beispiel_uebersetzung": "Ich vertraue Übersetzungen nicht unbedingt."
+  },
+  {
+    "frage": "brilliant",
+    "antwort": "bright",
+    "beispielsatz": "You have a bright future.",
+    "beispiel_uebersetzung": "Du hast eine glänzende Zukunft."
+  },
+  {
+    "frage": "einrahmen",
+    "antwort": "frame",
+    "beispielsatz": "Can you frame this picture?",
+    "beispiel_uebersetzung": "Können Sie das Bild einrahmen?"
+  },
+  {
+    "frage": "langsam",
+    "antwort": "slowly",
+    "beispielsatz": "He slowly finished the race.",
+    "beispiel_uebersetzung": "Langsam beendete er das Rennen."
+  },
+  {
+    "frage": "Loch",
+    "antwort": "hole",
+    "beispielsatz": "There's a hole in this.",
+    "beispiel_uebersetzung": "Das hat ein Loch."
+  },
+  {
+    "frage": "Literatur",
+    "antwort": "literature",
+    "beispielsatz": "He majors in English literature.",
+    "beispiel_uebersetzung": "Er studiert englische Literatur als Hauptfach."
+  },
+  {
+    "frage": "Opfer",
+    "antwort": "victim",
+    "beispielsatz": "Stop acting like a victim.",
+    "beispiel_uebersetzung": "Hör auf, dich wie ein Opfer aufzuführen."
+  },
+  {
+    "frage": "Division",
+    "antwort": "division",
+    "beispielsatz": "A major had to take command of the division.",
+    "beispiel_uebersetzung": "Ein Major musste das Kommando über die Division übernehmen."
+  },
+  {
+    "frage": "sicher",
+    "antwort": "secure",
+    "beispielsatz": "I feel secure with him.",
+    "beispiel_uebersetzung": "Ich fühle mich mit ihm sicher."
+  },
+  {
+    "frage": "Apparat",
+    "antwort": "device",
+    "beispielsatz": "This is an old device.",
+    "beispiel_uebersetzung": "Das ist ein alter Apparat."
+  },
+  {
+    "frage": "Wald",
+    "antwort": "forest",
+    "beispielsatz": "Silence reigned in the forest.",
+    "beispiel_uebersetzung": "Im Wald herrschte Stille."
+  },
+  {
+    "frage": "Etikett",
+    "antwort": "label",
+    "beispielsatz": "Read what's on the label.",
+    "beispiel_uebersetzung": "Lies, was auf dem Etikett steht!"
+  },
+  {
+    "frage": "Fabrik",
+    "antwort": "factory",
+    "beispielsatz": "This factory manufactures automobile parts.",
+    "beispiel_uebersetzung": "Diese Fabrik stellt Automobilteile her."
+  },
+  {
+    "frage": "Ausgabe",
+    "antwort": "expense",
+    "beispielsatz": "The expense is chargeable on him.",
+    "beispiel_uebersetzung": "Die Ausgabe ist ihm in Rechnung zu stellen."
+  },
+  {
+    "frage": "Kanal",
+    "antwort": "channel",
+    "beispielsatz": "Can I change the channel?",
+    "beispiel_uebersetzung": "Kann ich den Kanal wechseln?"
+  },
+  {
+    "frage": "untersuchen",
+    "antwort": "investigate",
+    "beispielsatz": "Investigate the cause of it.",
+    "beispiel_uebersetzung": "Forschen Sie nach der Ursache!"
+  },
+  {
+    "frage": "Empfehlung",
+    "antwort": "recommendation",
+    "beispielsatz": "That was a good recommendation.",
+    "beispiel_uebersetzung": "Das war eine gute Empfehlung."
+  },
+  {
+    "frage": "gewöhnlich",
+    "antwort": "typical",
+    "beispielsatz": "He is a typical Japanese.",
+    "beispiel_uebersetzung": "Er ist ein typischer Japaner."
+  },
+  {
+    "frage": "freundlich",
+    "antwort": "friendly",
+    "beispielsatz": "He seems to be friendly.",
+    "beispiel_uebersetzung": "Er scheint freundlich zu sein."
+  },
+  {
+    "frage": "Anwohner",
+    "antwort": "resident",
+    "beispielsatz": "Our resident squirrel eats all our camellias.",
+    "beispiel_uebersetzung": "Die hier lebenden Eichhörnchen fressen unsere ganzen Kamelien weg."
+  },
+  {
+    "frage": "konzentrieren",
+    "antwort": "concentrate",
+    "beispielsatz": "We must concentrate on that.",
+    "beispiel_uebersetzung": "Darauf müssen wir uns konzentrieren."
+  },
+  {
+    "frage": "Fülle",
+    "antwort": "plenty",
+    "beispielsatz": "You had plenty of time.",
+    "beispiel_uebersetzung": "Du hattest eine Menge Zeit."
+  },
+  {
+    "frage": "völlig",
+    "antwort": "entirely",
+    "beispielsatz": "It's entirely up to you.",
+    "beispiel_uebersetzung": "Das hängt völlig von dir ab."
+  },
+  {
+    "frage": "stark",
+    "antwort": "strongly",
+    "beispielsatz": "She strongly resembles her grandmother.",
+    "beispiel_uebersetzung": "Sie ähnelt stark ihrer Großmutter."
+  },
+  {
+    "frage": "Brücke",
+    "antwort": "bridge",
+    "beispielsatz": "The bridge is being repainted.",
+    "beispiel_uebersetzung": "Die Brücke wird gerade neu angestrichen."
+  },
+  {
+    "frage": "moralisch",
+    "antwort": "moral",
+    "beispielsatz": "It is a moral question.",
+    "beispiel_uebersetzung": "Das ist eine Frage der Moral."
+  },
+  {
+    "frage": "Kombination",
+    "antwort": "combination",
+    "beispielsatz": "Tom forgot the safe's combination.",
+    "beispiel_uebersetzung": "Tom hat die Kombination des Tresors vergessen."
+  },
+  {
+    "frage": "hauptsächlich",
+    "antwort": "principal",
+    "beispielsatz": "He must be the principal.",
+    "beispiel_uebersetzung": "Er muss der Rektor sein."
+  },
+  {
+    "frage": "definitiv",
+    "antwort": "definitely",
+    "beispielsatz": "I definitely told you that!",
+    "beispiel_uebersetzung": "Das habe ich dir doch gesagt!"
+  },
+  {
+    "frage": "Sitzung",
+    "antwort": "session",
+    "beispielsatz": "Parliament is now in session.",
+    "beispiel_uebersetzung": "Das Parlament hat jetzt eine Sitzung."
+  },
+  {
+    "frage": "Klasse",
+    "antwort": "grade",
+    "beispielsatz": "What grade are you in?",
+    "beispiel_uebersetzung": "In welcher Klasse bist du?"
+  },
+  {
+    "frage": "trotzdem",
+    "antwort": "nevertheless",
+    "beispielsatz": "He will certainly come, nevertheless.",
+    "beispiel_uebersetzung": "Er kommt bestimmt trotzdem."
+  },
+  {
+    "frage": "vorher",
+    "antwort": "previously",
+    "beispielsatz": "He arrived two days previously.",
+    "beispiel_uebersetzung": "Er ist zwei Tage vorher angekommen."
+  },
+  {
+    "frage": "Schutz",
+    "antwort": "protection",
+    "beispielsatz": "This is for your protection.",
+    "beispiel_uebersetzung": "Das ist zu deinem Schutz."
+  },
+  {
+    "frage": "Miete",
+    "antwort": "rent",
+    "beispielsatz": "The rent is due tomorrow.",
+    "beispiel_uebersetzung": "Die Miete ist morgen fällig."
+  },
+  {
+    "frage": "Erscheinen",
+    "antwort": "appearance",
+    "beispielsatz": "His appearance animated the party.",
+    "beispiel_uebersetzung": "Sein Erscheinen brachte die Feier in Schwung."
+  },
+  {
+    "frage": "anständig",
+    "antwort": "reasonable",
+    "beispielsatz": "You should be more reasonable.",
+    "beispiel_uebersetzung": "Du solltest vernünftiger sein."
+  },
+  {
+    "frage": "bis",
+    "antwort": "till",
+    "beispielsatz": "Wait till the soup warms.",
+    "beispiel_uebersetzung": "Warte, bis die Suppe aufwärmt."
+  },
+  {
+    "frage": "Urteil",
+    "antwort": "judgment",
+    "beispielsatz": "Do you trust my judgment?",
+    "beispiel_uebersetzung": "Traust du meinem Urteil?"
+  },
+  {
+    "frage": "seltsam",
+    "antwort": "odd",
+    "beispielsatz": "My behavior was very odd.",
+    "beispiel_uebersetzung": "Mein Verhalten war sehr seltsam."
+  },
+  {
+    "frage": "billigen",
+    "antwort": "approve",
+    "beispielsatz": "I approve of your plan.",
+    "beispiel_uebersetzung": "Ich billige Ihren Plan."
+  },
+  {
+    "frage": "Darlehen",
+    "antwort": "loan",
+    "beispielsatz": "The loan carries 5.5% interest.",
+    "beispiel_uebersetzung": "Das Darlehen hat einen Zinssatz von 5,5%."
+  },
+  {
+    "frage": "Definition",
+    "antwort": "definition",
+    "beispielsatz": "The dictionary definition is different.",
+    "beispiel_uebersetzung": "Die Definition im Wörterbuch lautet anders."
+  },
+  {
+    "frage": "wählen",
+    "antwort": "elect",
+    "beispielsatz": "Germany's citizens elect the Federal Parliament.",
+    "beispiel_uebersetzung": "Die Bürger Deutschlands wählen den Bundestag."
+  },
+  {
+    "frage": "Atmosphäre",
+    "antwort": "atmosphere",
+    "beispielsatz": "The moon has no atmosphere.",
+    "beispiel_uebersetzung": "Der Mond hat keine Atmosphäre."
+  },
+  {
+    "frage": "Bäuerin",
+    "antwort": "farmer",
+    "beispielsatz": "My grandmother was a farmer.",
+    "beispiel_uebersetzung": "Meine Großmutter war eine Bäuerin."
+  },
+  {
+    "frage": "Vergleich",
+    "antwort": "comparison",
+    "beispielsatz": "I don't like this comparison.",
+    "beispiel_uebersetzung": "Ich mag diesen Vergleich nicht."
+  },
+  {
+    "frage": "typisch",
+    "antwort": "characteristic",
+    "beispielsatz": "It is characteristic of him.",
+    "beispiel_uebersetzung": "Das ist typisch für ihn."
+  },
+  {
+    "frage": "schmal",
+    "antwort": "narrow",
+    "beispielsatz": "The street is very narrow.",
+    "beispiel_uebersetzung": "Die Straße ist sehr schmal."
+  },
+  {
+    "frage": "Identität",
+    "antwort": "identity",
+    "beispielsatz": "He didn't reveal his identity.",
+    "beispiel_uebersetzung": "Er gab seine Identität nicht preis."
+  },
+  {
+    "frage": "Schreibtisch",
+    "antwort": "desk",
+    "beispielsatz": "What is on the desk?",
+    "beispiel_uebersetzung": "Was liegt auf dem Schreibtisch?"
+  },
+  {
+    "frage": "erlauben",
+    "antwort": "permit",
+    "beispielsatz": "Why do you permit it?",
+    "beispiel_uebersetzung": "Warum lässt du das zu?"
+  },
+  {
+    "frage": "ernsthaft",
+    "antwort": "seriously",
+    "beispielsatz": "She might be seriously ill.",
+    "beispiel_uebersetzung": "Sie könnte ernsthaft krank sein."
+  },
+  {
+    "frage": "wild",
+    "antwort": "wild",
+    "beispielsatz": "The roses sometimes grow wild.",
+    "beispiel_uebersetzung": "Manchmal wachsen Rosen wild."
+  },
+  {
+    "frage": "leer",
+    "antwort": "empty",
+    "beispielsatz": "I found the box empty.",
+    "beispiel_uebersetzung": "Ich habe die Kiste leer vorgefunden."
+  },
+  {
+    "frage": "einzigartig",
+    "antwort": "unique",
+    "beispielsatz": "This is a unique situation.",
+    "beispiel_uebersetzung": "Das ist eine einzigartige Situation."
+  },
+  {
+    "frage": "Instrument",
+    "antwort": "instrument",
+    "beispielsatz": "Do you play an instrument?",
+    "beispiel_uebersetzung": "Spielen Sie irgendein Instrument?"
+  },
+  {
+    "frage": "praktisch",
+    "antwort": "practical",
+    "beispielsatz": "It's practical to have a laptop.",
+    "beispiel_uebersetzung": "Es ist praktisch, einen Laptop zu haben."
+  },
+  {
+    "frage": "Tee",
+    "antwort": "tea",
+    "beispielsatz": "I prefer coffee to tea.",
+    "beispiel_uebersetzung": "Mir ist Kaffee lieber als Tee."
+  },
+  {
+    "frage": "Treibstoff",
+    "antwort": "fuel",
+    "beispielsatz": "Gasoline is used for fuel.",
+    "beispiel_uebersetzung": "Benzin wird als Treibstoff verwendet."
+  },
+  {
+    "frage": "Erwartung",
+    "antwort": "expectation",
+    "beispielsatz": "His heart bounded with expectation.",
+    "beispiel_uebersetzung": "Sein Herz pochte voller Erwartung."
+  },
+  {
+    "frage": "Schulter",
+    "antwort": "shoulder",
+    "beispielsatz": "She leaned against his shoulder.",
+    "beispiel_uebersetzung": "Sie lehnte sich an seine Schulter."
+  },
+  {
+    "frage": "Atmen",
+    "antwort": "breath",
+    "beispielsatz": "I ran out of breath.",
+    "beispiel_uebersetzung": "Mir ging die Luft aus."
+  },
+  {
+    "frage": "Ahnung",
+    "antwort": "notion",
+    "beispielsatz": "I had no notion that you were coming.",
+    "beispiel_uebersetzung": "Ich hatte keine Ahnung, dass ihr gekommen seid."
+  },
+  {
+    "frage": "Konservativer",
+    "antwort": "conservative",
+    "beispielsatz": "We are a conservative people.",
+    "beispiel_uebersetzung": "Wir sind ein konservatives Volk."
+  },
+  {
+    "frage": "Reise",
+    "antwort": "journey",
+    "beispielsatz": "Everyone was enjoying the journey.",
+    "beispiel_uebersetzung": "Jeder genoss die Reise."
+  },
+  {
+    "frage": "Schulden",
+    "antwort": "debt",
+    "beispielsatz": "I owe him a debt.",
+    "beispiel_uebersetzung": "Ich habe Schulden bei ihm."
+  },
+  {
+    "frage": "Ergebnis",
+    "antwort": "outcome",
+    "beispielsatz": "It was a modest outcome.",
+    "beispiel_uebersetzung": "Das Resultat war bescheiden."
+  },
+  {
+    "frage": "Schuld",
+    "antwort": "blame",
+    "beispielsatz": "We are both to blame.",
+    "beispiel_uebersetzung": "Wir haben beide Schuld."
+  },
+  {
+    "frage": "Erklärung",
+    "antwort": "explanation",
+    "beispielsatz": "His explanation was not satisfactory.",
+    "beispiel_uebersetzung": "Seine Erklärung war nicht befriedigend."
+  },
+  {
+    "frage": "Papa",
+    "antwort": "dad",
+    "beispielsatz": "But Dad won't like it.",
+    "beispiel_uebersetzung": "Aber Papa wird es nicht gefallen."
+  },
+  {
+    "frage": "deklarieren",
+    "antwort": "declare",
+    "beispielsatz": "I have nothing to declare.",
+    "beispiel_uebersetzung": "Ich habe nichts zu deklarieren."
+  },
+  {
+    "frage": "Karriere beenden",
+    "antwort": "retire",
+    "beispielsatz": "I have decided to retire.",
+    "beispiel_uebersetzung": "Ich habe mich entschlossen, in den Ruhestand zu gehen."
+  },
+  {
+    "frage": "winzig",
+    "antwort": "tiny",
+    "beispielsatz": "The buildings look so tiny.",
+    "beispiel_uebersetzung": "Die Gebäude sehen so winzig aus."
+  },
+  {
+    "frage": "sorgfältig",
+    "antwort": "careful",
+    "beispielsatz": "You should be more careful.",
+    "beispiel_uebersetzung": "Du solltest noch vorsichtiger sein."
+  },
+  {
+    "frage": "geeignet",
+    "antwort": "suitable",
+    "beispielsatz": "Suitable for vegetarians and vegans.",
+    "beispiel_uebersetzung": "Für Vegetarier und Veganer geeignet."
+  },
+  {
+    "frage": "gebürtig",
+    "antwort": "native",
+    "beispielsatz": "Spanish is her native language.",
+    "beispiel_uebersetzung": "Spanisch ist ihre Muttersprache."
+  },
+  {
+    "frage": "analysieren",
+    "antwort": "analyze",
+    "beispielsatz": "We have to analyze that.",
+    "beispiel_uebersetzung": "Wir müssen das analysieren."
+  },
+  {
+    "frage": "schrecklich",
+    "antwort": "terrible",
+    "beispielsatz": "A terrible fate awaited him.",
+    "beispiel_uebersetzung": "Ihn erwartete ein schreckliches Schicksal."
+  },
+  {
+    "frage": "Forscher",
+    "antwort": "researcher",
+    "beispielsatz": "The researcher falsified his results.",
+    "beispiel_uebersetzung": "Der Forscher verfälschte die Ergebnisse."
+  },
+  {
+    "frage": "Auswahl",
+    "antwort": "selection",
+    "beispielsatz": "This shop has a much wider selection.",
+    "beispiel_uebersetzung": "Dieses Geschäft hat eine viel größere Auswahl."
+  },
+  {
+    "frage": "irgendwo",
+    "antwort": "anywhere",
+    "beispielsatz": "Just put those packages anywhere.",
+    "beispiel_uebersetzung": "Stellen Sie die Pakete einfach irgendwo hin."
+  },
+  {
+    "frage": "Trugbild",
+    "antwort": "vision",
+    "beispielsatz": "The prophet had a vision.",
+    "beispiel_uebersetzung": "Der Prophet hatte eine Vision."
+  },
+  {
+    "frage": "Persönlichkeit",
+    "antwort": "personality",
+    "beispielsatz": "He has a wonderful personality.",
+    "beispiel_uebersetzung": "Er hat eine wundervolle Persönlichkeit."
+  },
+  {
+    "frage": "fett",
+    "antwort": "fat",
+    "beispielsatz": "Their cattle are all fat.",
+    "beispiel_uebersetzung": "Ihr ganzes Vieh ist fett."
+  },
+  {
+    "frage": "Eintritt",
+    "antwort": "entry",
+    "beispielsatz": "You have an entry ticket.",
+    "beispiel_uebersetzung": "Du hast eine Eintrittskarte."
+  },
+  {
+    "frage": "Informant",
+    "antwort": "ear",
+    "beispielsatz": "I have an ear infection.",
+    "beispiel_uebersetzung": "Ich habe eine Ohrenentzündung."
+  },
+  {
+    "frage": "verschwinden",
+    "antwort": "disappear",
+    "beispielsatz": "The snow will soon disappear.",
+    "beispiel_uebersetzung": "Der Schnee wird bald verschwinden."
+  },
+  {
+    "frage": "Schrei",
+    "antwort": "shout",
+    "beispielsatz": "Then, a shout was raised.",
+    "beispiel_uebersetzung": "Dann erschallte ein Ruf."
+  },
+  {
+    "frage": "regelmäßig",
+    "antwort": "constant",
+    "beispielsatz": "Change is the only constant.",
+    "beispiel_uebersetzung": "Veränderung ist das einzig Konstante."
+  },
+  {
+    "frage": "wesentlich",
+    "antwort": "significantly",
+    "beispielsatz": "His grades have improved significantly.",
+    "beispiel_uebersetzung": "Seine Zensuren haben sich deutlich verbessert."
+  },
+  {
+    "frage": "Hügel",
+    "antwort": "hill",
+    "beispielsatz": "The hill is always green.",
+    "beispiel_uebersetzung": "Der Hügel ist immer grün."
+  },
+  {
+    "frage": "erheblich",
+    "antwort": "considerable",
+    "beispielsatz": "He has a considerable income.",
+    "beispiel_uebersetzung": "Er hat ein beträchtliches Einkommen."
+  },
+  {
+    "frage": "ideal",
+    "antwort": "ideal",
+    "beispielsatz": "The center is an ideal.",
+    "beispiel_uebersetzung": "Das Zentrum ist ein Ideal."
+  },
+  {
+    "frage": "bestimmt",
+    "antwort": "surely",
+    "beispielsatz": "That is surely an idea.",
+    "beispiel_uebersetzung": "Das ist zweifellos eine Idee."
+  },
+  {
+    "frage": "etwas",
+    "antwort": "somewhat",
+    "beispielsatz": "Tom somewhat resembles his father.",
+    "beispiel_uebersetzung": "Tom ähnelt etwas seinem Vater."
+  },
+  {
+    "frage": "küssen",
+    "antwort": "kiss",
+    "beispielsatz": "I want to kiss you.",
+    "beispiel_uebersetzung": "Ich möchte dich küssen."
+  },
+  {
+    "frage": "Vortrag",
+    "antwort": "presentation",
+    "beispielsatz": "Tom made an impressive presentation.",
+    "beispiel_uebersetzung": "Tom hielt einen beeindruckenden Vortrag."
+  },
+  {
+    "frage": "gemeinsame",
+    "antwort": "joint",
+    "beispielsatz": "It was a joint decision.",
+    "beispiel_uebersetzung": "Es war eine gemeinsame Entscheidung."
+  },
+  {
+    "frage": "streiten",
+    "antwort": "compete",
+    "beispielsatz": "We can't compete with that.",
+    "beispiel_uebersetzung": "Wir können damit nicht mithalten."
+  },
+  {
+    "frage": "schwach",
+    "antwort": "weak",
+    "beispielsatz": "The string is very weak.",
+    "beispiel_uebersetzung": "Die Schnur ist sehr schwach."
+  },
+  {
+    "frage": "Klage",
+    "antwort": "complaint",
+    "beispielsatz": "I would lodge a complaint.",
+    "beispiel_uebersetzung": "Ich möchte Klage einreichen."
+  },
+  {
+    "frage": "irgendwie",
+    "antwort": "somehow",
+    "beispielsatz": "Can I help you somehow?",
+    "beispiel_uebersetzung": "Kann ich Ihnen irgendwie helfen?"
+  },
+  {
+    "frage": "Ton",
+    "antwort": "tone",
+    "beispielsatz": "She always sets the tone.",
+    "beispiel_uebersetzung": "Sie gibt immer den Ton an."
+  },
+  {
+    "frage": "Nachbarschaft",
+    "antwort": "neighborhood",
+    "beispielsatz": "He moved into my neighborhood.",
+    "beispiel_uebersetzung": "Er ist in meine Nachbarschaft umgezogen."
+  },
+  {
+    "frage": "Phase",
+    "antwort": "phase",
+    "beispielsatz": "She's just going through a phase.",
+    "beispiel_uebersetzung": "Sie durchläuft nur eine Phase."
+  },
+  {
+    "frage": "Eile",
+    "antwort": "rush",
+    "beispielsatz": "Are you in a rush?",
+    "beispiel_uebersetzung": "Sind Sie in Eile?"
+  },
+  {
+    "frage": "Religion",
+    "antwort": "religion",
+    "beispielsatz": "Making money is his religion.",
+    "beispiel_uebersetzung": "Geld verdienen ist seine Religion."
+  },
+  {
+    "frage": "Arbeitgeber",
+    "antwort": "employer",
+    "beispielsatz": "His employer dismissed him yesterday.",
+    "beispiel_uebersetzung": "Sein Arbeitgeber hat ihn gestern entlassen."
+  },
+  {
+    "frage": "zurückweisen",
+    "antwort": "reject",
+    "beispielsatz": "I must reject your request.",
+    "beispiel_uebersetzung": "Ich muss deine Anfrage zurückweisen."
+  },
+  {
+    "frage": "letzterer",
+    "antwort": "latter",
+    "beispielsatz": "Let's hope for the latter.",
+    "beispiel_uebersetzung": "Hoffen wir auf das Letztere!"
+  },
+  {
+    "frage": "Teller",
+    "antwort": "plate",
+    "beispielsatz": "I almost dropped a plate.",
+    "beispiel_uebersetzung": "Ich hätte fast einen Teller fallenlassen."
+  },
+  {
+    "frage": "verbieten",
+    "antwort": "ban",
+    "beispielsatz": "We must ban opposing views.",
+    "beispiel_uebersetzung": "Wir müssen andere Meinungen verbieten."
+  },
+  {
+    "frage": "protestieren",
+    "antwort": "protest",
+    "beispielsatz": "American workers began to protest.",
+    "beispiel_uebersetzung": "Die amerikanischen Arbeiter begannen zu protestieren."
+  },
+  {
+    "frage": "traurig",
+    "antwort": "sad",
+    "beispielsatz": "What makes you so sad?",
+    "beispiel_uebersetzung": "Was macht dich so traurig?"
+  },
+  {
+    "frage": "häufig",
+    "antwort": "frequently",
+    "beispielsatz": "Such a thing occurs frequently.",
+    "beispiel_uebersetzung": "So etwas kommt häufig vor."
+  },
+  {
+    "frage": "Kreis",
+    "antwort": "circle",
+    "beispielsatz": "Please circle the right answer.",
+    "beispiel_uebersetzung": "Bitte die richtige Antwort mit einem Kreis markieren."
+  },
+  {
+    "frage": "Befehl",
+    "antwort": "command",
+    "beispielsatz": "We are under his command.",
+    "beispiel_uebersetzung": "Wir stehen unter seinem Befehl."
+  },
+  {
+    "frage": "attraktiv",
+    "antwort": "attractive",
+    "beispielsatz": "Do you think she's attractive?",
+    "beispiel_uebersetzung": "Findest du sie attraktiv?"
+  },
+  {
+    "frage": "krank",
+    "antwort": "sick",
+    "beispielsatz": "She got sick this weekend.",
+    "beispiel_uebersetzung": "Sie ist an diesem Wochenende krank geworden."
+  },
+  {
+    "frage": "Eindruck",
+    "antwort": "impression",
+    "beispielsatz": "Tom made a poor impression.",
+    "beispiel_uebersetzung": "Tom hat einen schwachen Eindruck hinterlassen."
+  },
+  {
+    "frage": "Witz",
+    "antwort": "joke",
+    "beispielsatz": "It was just a joke.",
+    "beispiel_uebersetzung": "Das war nur ein Witz."
+  },
+  {
+    "frage": "Himmel",
+    "antwort": "sky",
+    "beispielsatz": "The sky promises fair weather.",
+    "beispiel_uebersetzung": "Der Himmel verspricht schönes Wetter."
+  },
+  {
+    "frage": "Kolumne",
+    "antwort": "column",
+    "beispielsatz": "I found this column interesting.",
+    "beispiel_uebersetzung": "Ich fand diese Kolumne interessant."
+  },
+  {
+    "frage": "richtig",
+    "antwort": "properly",
+    "beispielsatz": "The toilet doesn't flush properly.",
+    "beispiel_uebersetzung": "Die Toilette spült nicht richtig."
+  },
+  {
+    "frage": "historisch",
+    "antwort": "ancient",
+    "beispielsatz": "This is an ancient law.",
+    "beispiel_uebersetzung": "Das ist ein altes Gesetz."
+  },
+  {
+    "frage": "per",
+    "antwort": "via",
+    "beispielsatz": "Could I pay via Mastercard?",
+    "beispiel_uebersetzung": "Kann ich per Mastercard zahlen?"
+  },
+  {
+    "frage": "Landkreis",
+    "antwort": "county",
+    "beispielsatz": "She met a boy at the county fair.",
+    "beispiel_uebersetzung": "Sie lernte auf dem Jahrmarkt einen Jungen kennen."
+  },
+  {
+    "frage": "unähnlich",
+    "antwort": "unlike",
+    "beispielsatz": "Unlike her, you are diligent.",
+    "beispiel_uebersetzung": "Im Gegensatz zu ihr bist du fleißig."
+  },
+  {
+    "frage": "anerkennen",
+    "antwort": "acknowledge",
+    "beispielsatz": "You should acknowledge your failure.",
+    "beispiel_uebersetzung": "Du solltest deinen Misserfolg anerkennen."
+  },
+  {
+    "frage": "Hut",
+    "antwort": "hat",
+    "beispielsatz": "Please take off your hat.",
+    "beispiel_uebersetzung": "Bitte nehmen Sie Ihren Hut ab."
+  },
+  {
+    "frage": "akademisch",
+    "antwort": "academic",
+    "beispielsatz": "His thoughts are extremely academic.",
+    "beispiel_uebersetzung": "Seine Überlegungen sind extrem akademisch."
+  },
+  {
+    "frage": "Wähler",
+    "antwort": "voter",
+    "beispielsatz": "Are you a registered voter?",
+    "beispiel_uebersetzung": "Bist du wahlberechtigt?"
+  },
+  {
+    "frage": "inzwischen",
+    "antwort": "meanwhile",
+    "beispielsatz": "Meanwhile a rethink has begun.",
+    "beispiel_uebersetzung": "Inzwischen hat ein Umdenken begonnen."
+  },
+  {
+    "frage": "Abwesenheit",
+    "antwort": "absence",
+    "beispielsatz": "I soon noticed his absence.",
+    "beispiel_uebersetzung": "Ich bemerkte bald seine Abwesenheit."
+  },
+  {
+    "frage": "Bemerkung",
+    "antwort": "remark",
+    "beispielsatz": "Jim made a superfluous remark.",
+    "beispiel_uebersetzung": "Jim machte eine unnötige Bemerkung."
+  },
+  {
+    "frage": "Medizin",
+    "antwort": "medicine",
+    "beispielsatz": "I have to take medicine.",
+    "beispiel_uebersetzung": "Ich muss Medizin einnehmen."
+  },
+  {
+    "frage": "Professor",
+    "antwort": "professor",
+    "beispielsatz": "Professor Jones retires next year.",
+    "beispiel_uebersetzung": "Professor Jones geht nächstes Jahr in Rente."
+  },
+  {
+    "frage": "Absicht",
+    "antwort": "intention",
+    "beispielsatz": "It was not my intention.",
+    "beispiel_uebersetzung": "Das war nicht meine Absicht."
+  },
+  {
+    "frage": "Dutzende",
+    "antwort": "dozen",
+    "beispielsatz": "He bought a dozen eggs.",
+    "beispiel_uebersetzung": "Er kaufte ein Dutzend Eier."
+  },
+  {
+    "frage": "Siedlung",
+    "antwort": "settlement",
+    "beispielsatz": "The settlement is relatively isolated.",
+    "beispiel_uebersetzung": "Die Siedlung liegt relativ abgeschieden."
+  },
+  {
+    "frage": "Spalt",
+    "antwort": "gap",
+    "beispielsatz": "The gap between rich and poor is widening.",
+    "beispiel_uebersetzung": "Die Kluft zwischen Reich und Arm wird immer größer."
+  },
+  {
+    "frage": "nördlich",
+    "antwort": "northern",
+    "beispielsatz": "I live in northern Sweden.",
+    "beispiel_uebersetzung": "Ich wohne in Nordschweden."
+  },
+  {
+    "frage": "gleichmäßig",
+    "antwort": "equally",
+    "beispielsatz": "We shared the profit equally.",
+    "beispiel_uebersetzung": "Wir teilten den Gewinn gleichmäßig auf."
+  },
+  {
+    "frage": "Sieg",
+    "antwort": "victory",
+    "beispielsatz": "The victory was dearly won.",
+    "beispiel_uebersetzung": "Der Sieg wurde teuer bezahlt."
+  },
+  {
+    "frage": "lösen",
+    "antwort": "resolve",
+    "beispielsatz": "The problem will resolve itself eventually.",
+    "beispiel_uebersetzung": "Dieses Problem wird sich eventuell von selbst lösen."
+  },
+  {
+    "frage": "Kritiker",
+    "antwort": "critic",
+    "beispielsatz": "He is a harsh critic.",
+    "beispiel_uebersetzung": "Er ist ein scharfer Kritiker."
+  },
+  {
+    "frage": "riesig",
+    "antwort": "enormous",
+    "beispielsatz": "The new building is enormous.",
+    "beispiel_uebersetzung": "Das neue Gebäude ist riesig."
+  },
+  {
+    "frage": "permanent",
+    "antwort": "permanent",
+    "beispielsatz": "I have no permanent residence.",
+    "beispiel_uebersetzung": "Ich habe keinen festen Wohnsitz."
+  },
+  {
+    "frage": "Gefühl",
+    "antwort": "emotion",
+    "beispielsatz": "I was speechless with emotion.",
+    "beispiel_uebersetzung": "Ich war vor lauter Gefühlsregung unfähig zu sprechen."
+  },
+  {
+    "frage": "Drang",
+    "antwort": "urge",
+    "beispielsatz": "Advertisements urge us to buy luxuries.",
+    "beispiel_uebersetzung": "Die Werbung treibt uns an, Luxusartikel zu kaufen."
+  },
+  {
+    "frage": "Feind",
+    "antwort": "enemy",
+    "beispielsatz": "We crept toward the enemy.",
+    "beispiel_uebersetzung": "Wir robbten uns an den Feind heran."
+  },
+  {
+    "frage": "ernennen",
+    "antwort": "appoint",
+    "beispielsatz": "When will they appoint someone to replace Tom?",
+    "beispiel_uebersetzung": "Wann werden sie jemanden ernennen, der Tom ersetzt?"
+  },
+  {
+    "frage": "ausschöpfen",
+    "antwort": "milk",
+    "beispielsatz": "Do you have some milk?",
+    "beispiel_uebersetzung": "Hast du Milch?"
+  },
+  {
+    "frage": "Talent",
+    "antwort": "talent",
+    "beispielsatz": "She has some literary talent.",
+    "beispiel_uebersetzung": "Sie hat ein gewisses literarisches Talent."
+  },
+  {
+    "frage": "Riechen",
+    "antwort": "smell",
+    "beispielsatz": "We smell with our noses.",
+    "beispiel_uebersetzung": "Wir riechen mit unserer Nase."
+  },
+  {
+    "frage": "Pilot",
+    "antwort": "pilot",
+    "beispielsatz": "The pilot flew the airplane.",
+    "beispiel_uebersetzung": "Der Pilot flog das Flugzeug."
+  },
+  {
+    "frage": "Stall",
+    "antwort": "stable",
+    "beispielsatz": "This stable contains twelve stalls.",
+    "beispiel_uebersetzung": "Dieser Stall enthält zwölf Boxen."
+  },
+  {
+    "frage": "nur",
+    "antwort": "merely",
+    "beispielsatz": "It is merely an ornament.",
+    "beispiel_uebersetzung": "Das ist nur eine Verzierung."
+  },
+  {
+    "frage": "kommunizieren",
+    "antwort": "communicate",
+    "beispielsatz": "We use words to communicate.",
+    "beispiel_uebersetzung": "Wir kommunizieren mit Hilfe von Wörtern."
+  }
+]
