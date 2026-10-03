@@ -78,20 +78,45 @@ export default function Einstellungen() {
         art: "ok" | "fehler";
         text: string;
     } | null>(null);
-    const [pushUnterstuetzt] = useState(
-        () =>
-            typeof window !== "undefined" &&
-            "serviceWorker" in navigator &&
-            "PushManager" in window,
-    );
+    /*
+     * Ob der Browser Push kann, laesst sich nur im Browser feststellen – auf
+     * dem Server gibt es weder `navigator` noch `window`.
+     *
+     * Das stand vorher in einem `useState`-Initializer mit `typeof window`, und
+     * genau daher kam der Hydration-Fehler #418, den das Audit laengst als
+     * "vorbestehend" mitbrachte: der Server.renderte "Dieser Browser
+     * unterstuetzt keine Push-Benachrichtigungen", der Client haette
+     * "Erhalte eine taegliche Lernerinnerung" geschrieben. Siehe aus
+     * demselben Grund die Erklaerung beim Kartenzeichen weiter oben.
+     *
+     * `null` heisst "noch unbekannt". Server und erster Client-Render zeigen
+     * deshalb beide den Text fuer "unterstuetzt"; der Schalter ist in diesem
+     * Zustand sowieso noch gesperrt, weil `erinnerung` auch erst nach dem
+     * Mount feststeht. Wer kein Push kann, sieht den richtigen Text einen
+     * Augenblick spaeter. Andersherum waere jeder Browser ohne Push erst
+     * unnoetig mit der richtigen Antwort bedient worden.
+     */
+    const [pushUnterstuetzt, setPushUnterstuetzt] = useState<boolean | null>(null);
 
     useEffect(() => {
         let weg = false;
+        /*
+         * Die Push-Faehigkeit wird zusammen mit dem Abo festgestellt und
+         * nicht synchron im Effekt: ein `setState` direkt im Effekt ist eine
+         * zweite Renderstufe fuer ein Ergebnis, das ohnehin asynchron
+         * eintrifft. Beide Werte gehoeren in dieselbe Auswertung, weil beide
+         * dieselbe Anzeige steuern.
+         */
+        const merkePush = () => {
+            if (!weg) setPushUnterstuetzt("serviceWorker" in navigator && "PushManager" in window);
+        };
         holeAbo()
             .then((abo) => {
+                merkePush();
                 if (!weg) setErinnerung(abo !== null);
             })
             .catch(() => {
+                merkePush();
                 if (!weg) setErinnerung(false);
             });
         return () => {
@@ -309,17 +334,17 @@ export default function Einstellungen() {
                     <div>
                         <p className="überschrift-reminder">Tägliche Erinnerung</p>
                         <p className="unterüberschrift-reminder">
-                            {pushUnterstuetzt
-                                ? "Erhalte eine tägliche Lernerinnerung, auch wenn Lexio zu ist."
-                                : "Dieser Browser unterstützt keine Push-Benachrichtigungen."}
+                            {pushUnterstuetzt === false
+                                ? "Dieser Browser unterstützt keine Push-Benachrichtigungen."
+                                : "Erhalte eine tägliche Lernerinnerung, auch wenn Lexio zu ist."}
                         </p>
                     </div>
-                    <label className={`switch ${pushUnterstuetzt ? "" : "switch-deaktiviert"}`} aria-label="Tägliche Erinnerung">
+                    <label className={`switch ${pushUnterstuetzt === false ? "switch-deaktiviert" : ""}`} aria-label="Tägliche Erinnerung">
                         <input
                             id="dailyReminder"
                             type="checkbox"
                             checked={erinnerung === true}
-                            disabled={!pushUnterstuetzt || erinnerungLaeuft || erinnerung === null}
+                            disabled={pushUnterstuetzt === false || erinnerungLaeuft || erinnerung === null}
                             onChange={(e) => void erinnerungUmschalten(e.target.checked)}
                         />
                         <span className="slider" />

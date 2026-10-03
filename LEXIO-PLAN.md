@@ -1067,6 +1067,62 @@ committet. Diese Phase ist damit **gemessen abgeschlossen, optisch nicht
 abgenommen** — und ein Plan, der beides gleichsetzt, ist der Fehler, den er
 sich selbst vorwirft.
 
+#### Nachtrag vom 2026-10-03 — die Abnahme oben ist nicht reproduzierbar
+
+Der Nachtrag von gestern meldet für den Produktionsstand **66 Durchläufe,
+0 Befunde**. Heute am selben Commit `7604782` gemessen: **66 Durchläufe,
+18 mit Befund.** Bevor die Zahl als Fehler im Audit abgetan wird, wurde der
+alte Stand gebaut und gemessen — in einem zweiten Arbeitsverzeichnis, nicht
+durch Raten:
+
+| Stand | Durchläufe | mit Befund | Fehler |
+|---|---:|---:|---:|
+| `7604782`, vor den Kartenzeichen-Commits | 66 | 18 | 0 |
+| `7c3358c` plus Hydration-Fix | 66 | 18 | 0 |
+
+Die Fundstellen sind in beiden Läufen **identisch**:
+
+| Fundstelle | gemessener Wert | Läufe |
+|---|---|---:|
+| `uebersicht…kachelLoeschen` („Löschen") | 11,52 px Schrift, 88 × 34 px | 6 |
+| `statistiken…spracheKopf` (Sprachzeile) | 18 px hoch, 305–691 px breit | 6 |
+| `statistiken…tagXp` (XP-Anzeige) | 9,6 px | 6 |
+
+Zwei Schlüsse, und sie sind verschieden:
+
+1. **Die Kartenzeichen-Commits haben nichts verursacht.** Sie fassen
+   `lernen-seite.tsx`, `einstellungen/page.tsx` und die Zeichenmodule an.
+   `kachelLoeschen` und `spracheKopf` liegen auf Übersicht und Statistiken —
+   Seiten, die in keinem dieser Commits vorkommen. Das ist gemessen.
+2. **Phase 5 ist nicht sauber abgenommen.** Drei Fundstellen stehen gegen das
+   eigene Abnahmekriterium „kein Text unter 14 px, kein Bedienelement unter
+   44 × 44 px". Warum sie am 2026-10-02 nicht auftauchten, ist offen; beide
+   Messungen liefen mit frischen Audit-Konten. Bis dahin gilt die Phase als
+   **gemessen, nicht bestanden**.
+
+#### Nachtrag vom 2026-10-03 — Hydration-Fehler auf `/einstellungen` behoben
+
+`scripts/zeichen-audit.mjs` meldete bei jedem Lauf einen React-Fehler #418 auf
+`/einstellungen` und schob ihn mit dem Zusatz „vorbestehend" beiseite. Das war
+kein unvermeidbarer Rest, sondern derselbe Fehler, den dieselbe Datei sich
+beim Kartenzeichen schon selbst erklärt hatte.
+
+**Ursache.** `pushUnterstuetzt` stand in einem `useState`-Initializer mit
+`typeof window`-Prüfung. Auf dem Server ist das immer `false`, der Server
+schrieb also „Dieser Browser unterstützt keine Push-Benachrichtigungen",
+während der Client „Erhalte eine tägliche Lernerinnerung" schrieb. Genau die
+Reihe, die React in der Hydration-Meldung nennt.
+
+**Fix.** Der Wert ist jetzt `boolean | null`; `null` heißt „noch unbekannt".
+Server und erster Client-Render zeigen denselben Text, und die Fähigkeit wird
+im selben Effekt festgestellt wie das Push-Abo. Bewusst **nicht** synchron im
+Effekt: `eslint` meldet ein `setState` direkt im Effekt als zusätzliche
+Renderstufe, und das Ergebnis tritt ohnehin asynchron ein.
+
+**Verifiziert.** Audit gegen `npm run build && npm run start`: **0 Fehler,
+0 Hinweise** — der Hinweis ist weg. `/einstellungen` fünfmal hintereinander
+geladen: **5/5 ohne Konsolenfehler**, Schalter und Text korrekt.
+
 #### Zwei Punkte aus der Abnahme, vom Nutzer gemeldet
 
 Beide Punkte sind erledigt. Sie standen hier zuerst nur als Meldung, weil sie
