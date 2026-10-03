@@ -1220,9 +1220,24 @@ if (karten.length === 0) {
                                  * noch einmal: eine zweite Zahl waere eine
                                  * Gelegenheit, die beiden auseinanderlaufen
                                  * zu lassen.
+                                 *
+                                 * Begriff und Uebersetzung wandern mit,
+                                 * damit die Komponente entscheiden kann, ob
+                                 * es zu diesem Wort ein Bild gibt. Ohne sie
+                                 * zeichnet sie die Form aus der UUID, wie
+                                 * vorher; mit ihnen wird aus „haus" ein 🏠.
+                                 * Beide Seiten zu uebergeben ist Absicht:
+                                 * steht auf der Karte etwa „katze/feline",
+                                 * greift die Uebersetzung, wenn das deutsche
+                                 * Wort fehlt.
                                  */}
                                 {zeichenAn && (
-                                    <Kartenzeichen karteId={karte.id} className={styles.karteMarke} />
+                                    <Kartenzeichen
+                                        karteId={karte.id}
+                                        begriff={karte.frage}
+                                        uebersetzung={karte.antwort}
+                                        className={styles.karteMarke}
+                                    />
                                 )}
                             </span>
                         </span>

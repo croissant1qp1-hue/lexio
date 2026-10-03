@@ -1235,6 +1235,12 @@ dasselbe: von den NGSL-Wörtern des Demovets hat **1 von 100** ein direkt
 passendes Icon. Eine Tabelle, die für 99 von 100 Wörtern etwas Falsches oder
 Abstraktes einträgt, ist schlechter als keine — sie sitzt als Lärm im Bild.
 
+**Korrektur vom 2026-10-03.** Diese Entscheidung galt dem ersten Stand und
+hält nicht. Zurück kam der Wunsch nach einem Zeichen, das man beim Wort
+*wiedererkennt*: „haus ist ein Haus". Die Begründung oben bleibt trotzdem
+richtig, sie gilt nur nicht mehr für jedes Wort. Genau darin liegt der
+Zwischenstand unten: semantisch, aber nur wo es eindeutig ist.
+
 **Der Weg, der gebaut wurde.** Kein Icon-Satz, keine Zuordnungstabelle, keine
 Migration. Die Zeichen entstehen **aus der Karten-ID**:
 
@@ -1246,6 +1252,40 @@ Migration. Die Zeichen entstehen **aus der Karten-ID**:
   festes 24er-`viewBox`, `aria-hidden`, `pointer-events: none`.
 - `lib/kartenzeichen-ein.ts` — die Sichtbarkeit als Geräteeinstellung im
   `localStorage`, gelesen über `useSyncExternalStore`.
+
+**Der Nachtrag: semantisch, aber nur wo es eindeutig ist.**
+
+- `lib/kartenzeichen-semantik.ts` — kuratierte Wort → Emoji-Tabelle für
+  Deutsch und Englisch, mit Normalisierung (`ä` → `ae`, `ß` → `ss`) und
+  einer Sperre für die Homographen `see` und `gift`.
+- Bewusst **kein** Icon-Satz. FontAwesome Free ist lokal vorhanden und
+  bringt 1.992 Icons mit, deckt aber genau die Wörter nicht ab, um die es
+  geht: `bird`, `bear`, `elephant`, `tomato`, `flower` und `grass` fehlen.
+  Für Deutsch ist der Satz von vornherein der falsche.
+- `scripts/emoji-woerter.mjs` — liest `/usr/share/unicode/emoji/emoji-test.txt`
+  und schlägt Kandidaten vor. Nur ein Werkzeug für Menschen, **kein**
+  Laufzeitcode. Die vollautomatische Namenssuche traf `but` als 😥, `from` als
+  😤, `or` als ⏯️ und `die` als 🎲 — deshalb entscheidet die Handtabelle und
+  nicht die Zeichenkette.
+- `components/kartenzeichen.tsx` — bei einem Treffer ein `span` mit dem
+  Emoji statt des `svg`. Schriftgröße und Versatz schwanken aus derselben
+  UUID wie die Geometrie, damit nicht jede Karte denselben Abdruck hat.
+- Keine Anmeldung, kein Schlüssel, kein Netz. Eine KI-API, die das Gleiche
+  könnte, wäre mit Konto, Kosten und einer Übermittlung aller Lernwörter an
+  einen Dritten verbunden — dafür ist der Nutzer nicht erreichbar.
+
+**Ehrlich zur Reichweite.** Gemessen mit `scripts/zeichen-reichweite.mjs`:
+
+| Wortliste | Karten | mit Bild |
+|---|---:|---:|
+| NGSL top 100, das Demovet, viele Funktionswörter | 100 | **17 (17 %)** |
+| Sachwörter, stellvertretende Auswahl | 187 | 187 (100 %) |
+
+Die 17 Prozent sind weder ein Misserfolg noch eine Täuschung. Die übrigen
+83 Prozent sind Funktionswörter und Abstrakta wie *der*, *werden*,
+*verstehen*, *nicht*. Dafür gibt es kein ehrliches Bild, und dafür steht
+weiter das erzeugte Zeichen. Ein Wort, das kein Bild verdient, sieht hier
+aus wie das, was es ist: ein Lernwort.
 
 **Warum die UUID und nicht ein Datenbankfeld.** Eine neue Spalte plus Backfill
 für jede Karte wäre der übliche Weg — und er wäre hier falsch. Der Nutzer
@@ -1296,7 +1336,7 @@ Foundation, nicht hierher.
 
 **Abnahme, gemessen mit `scripts/zeichen-audit.mjs`** (Produktions-Build, Wegwerf-Konto):
 
-- 0 Fehler, 24 Messungen.
+- 0 Fehler, 34 Messungen.
 - Zeichen 32 × 32 px und quadratisch auf 320, 360, 414 px hoch, 740 px quer
   und 1280 px — **auf beiden Seiten** der Karte, je 10 Prüfungen.
 - Einzug rechts 13,6 px und unten 13,6 px: unten rechts, wie bestellt.
@@ -1306,8 +1346,30 @@ Foundation, nicht hierher.
 - 6 Karten durchlaufen, 6 verschiedene Zeichenformen.
 - Schalter schreibt `{"v":1,"an":false}`, das Zeichen verschwindet aus dem
   DOM, übersteht das Neuladen und kommt beim Wiedereinschalten zurück.
-- Eigenes Set über `POST /api/sets`, zwei eigene Karten über `POST /api/karten`,
-  beide Seiten zeigen ein Zeichen.
+- Eigenes Set über `POST /api/sets`, fünf eigene Karten über `POST /api/karten`.
+- Der Stapel vollständig durchlaufen: `haus`/`house` → 🏠, `katze`/`cat` → 🐱,
+  `apfel`/`apple` → 🍎, und die beiden erfundenen Probewoörter fallen auf die
+  erzeugte Form zurück.
+- Jedes Bild sitzt in derselben 32 × 32 px-Box wie die Form, Schrift 28 bis
+  32 px.
+
+**Vier Messfehler, die erst das Audit gefunden hat.** Sie standen alle im
+Messskript, nicht im Produkt, und jeder davon hätte einen Fehlbefund
+gemeldet, der genau das Gegenteil der Wahrheit war:
+
+1. Der Selektor `.karteMarke` findet nichts. Next.js schreibt die
+   CSS-Modulklasse im Produktionsbau als `lernen-module__LnHAJq__karteMarke`.
+2. Die Prüfung suchte nur das `svg` und meldete für jede Karte mit einem Bild
+   „kein Zeichen".
+3. Umgekehrt wurde über einen Selektor für beide Arten die `svg` mit erfasst,
+   weil sie dieselbe Klasse trägt. Ergebnis: „6 Karten, aber nur 1
+   verschiedene Zeichenform".
+4. `getBoundingClientRect` rechnet die 3D-Kartendrehung mit ein. Gemessen
+   wurde 12 × 33 px statt 32 × 32 px. Richtig ist `offsetWidth`.
+
+Dazu kam ein Denkfehler: der „Gut"-Knopf steht erst nach dem Aufdecken im
+DOM, und der Stapel ist ein Kreis — nach der letzten Karte kommt die erste
+wieder. Beides gehört zu den Dingen, die ein Audit misst und nicht weiß.
 
 ### Phase 7 — React Native App
 

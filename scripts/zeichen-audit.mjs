@@ -100,7 +100,34 @@ async function lage() {
             const r = el.getBoundingClientRect();
             return { x: r.x, y: r.y, width: r.width, height: r.height };
         };
-        const svg = document.querySelector('svg[viewBox="0 0 24 24"][aria-hidden="true"]');
+        /*
+         * Die Marke ist jetzt zweierlei: ein `svg` mit der erzeugten Form oder
+         * ein `span` mit einem Emoji. Der erste Lauf dieses Audits suchte nur
+         * das `svg` und meldete daraufhin fuer jede Karte mit einem Wort, zu
+         * dem es ein Bild gibt, „kein Zeichen" – ein Befund, der genau das
+         * Gegenteil dessen war, was zu sehen war. Beides wird jetzt geholt und
+         * im Ergebnis getrennt ausgewiesen.
+         */
+        /*
+         * Nicht `.karteMarke`: Next.js schreibt die CSS-Modulklasse im
+         * Produktionsbau als `lernen-module__LnHAJq__karteMarke`, und der
+         * Selektor ohne Modulpraefix findet nichts. Ein erster Versuch mit
+         * einem beliebigen aria-hidden-`span` fand dafuer den Profil-Namen
+         * „K" in der Navigation und meldete 28x28px statt 32x32px.
+         *
+         * Entscheidend ist die Unterscheidung nach dem Tag und nicht danach,
+         * ob irgendetwas mit dieser Klasse da ist: die `svg` traegt
+         * `karteMarke` genauso wie das Emoji. Ein Versuch, beides ueber einen
+         * Selektor zu holen, hielt jede Karte fuer ein Bild – Folge waren
+         * sechs Karten mit derselben leeren Kennung und die Meldung
+         * „6 Karten, aber nur 1 verschiedene Zeichenform".
+         */
+        const form = document.querySelector('svg[class*="karteMarke"]')
+            ?? document.querySelector('svg[viewBox="0 0 24 24"][aria-hidden="true"]');
+        const bild = document.querySelector('span[class*="karteMarke"]');
+        const svg = form;
+        const span = form ? null : bild;
+        const marke = form ?? bild;
         // `getAttribute("class")` statt `el.className`: bei SVG-Elementen ist
         // className ein SVGAnimatedString und hat keine includes-Methode. Der
         // erste Lauf ist genau daran mit einem TypeError abgestuerzt, nachdem
@@ -115,16 +142,26 @@ async function lage() {
          * hängt. Das ist eine Eigenschaft des Elements, keine Vermutung über
          * den Klassennamen.
          */
-        const karteEl = svg?.offsetParent ?? null;
+        const karteEl = marke?.offsetParent ?? null;
+        const istForm = !span;
         return {
-            marke: rechteck(svg),
-            markePfade: svg ? [...svg.querySelectorAll("path")].map((p) => p.getAttribute("d")) : [],
-            markeDeckkraft: svg ? svg.style.opacity : null,
+            marke: rechteck(marke),
+            markePfade: istForm && svg ? [...svg.querySelectorAll("path")].map((p) => p.getAttribute("d")) : [],
+            markeText: istForm ? "" : (span?.textContent ?? "").trim(),
+            // Bei einem Bild sind Zeichen und Versatz das Unterscheidende, nicht
+            // der Pfad. Beide werden mitgenommen, damit der Vergleich gleich
+            // zwei Karten mit demselben Wort als verschieden erkennt – das ist
+            // der Fall, den die reine Textangabe nicht abdecken wuerde.
+            markeStil: istForm || !span ? "" : (() => {
+                const st = getComputedStyle(span);
+                return `${st.fontSize}|${st.transform}`;
+            })(),
+            markeDeckkraft: istForm && svg ? svg.style.opacity : null,
             tipp: rechteck(nach("karteTipp")),
             sprache: rechteck(nach("karteZeichen")),
             karte: rechteck(karteEl),
-            seite: (svg?.offsetParent ? klasse(svg.offsetParent) : "").includes("kartenSeiteHinten"),
-            viewBox: svg ? svg.getAttribute("viewBox") : null,
+            seite: (marke?.offsetParent ? klasse(marke.offsetParent) : "").includes("kartenSeiteHinten"),
+            viewBox: istForm && svg ? svg.getAttribute("viewBox") : null,
         };
     });
 }
@@ -271,7 +308,8 @@ console.log("\n3. Verschiedene Karten zeigen verschiedene Zeichen");
      * verschiedene Zeichen dastanden. Der Pfad ist deterministisch aus der
      * Karten-ID, also ist der rohe String genau das richtige Vergleichsmittel.
      */
-    const schluessel = (l) => l.markePfade.join("|");
+    const schluessel = (l) =>
+        l.markePfade.length ? l.markePfade.join("|") : `bild:${l.markeText}|${l.markeStil}`;
     const gutKnopf = () =>
         seite.evaluate(() => {
             const b = [...document.querySelectorAll("button")].find((x) => /^Gut\b/i.test((x.textContent ?? "").trim()));
@@ -434,6 +472,13 @@ console.log("\n5. Eigenes Set und eigene Karte");
                 body: JSON.stringify({
                     setSlug,
                     paare: [
+                        // Drei mit Bild, damit die semantische Strecke geprueft
+                        // wird, und zwei ohne, damit der Rueckfall auf die
+                        // erzeugte Form geprueft wird. „zeichenprobe" ist
+                        // erfunden und faellt deshalb zuverlaessig auf die Form.
+                        { frage: "haus", antwort: "house" },
+                        { frage: "katze", antwort: "cat" },
+                        { frage: "apfel", antwort: "apple" },
                         { frage: "zeichenprobe", antwort: "markenprobe" },
                         { frage: "zweite probe", antwort: "zweite marke" },
                     ],
@@ -451,11 +496,122 @@ console.log("\n5. Eigenes Set und eigene Karte");
             await beideSeiten(360, 740, "eigenes Set 360px");
             const eigen = await lage();
             if (eigen.marke) {
-                gemessen(`eigene Karte zeigt ein Zeichen (${eigen.markePfade.length} Pfade)`);
+                gemessen(
+                    eigen.markeText
+                        ? `eigene Karte zeigt das Bild ${eigen.markeText}`
+                        : `eigene Karte zeigt die erzeugte Form (${eigen.markePfade.length} Pfade)`,
+                );
                 await seite.screenshot({ path: `${ORDNER}/live-eigene-karte.png` });
             } else {
                 befund("eigene Karte zeigt kein Zeichen", "fehler");
             }
+
+            /*
+             * Die semantische Strecke, am lebenden System gemessen.
+             *
+             * Erwartet wird: von den fuenf eig angelegten Karten zeigen
+             * „haus", „katze" und „apfel" ein Emoji, die beiden erfundenen
+             * Probewoerter die erzeugte Form. Genau das ist die Zusage des
+             * Nutzers an einem Punkt – „haus ist ein Haus".
+             *
+             * Der Stapel wird durchlaufen statt alle Karten auf einmal geprueft:
+             * die Lernseite zeigt genau eine Karte, und ein erster Versuch,
+             * alle gleichzeitig zu finden, hat genau eine gesehen und daraus
+             * fuenf Fehlbefunde gebaut. Im gemessenen DOM ist es eindeutig:
+             * ein Emoji steht in einem `span`, die Form in einem `svg`.
+             */
+            const karten = [];
+            const gesehen = new Set();
+            let stopp = "";
+            let ende = false;
+            for (let schritt = 0; schritt < 6; schritt += 1) {
+                const k = await seite.evaluate(() => {
+                    const karte = document.querySelector('[class*="kartenSeite"]')?.closest("button");
+                    const marke = karte?.querySelector('[class*="karteMarke"]');
+                    if (!karte || !marke) return null;
+                    const istForm = marke.tagName.toLowerCase() === "svg";
+                    return {
+                        wort: (karte.querySelector('[class*="karteText"]')?.textContent ?? "").trim(),
+                        art: istForm ? "form" : "bild",
+                        text: istForm ? "" : (marke.textContent ?? "").trim(),
+                        schrift: istForm ? 0 : Math.round(parseFloat(getComputedStyle(marke).fontSize)),
+                        // `offsetWidth`, nicht `getBoundingClientRect`: die
+                        // Kartenansicht dreht beim Aufdecken in 3D, und die
+                        // Bildlaenge des Rechtecks rechnet diese Drehung mit
+                        // ein. Gemessen wurde so 12x33px statt 32x32px, obwohl
+                        // die Box genau 32x32px gross ist.
+                        breite: marke.offsetWidth,
+                        hoehe: marke.offsetHeight,
+                    };
+                });
+                if (!k) { stopp = "keine Karte mit Zeichen im DOM"; break; }
+                karten.push(k);
+                // Die Animation der neuen Karte abwarten, bevor weitergelaufen
+                // wird, sonst wird der naechste Zustand im Halbbild geprueft.
+                await seite.waitForTimeout(400);
+                /*
+                 * Erst aufdecken. Der „Gut"-Knopf steht erst dann im DOM.
+                 * Ein erster Versuch hat ihn direkt gesucht und kam ueber
+                 * genau eine Karte hinaus, danach war Schluss.
+                 */
+                await seite.evaluate(() => {
+                    document.querySelector('[class*="kartenSeite"]')?.closest("button")?.click();
+                });
+                await seite.waitForTimeout(320);
+                const weiter = await seite.evaluate(() => {
+                    const b = [...document.querySelectorAll("button")].find((x) =>
+                        /^(Gut|Weiter|Nochmal)/i.test((x.textContent ?? "").trim()),
+                    );
+                    if (!b) return false;
+                    b.click();
+                    return true;
+                });
+                if (!weiter) { stopp = "kein Weiter-Knopf nach dem Aufdecken"; break; }
+                await seite.waitForTimeout(450);
+                /*
+                 * Der Stapel ist ein Kreis: nach der letzten Karte kommt die
+                 * erste wieder. Das ist das Ende, kein Fehler – ein erster
+                 * Versuch hat es als Abbruch gemeldet und damit einen
+                 * voellig einwandfreien Lauf als fehlgeschlagen verbucht.
+                 */
+                if (gesehen.has(k.wort)) { ende = true; break; }
+                gesehen.add(k.wort);
+            }
+            if (ende) gemessen(`Stapel vollstaendig durchlaufen: ${gesehen.size} verschiedene Karten`);
+            if (stopp) befund(`Stapel nach ${karten.length} Karten abgebrochen: ${stopp}`, "fehler");
+            const mitBild = karten.filter((k) => k.art === "bild");
+            const mitForm = karten.filter((k) => k.art === "form");
+            gemessen(`${karten.length} Karten durchlaufen: ${mitBild.length} mit Bild, ${mitForm.length} mit erzeugter Form`);
+            for (const k of mitBild) {
+                gemessen(`Bild ${k.text} zu „${k.wort}", Schrift ${k.schrift}px, Box ${k.breite}x${k.hoehe}px`);
+            }
+            for (const [emoji, wort] of [["\u{1F3E0}", "haus"], ["\u{1F431}", "katze"], ["\u{1F34E}", "apfel"]]) {
+                const karte = mitBild.find((k) => k.text === emoji);
+                if (!karte) befund(`fuer „${wort}" wurde kein ${emoji} gefunden`, "fehler");
+                else gemessen(`Karte „${karte.wort}" zeigt ${emoji} wie verlangt`);
+            }
+            // Auf der Vorderseite steht die Uebersetzung, also „markenprobe"
+            // und „zweite marke". Zuerst war hier „zeichenprobe" erwartet –
+            // das ist die Frage, und die steht erst auf der Rueckseite.
+            for (const wort of ["markenprobe", "zweite marke"]) {
+                const karte = mitForm.find((k) => k.wort.startsWith(wort));
+                if (karte) gemessen(`Karte „${karte.wort}" faellt korrekt auf die erzeugte Form zurueck`);
+                else befund(`Karte „${wort}" sollte die erzeugte Form zeigen`, "fehler");
+            }
+            /*
+             * Das Bild muss in derselben Box sitzen wie die Form, sonst rutscht
+             * es auf einer Breite aus dem Kartenrand. Die Schriftgroesse darf
+             * dagegen kleiner sein: sie schwankt absichtlich zwischen 86 und
+             * 100 Prozent, damit nicht jede Karte denselben Abdruck hat.
+             */
+            for (const k of mitBild) {
+                if (k.breite !== 32 || k.hoehe !== 32) {
+                    befund(`Bild auf „${k.wort}" ist ${k.breite}x${k.hoehe}px statt 32x32px`, "fehler");
+                } else if (k.schrift < 27 || k.schrift > 32) {
+                    befund(`Bild auf „${k.wort}" hat ${k.schrift}px Schrift, erlaubt sind 27 bis 32px`, "fehler");
+                }
+            }
+            await seite.screenshot({ path: `${ORDNER}/live-semantik.png` });
         }
     }
 }
