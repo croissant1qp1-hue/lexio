@@ -521,6 +521,24 @@ Fehlerquellen, die zusammen das Ergebnis beschädigten.
 > --name ngsl-pruefung --mengen` erzeugt alle vier Dateien byteweise
 > identisch, ebenso `--top 100` das Starter-Set.
 >
+> **Vom Quelltext zur Karte, vollständig.** Die Rohdaten lagen bisher nur in
+> `/tmp` und damit nach dem nächsten Neustart im Nichts. Zwei Skripte machen
+> den Weg jetzt nachvollziehbar:
+>
+> ```sh
+> sh scripts/wortlisten-quellen-holen.sh scripts/quellen   # ~840 MB
+> sh scripts/wortlisten-links-bauen.sh scripts/quellen     # filtert + entpackt
+> npm run wortlisten:erzeugen -- --quellen scripts/quellen --top 0 \
+>   --name ngsl-voll --mengen
+> npm run wortlisten:importieren -- scripts/wortlisten/ngsl-alltag-1.json \
+>   englisch-alltag-1 "Englisch Alltag I"
+> ```
+>
+> Das Holen lädt erst nach `.teil` und benennt danach um, mit `curl --fail`:
+> ein falscher Pfad ist damit ein Fehler und keine dreisätzige JSON-Datei.
+> Rohdaten bleiben draußen (`.gitignore`), die Skripte gehören ins Repo —
+> sonst ist der Weg nur auf dem Rechner nachzulesen, auf dem er einmal lief.
+>
 > **Verteilung, live in der Produktivdatenbank (5 globale Sets):**
 >
 > | Set | Karten | NGSL-Rang |
