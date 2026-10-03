@@ -1,0 +1,182 @@
+/*
+ * Styles der Quellenseite.
+ *
+ * Dieselbe Regel wie auf der Startseite: nur Variablen aus global.css, keine
+ * eigenen Farben. Die Seite muss in hell und dunkel stehen, ohne dass hier
+ * eine Farbe nachgepflegt werden muss, die an zwei Stellen auseinanderläuft.
+ *
+ * Eine Textseite, kein Grid und kein Bild. Der Rhythmus entsteht über
+ * `max-width` beim Fließtext (Zeilenlänge von rund 70 Zeichen ist lesbar,
+ * mehr nicht) und über den Abstand zwischen den Abschnitten. Der
+ * Linkspalt wäre hier Kosmetik ohne Nutzen: es gibt genau eine Spalte Text.
+ */
+
+.seite {
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: var(--hero-grund, var(--background));
+  color: var(--text-primary);
+  font-family: var(--sans);
+}
+
+.kopf {
+  width: min(100% - 2rem, 46rem);
+  margin-inline: auto;
+  padding-block: 1.25rem;
+}
+
+.zurueck {
+  display: inline-flex;
+  align-items: center;
+  /* Wie die Links in der Leiste der Startseite: 44 px, damit die Zeile auf
+     dem Telefon nicht unter der Fingergrenze liegt. */
+  min-height: 44px;
+  padding: 0.5rem 0.9rem;
+  margin-left: -0.9rem;
+  border-radius: 999px;
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.zurueck:hover {
+  color: var(--text-primary);
+}
+
+.text {
+  width: min(100% - 2rem, 46rem);
+  margin-inline: auto;
+  padding-block: 0.5rem 4rem;
+}
+
+.text h1 {
+  font-family: var(--serif);
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
+  line-height: 1.15;
+  margin: 0 0 1.25rem;
+}
+
+.text h2 {
+  font-family: var(--serif);
+  font-size: 1.375rem;
+  line-height: 1.25;
+  margin: 2.75rem 0 0.75rem;
+}
+
+.einleitung {
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  max-width: 68ch;
+  margin: 0 0 0.5rem;
+}
+
+.text p,
+.text li {
+  line-height: 1.65;
+  max-width: 68ch;
+  margin: 0 0 1rem;
+}
+
+/* ------------------------------------------------------------ Quellen -- */
+
+.liste {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  /* Der Strich zwischen den Quellen ist dünn und in beiden Designs gleich. */
+  border-top: 1px solid var(--line);
+}
+
+.eintrag {
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.eintrag dt {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-bottom: 0.35rem;
+}
+
+.lizenz {
+  font-family: var(--sans);
+  /*
+   * 14 px, nicht 12 px. Der Responsive-Audit meldet Text unter 14 px als
+   * Befund, und das ist die einzige Zeile auf dieser Seite, die daran
+   * scheitern konnte: eine Plakette ist visuell ein Etikett, kein Fliesstext
+   * – lesbarer wird sie davon nicht, kleiner schon. Der Befund steht in
+   * /tmp/audit-rohdaten.json unter "Text unter 14px".
+   */
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  /* Die Lizenz ist das juristisch relevante Detail am Eintrag. Sie soll
+     auffallen, aber nicht den Namen der Quelle ueberstimmen. */
+  color: var(--ink, #0e0c09);
+  background: var(--gold);
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  /*
+   * Kein `white-space: nowrap`. Der Text steht bei "je Satz verschieden,
+   * überwiegend CC BY 2.0 FR" in einer Zeile 388 px breit – bei 360 px
+   * Viewport schob das die ganze Seite seitwärts (Befund "Bildlauf
+   * waagerecht" im Responsive-Audit). Eine Plakette, die auf dem Telefon
+   * zweizeilig wird, ist unauffällig. Eine, die den ganzen Textlauf
+   * verschiebt, nicht.
+   */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.eintrag dd {
+  margin: 0;
+}
+
+.eintrag dd p {
+  margin: 0 0 0.5rem;
+  color: var(--text-secondary);
+}
+
+.hinweis {
+  font-size: 0.9375rem;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+.link:hover {
+  color: var(--gold-dark, var(--gold));
+}
+
+/* -------------------------------------------------------------- Punkte -- */
+
+.punkte {
+  margin: 0 0 1rem;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.punkte li::marker {
+  color: var(--text-muted, var(--text-secondary));
+}
+
+.klein {
+  font-size: 0.875rem;
+  color: var(--text-muted, var(--text-secondary));
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--line);
+}

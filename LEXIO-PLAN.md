@@ -1034,7 +1034,22 @@ von selbst weg.
 > `/uebersicht`. Anonym `/uebersicht` → `/anmelden`. Responsive-Audit: **72
 > Durchläufe**, die Startseite in allen sechs Viewports ohne Befund.
 
-
+> **Teil 3 (Quellenseite) ist erledigt (2026-10-03).** `/quellen` liegt
+> öffentlich, ohne Anmeldung, und nennt die drei Wortlistenquellen mit
+> Lizenz. Hintergrund ist Phase 2.2b: sobald 1.582 Karten live sind, ist
+> Share-Alike keine theoretische Frage mehr. Die Seite steht im Fuß der
+> Startseite und in der Sitemap — eine Quellenangabe, die niemand findet,
+> erfüllt ihre Pflicht nicht.
+>
+> **Zwei Befunde aus dem eigenen Audit, beide in neuem CSS:**
+> 1. Die Lizenz-Plaketten standen auf 12 px. Das Projekt-Minimum sind 14 px.
+> 2. Mit `white-space: nowrap` wurde die Plakette bei 360 px 388 px breit und
+>    schob die ganze Seite seitwärts.
+>
+> Beides ist behoben; der Nachweis steht in
+> `scripts/responsive-audit.mjs`, wo `/quellen` jetzt in der Seitenliste
+> steht. Titel-Doppelung „Quellen der Wortlisten – Lexio · Lexio" war der
+> dritte Befund und kam vom `title.template` im Root-Layout.
 
 ### Phase 5 — Responsive-Audit
 

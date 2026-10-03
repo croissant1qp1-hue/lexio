@@ -212,6 +212,17 @@ export default async function Startseite() {
       </main>
 
       <footer className={styles.fuss}>
+        {/*
+         * Die Quellen stehen im Fuss, nicht in einem eigenen Menuepunkt.
+         *
+         * Die Wortlisten sind Bearbeitungen fremder Quellen unter CC BY-SA.
+         * Share-Alike verlangt die Quellenangabe dort, wo die Inhalte
+         * abrufbar sind – ein Link im Fuss reicht dafuer, und er steht auf
+         * jeder Seite, die jemand ohne Konto sieht. Wer nach der Herkunft
+         * der englischen Sets fragt, muss nicht erst in den Einstellungen
+         * suchen.
+         */}
+        <Link href="/quellen">Quellen der Wortlisten</Link>
         <Link href="/anmelden">Anmelden</Link>
         <span className={styles.klein}>
           Alle Daten liegen bei dir im Konto. Diese Seite nennt nur, was Lexio tut.

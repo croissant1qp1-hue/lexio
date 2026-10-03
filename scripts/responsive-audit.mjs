@@ -48,6 +48,11 @@ const SICHTBAR = process.argv.includes("--sichtbar");
 const SEITEN = [
   { pfad: "/anmelden", name: "Anmelden", ohneLogin: true },
   { pfad: "/", name: "Startseite", ohneLogin: true },
+  // Seit dem Quellenseiten-Pass mit drin: die Seite ist Text mit Aufzählung
+  // und Lizenz-Plaketten, und der Fuß der Startseite hat inzwischen drei
+  // Kinder. Beides ist ohne Messung nicht zu beurteilen – besonders die
+  // Zeilenhöhe der Links und das Umbrechen der Plaketten bei 360 px.
+  { pfad: "/quellen", name: "Quellen", ohneLogin: true },
   { pfad: "/uebersicht", name: "Übersicht" },
   { pfad: "/wortschatz", name: "Wortschatz" },
   { pfad: "/lernen/englisch-grundlagen", name: "Lernansicht" },
