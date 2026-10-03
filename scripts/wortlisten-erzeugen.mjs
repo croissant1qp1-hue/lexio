@@ -61,6 +61,10 @@ function argumente() {
     ausgabe: hol("--ausgabe", path.join(WURZEL, "scripts", "wortlisten")),
     top: Number(hol("--top", "0")),           // 0 = volle NGSL (2809 Worte)
     name: hol("--name", "ngsl-grundlagen"),
+    // --mengen: zusaetzlich die vier Lern-Sets (Alltag I/II, Ausbau I/II)
+    // nach NGSL-Frequenzrang schreiben. Ohne den Schalter bleibt es bei
+    // einer Datei, damit der kleine Starter-Lauf unveraendert bleibt.
+    mengen: a.includes("--mengen"),
   };
 }
 
@@ -540,9 +544,76 @@ async function main() {
   ];
   fs.writeFileSync(path.join(a.ausgabe, `${a.name}.csv`), csvZeilen.join("\n") + "\n");
 
+  if (a.mengen) schreibeMengen(karten, a.ausgabe, a.name, a.quellen);
+
   console.log(
     `\n${TIEFE}Ergebnis: ${karten.length} von ${worte.length} Worten komplett (${Math.round((karten.length / worte.length) * 100)}%).\n${TIEFE}JSON: ${jsonPfad}`,
   );
+}
+
+/**
+ * Die vier Lern-Sets als Dateien schreiben (Schalter --mengen).
+ *
+ * Bisher wurden die vier Dateien per Inline-Skript erzeugt und einzeln
+ * eingecheckt. Das funktioniert genau einmal: wer die Wortliste neu
+ * erzeugt, bekam die Master-Datei und keine Sets mehr, und die vier Dateien
+ * im Repo waren nicht mehr aus dem Generator herstellbar. Eine Datei, die
+ * niemand neu erzeugen kann, ist eine Handwerksdatei – der Unterschied
+ * merkt sich erst, wenn sich die Quellen einmal ändern.
+ *
+ * Die Grenzen sind Frequenzraenge, keine erfundenen Niveaus. NGSL kennt
+ * keine CEFR-Stufen, also heissen die Sets "Alltag" und "Ausbau" und nicht
+ * "A2" oder "B1". Rang 1–100 bleibt das Starter-Set und wird hier nicht
+ * noch einmal geschrieben.
+ */
+const MENGEN = [
+  { name: "alltag-1", von: 101, bis: 500 },
+  { name: "alltag-2", von: 501, bis: 1000 },
+  { name: "ausbau-1", von: 1001, bis: 1800 },
+  { name: "ausbau-2", von: 1801, bis: 99999 },
+];
+
+function schreibeMengen(karten, ziel, name, quellen) {
+  const ngsl = JSON.parse(fs.readFileSync(pfad(quellen, "ngsl.json"), "utf8"));
+  const rang = new Map(ngsl.map(w => [w.Lemma.toLowerCase(), Number(w.Rank)]));
+  const zeilen = [];
+
+  for (const menge of MENGEN) {
+    const teil = karten
+      .filter(k => {
+        const r = rang.get(k.antwort.toLowerCase());
+        return r !== undefined && r >= menge.von && r <= menge.bis;
+      })
+      .sort((a, b) => rang.get(a.antwort.toLowerCase()) - rang.get(b.antwort.toLowerCase()));
+
+    const basis = `${name}-${menge.name}`;
+    fs.writeFileSync(path.join(ziel, `${basis}.json`), JSON.stringify(teil, null, 2) + "\n");
+    fs.writeFileSync(
+      path.join(ziel, `${basis}.csv`),
+      [
+        "frage;antwort;beispielsatz;beispiel_uebersetzung",
+        ...teil.map(k =>
+          [k.frage, k.antwort, k.beispielsatz, k.beispiel_uebersetzung]
+            .map(c => `"${(c || "").replace(/"/g, '""')}"`)
+            .join(";"),
+        ),
+      ].join("\n") + "\n",
+    );
+    zeilen.push(`  ${basis}: ${teil.length} Karten (Rang ${menge.von}–${menge.bis})`);
+  }
+
+  const gedeckt = new Set(
+    karten
+      .map(k => rang.get(k.antwort.toLowerCase()))
+      .filter(r => r !== undefined && r > 100),
+  );
+  const fehlend = MENGEN.filter(
+    m => [...gedeckt].some(r => r >= m.von && r <= m.bis) === false,
+  );
+  ausgabe(`Mengen geschrieben:\n${zeilen.join("\n")}`);
+  if (fehlend.length) {
+    console.error(`  Achtung: leere Bereiche: ${fehlend.map(f => f.name).join(", ")}`);
+  }
 }
 
 main().catch(fehler => {

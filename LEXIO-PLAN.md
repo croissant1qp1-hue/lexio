@@ -512,6 +512,15 @@ Fehlerquellen, die zusammen das Ergebnis beschädigten.
 > 3. **64 handkuratierte Sonderfälle** für Funktionswörter und die früher
 >    falschen Karten. Ergebnis: **1.582 von 2.809** (56 %).
 >
+> **Die vier Mengen-Dateien sind aus dem Generator erzeugt, nicht von
+> Hand.** Der Schalter `--mengen` schreibt sie nach NGSL-Frequenzrang. Das
+> kam spät: zuerst waren sie per Inline-Skript entstanden und einzeln
+> eingecheckt — eine Datei, die nur einmal erzeugt werden kann, ist eine
+> Handwerksdatei, und das merkt sich erst, wenn sich die Quellen ändern.
+> Gegengeprüft: `npm run wortlisten:erzeugen -- --quellen <ordner> --top 0
+> --name ngsl-pruefung --mengen` erzeugt alle vier Dateien byteweise
+> identisch, ebenso `--top 100` das Starter-Set.
+>
 > **Verteilung, live in der Produktivdatenbank (5 globale Sets):**
 >
 > | Set | Karten | NGSL-Rang |
