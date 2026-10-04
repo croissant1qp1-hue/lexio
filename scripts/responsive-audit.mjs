@@ -61,8 +61,13 @@ const SEITEN = [
   { pfad: "/einstellungen", name: "Einstellungen" },
   { pfad: "/karteikarten", name: "Karteikarten" },
   { pfad: "/karteikarten-hinzufuegen", name: "Hinzufügen 1" },
-  { pfad: "/karteikarten-hinzufuegen/sprache-hinzufuegen", name: "Hinzufügen 3" },
-  { pfad: "/karteikarten-hinzufuegen/vokabeln-hinzufuegen", name: "Hinzufügen 4" },
+  // "Hinzufügen 3" ist eine reine Umleitungsseite: Die page.tsx dort ruft
+  // `redirect("/karteikarten-hinzufuegen/vokabeln-hinzufuegen")` auf und
+  // enthaelt sonst nichts (so seit dem Stand 1.0). Das Audit hat den Pfad
+  // trotzdem gemessen und danach jedes Mal "Umleitung" gemeldet – 6 Befunde,
+  // die nichts mit dem Layout zu tun haben und nur dafür sorgen, dass eine
+  // echte Zahl untergeht. Gewartet wird das Ziel, nicht die Vorstufe.
+  { pfad: "/karteikarten-hinzufuegen/vokabeln-hinzufuegen", name: "Hinzufügen 3", erwartet: "/karteikarten-hinzufuegen/vokabeln-hinzufuegen" },
 ];
 
 /**
@@ -323,7 +328,11 @@ async function messe(context, seite, groesse) {
   await p.emulateMedia({ reducedMotion: "no-preference" });
 
   const gelandet = p.url().replace(BASIS, "") || seite.pfad;
-  const umgeleitet = !gelandet.startsWith(seite.pfad);
+  // Eine Umleitung ist nur dann ein Befund, wenn niemand sie erwartet hat.
+  // Steht `erwartet` in der Seitenliste, ist der Sprung der dokumentierte
+  // Weg der Seite und die Messung galt dem Ziel.
+  const umgeleitet = !gelandet.startsWith(seite.pfad) && !seite.erwartet;
+  const erwartetGehalten = seite.erwartet ? gelandet.startsWith(seite.erwartet) : true;
 
   await p.close();
   // Ein 404 auf einer Seite, die es noch gar nicht gibt (unvollstaendig),
@@ -331,6 +340,14 @@ async function messe(context, seite, groesse) {
   const echteFehler = seite.unvollstaendig
     ? []
     : [...new Set(antworten)].slice(0, 5);
+
+  if (seite.erwartet && !erwartetGehalten) {
+    befunde.push({
+      regel: "erwartete Umleitung",
+      text: `sollte nach ${seite.erwartet} fuehren, landete aber auf ${gelandet}`,
+      element: "url",
+    });
+  }
 
   return {
     seite: seite.name,
