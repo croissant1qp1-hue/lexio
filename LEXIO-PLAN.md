@@ -1810,6 +1810,62 @@ doppelt.
 > Normalfall ohne Abbruch zusätzlich. Tests 141/141, Lint und Build sauber,
 > Responsive-Audit 72 Durchläufe ohne Befund.
 
+**Nachgeholt am 2026-10-04.** Dieser Lauf ist älter als zwei Änderungen mit
+Berührung an der Oberfläche: das Merken-Kästchen (Punkt 7, Commit `bdddb5a`) und
+das Löschen von `karteikarten-hinzufuegen/page.module.css` (Punkt 11, Commit
+`7872c24`). Ein Audit von gestern sagt nichts über den Stand von heute, also
+neu: Produktionsserver gestartet, Wegwerf-Konto angelegt, **72 Durchläufe,
+0 Befunde, 0 Fehler**. Danach Konto gelöscht, Session-Datei und Server
+weggeräumt.
+
+**Der Audit hat sich gelohnt, und er hat gleich drei Dinge aufgedeckt.** Alle
+drei sind vom 2026-10-04 und stehen ausführlich in `OFFENE-PUNKTE.md`.
+
+**1. Der Kommentar im Audit-Skript war falsch — und zwar schon damals.** Er
+behauptete, unter `/karteikarten-hinzufuegen/sprache-auswählen` liege „nur
+eine CSS-Datei, keine `page.tsx`“. Die `page.tsx` mit dem `redirect()` gab es
+längst. Jetzt korrigiert, und der Kommentar sagt, woran das zu erkennen ist
+— an einer `page.tsx`, nicht an ihm selbst.
+
+**2. Zwei tote CSS-Dateien, die der Scan für Punkt 11 übersehen hatte.**
+Beide in `sprache-auswählen`, beide mit denselben Debug-Farben (`blue`/`red`,
+`100vh`, `gap: 100px`), beide von niemandem importiert:
+`app/(app)/karteikarten-hinzufuegen/sprache-auswählen/sprachen-auswählen-seite.module.css`
+und ihr Zwillings unter `app/karteikarten-hinzufuegen/` ohne Route-Gruppe.
+Der Scan von damals lief über `git ls-files` — und git maskiert
+Nicht-ASCII-Pfade als `\303\244`. Gesucht wurde unmaskiert, verglichen wurde
+maskiert. **Ein Scan, der seine eigenen Eingabedateien nicht sieht, meldet
+Erfolg, statt zu scheitern.**
+
+Deshalb gibt es jetzt `npm run toter-code` (`scripts/toten-code.mjs`) als
+Torwächter: `git ls-files -z`, Suche nach dem Basisnamen, exit 1 beim ersten
+Fund. Gegenprobe gegen genau diesen Fehler — eine leere Datei
+`prüfordner/prüfdatei-mit-ü.css` angelegt: **gefunden**. `.vscode/` und die
+Datenkörper in `scripts/wortlisten/` sind getrennt geführt, sonst schreit das
+Skript bei jedem CSV-Export.
+
+**3. Ein Test, der nur durch Zufall grün war.** Beim Neulaufen der Suite
+fiel „Einschalten haelt den alten Zeitstempel“ in 2 von 30 Läufen durch.
+`setzeMerken(false)` warf `zuletztAngemeldet` weg, beim Einschalten kam
+`Date.now()` zurück — der Test bestand nur, wenn drei Aufrufe in derselben
+Millisekunde passierten. Der Schalter beendet keine Anmeldung; er ist kein
+Login. Der Code ist entsprechend geändert, der Test bewegt jetzt die Uhr.
+Gegenprobe: ohne den Fix 10 von 10 rot, mit dem Fix 20 von 20 grün.
+
+Und als vierter Punkt, nicht behoben und nicht behoben werdend:
+`/karteikarten-hinzufuegen/sprache-auswählen` liefert 404, obwohl Next die Route
+im Manifest führt und die Geschwister ohne Umlaut 307 liefern. Auch Chromium
+sieht den 404; mit wiederhergestellter CSS-Datei bleibt er. Älter als alle
+Commits von heute, also kein Fund aus dieser Runde — aber eine Notiz, die man
+absichtlich stehen lässt, statt sie zu löschen, weil eine Umleitung nach einem
+Next-Upgrade zurückkommen kann.
+
+Die drei ersten Punkte sind dieselbe Sorte Fehler wie die veralteten
+Fundstellen in `OFFENE-PUNKTE.md`: eine Aussage, die man irgendwann nicht
+mehr nachprüft. Der Unterschied ist nur, dass sie diesmal von einem Skript
+behauptet wurde. Ein Skript, das falsch grün meldet, ist gefährlicher als
+kein Skript — also bekommt es jetzt einen Gegentest.
+
 **Punkt 8 — öffentlicher Endpunkt.** Die Env-Diagnosen waren in Phase 3.8
 bereits hinter `inklusiveServerKonfiguration` gelegt; `OFFENE-PUNKTE.md` führte
 den Punkt trotzdem noch als offen. Am laufenden Produktionsbuild nachgemessen:

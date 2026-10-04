@@ -295,6 +295,32 @@ Abmelden): die Adresse kommt nach jedem Einschalten zurück und ist nach dem
 Abmelden weg. `tests/geraet.test.ts` deckt beide Richtungen ab (10 Tests); mit
 dem alten Rumpf schlägt der Test fehl, mit dem neuen nicht.
 
+> **Nachtrag: einer dieser Tests war Flakes und hat einen echten Fehler
+> verdeckt.** „Einschalten haelt den alten Zeitstempel" fiel in 2 von 30
+> Läufen durch. Ursache: `setzeMerken(false)` schrieb `{ v: 1, merken: false }`
+> und **warf dabei `zuletztAngemeldet` weg**; beim wieder Einschalten ersetzte
+> `Date.now()` es. Der Test verglich beide Werte und bestand nur, wenn die
+> drei Aufrufe in derselben Millisekunde passierten — also meistens, und nie
+> zuverlässig.
+>
+> Das Verhalten ist älter als Punkt 7 (`bdddb5a` hat es nur umgebogen, nicht
+> eingebaut). Der **Test** hatte recht und der **Code** unrecht: Der Schalter
+> beendet die Anmeldung nicht — er ist kein Login. Ein erfundener Zeitstempel
+> heißt „angemeldet vor eben", und alles, was daraus einmal eine Sitzungsdauer
+> ableitet, rechnet mit einem Alter, das es nicht gibt. `setzeMerken(false)`
+> löscht deshalb weiter die Adresse, behält aber den Zeitstempel.
+> `vergissAnmeldung()` bleibt der Ort, der alles löscht — wer sich abmeldet,
+> hat die Anmeldung wirklich beendet.
+>
+> Und der Test prüft jetzt überhaupt etwas: `Date.now` ist darin ersetzt, damit
+> die Uhr garantiert weiterläuft. Gegenprobe: ohne den Fix **10 von 10** rot,
+> mit dem Fix **20 von 20** grün, Suite dreimal hintereinander 173/173.
+>
+> *Randnotiz:* `zuletztAngemeldet` wird derzeit nirgends **gelesen**, nur
+> geschrieben. Die Semantik ist damit nicht falsch, nur ungenutzt — die
+> Entscheidung, was damit geschehen soll, gehört an die Stelle, an der etwas
+> es liest.
+
 ### 8. ~~Der öffentliche Endpunkt verrät den Fehlkonfigurationszustand~~ ✅
 
 `app/api/gesundheit/route.ts:16` → `lib/gesundheit.ts:194-273`
@@ -486,11 +512,42 @@ sonstwo im Projekt vor — der Ein-Schritt-Bildschirm hat seinen eigenen
 Aufbau. Eine Datei, die niemand laden kann, wieder zu löschen ist die
 billigste Aufräumarbeit, die es gibt.
 
-**Gegenprobe:** ein Skript über alle versionierten Dateien, die weder von
-Next-Routing noch von einem anderen Modul referenziert werden. Ergebnis nach
-der Löschung: **nichts**. (`app/**/page.tsx`, `app/api/**/route.ts`, Tests,
-Scripts und Config ausgenommen — die werden von Next bzw. npm aufgelöst, nicht
-per Import.)
+**Gegenprobe:** `npm run toter-code` — `scripts/toten-code.mjs`, das alle
+versionierten Dateien prüft und beim ersten Fund mit exit 1 endet. Es sucht
+nach dem Basisnamen ohne Endung, weil ein CSS-Modul über `./name.module.css`
+importiert wird und nie über seinen Ordner.
+
+> **Der erste Lauf dieses Skripts hat zwei weitere Leichen gefunden — und damit
+> den ersten Scan widerlegt.** Dort stand „Ergebnis: nichts", und das war
+> falsch. Übersehen worden waren
+> `app/(app)/karteikarten-hinzufuegen/sprache-auswählen/sprachen-auswählen-seite.module.css`
+> und ihr Zwillings unter `app/karteikarten-hinzufuegen/` (ohne Route-Gruppe,
+> ohne jede `page.tsx`, also selbst keine Route). Beide enthielten dieselben
+> zwei Debug-Klassen — `background-color: blue`, `red`, `height: 100vh`,
+> `gap: 100px` — und **keine wurde irgendwo importiert**.
+>
+> **Warum der erste Scan sie übersehen hat:** Er lief über `git ls-files`, und
+> git maskiert Pfade mit Nicht-ASCII-Zeichen als `\303\244`. Gesucht wurde
+> nach dem unmaskierten Namen, verglichen wurde die maskierte Form. Ein Scan,
+> der seine eigenen Eingabedateien nicht sieht, findet nichts und meldet
+> Erfolg. Beide Dateien sind gelöscht, und der Ordner
+> `app/karteikarten-hinzufuegen/` war danach leer und ist mit verschwunden.
+>
+> Gegenprobe gegen genau diesen Fehler: eine leere Datei
+> `app/(app)/prüfordner/prüfdatei-mit-ü.css` angelegt → **gefunden**, exit 1.
+> Danach entfernt. `.vscode/` und die Datenkörper in `scripts/wortlisten/`
+> sind getrennt geführt: die CSV-Exporte werden nie von einer Datei
+> referenziert und sind trotzdem kein toter Code.
+
+**Nebenbefund, nicht behoben:** `/karteikarten-hinzufuegen/sprache-auswählen`
+liefert **404**, obwohl dort eine `page.tsx` mit `redirect()` liegt und Next
+die Route im Manifest führt. Die beiden Geschwister ohne Umlaut im Namen
+(`sprache-hinzufuegen`, `vokabeln-hinzufuegen`) liefern 307. Auch Chromium
+sieht den 404, es ist also kein `curl`-Artefakt. Gegenprobe **ohne** die
+vorstehende Löschung: derselbe 404 — der Fehler ist älter als dieser Commit
+und hängt am Nicht-ASCII-Pfadsegment, nicht an toter CSS. Die Datei bleibt
+stehen: sie zu löschen würde eine Umleitung entfernen, die nach einem
+Next-Upgrade wieder funktionieren kann.
 
 ---
 

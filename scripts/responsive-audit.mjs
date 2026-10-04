@@ -35,15 +35,25 @@ const SICHTBAR = process.argv.includes("--sichtbar");
  * und lieferte damit 404 – das ist kein Befund an der App, sondern ein
  * Tippfehler im Audit. Das Demoset aus 002 heißt "englisch-grundlagen".
  *
- * /karteikarten-hinzufuegen/sprache-auswählen war in der Liste, weil der
- * Plan alle vier Wizard-Schritte nennt, und lieferte 404: dort liegt nur eine
- * CSS-Datei, keine page.tsx. Die Seite wurde am 2026-10-02 aus der Liste
- * genommen, nachdem `grep` bestaetigt hat, dass **kein** Element der App auf
- * diesen Pfad verweist – sie ist also fuer niemanden erreichbar, auch nicht
- * fuer einen Besucher mit einer falschen Adresse. Solange sie nicht
- * existiert, ist ein Befund von dort nur eine Messung der 404-Seite unter
- * falschem Namen. Sobald die `page.tsx` committet ist, gehoert der Pfad
- * wieder in die Liste.
+ * /karteikarten-hinzufuegen/sprache-auswählen stand in der Liste, weil der
+ * Plan alle vier Wizard-Schritte nennt, und lieferte 404: die Seite dort ist
+ * seit dem Stand 1.0 ein `redirect()` ohne eigenen Inhalt. Das Audit hat den
+ * Pfad trotzdem gemessen und danach jedes Mal "Umleitung" gemeldet – Befunde,
+ * die nichts mit dem Layout zu tun haben und nur dafür sorgen, dass eine echte
+ * Zahl untergeht. Gewartet wird das Ziel, nicht die Umleitungsstufe.
+ *
+ * Zwei Notizen zu diesem Pfad, beide vom 2026-10-04, und beide lehrreich:
+ *
+ *   - Der alte Kommentar an dieser Stelle behauptete, dort liege "nur eine
+ *     CSS-Datei, keine page.tsx". Das war schon damals falsch: die `page.tsx`
+ *     mit dem `redirect()` existierte, und die CSS-Datei daneben wurde nie von
+ *     jemandem importiert. Sie ist in `b7c8598`/`50633a4` mit der zweiten
+ *     identischen Kopie unter `app/karteikarten-hinzufuegen/` (ohne
+ *     Route-Gruppe, ohne jede `page.tsx`) gelöscht worden — toter Code, den
+ *     der Scan für Punkt 11 übersehen hatte, weil er über `git ls-files` lief
+ *     und git Umlautpfade maskiert. Siehe `scripts/toten-code.mjs`.
+ *   - Sobald dort echter Inhalt steht, gehört der Pfad wieder in die Liste.
+ *     Das ist an einer `page.tsx` zu erkennen, nicht an diesem Kommentar.
  */
 const SEITEN = [
   { pfad: "/anmelden", name: "Anmelden", ohneLogin: true },

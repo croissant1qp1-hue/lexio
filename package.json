@@ -14,6 +14,7 @@
     "push:schluessel": "node scripts/push-schluessel.mjs",
     "push:senden": "node scripts/erinnerung-senden.mjs",
     "wortlisten:erzeugen": "node scripts/wortlisten-erzeugen.mjs",
+    "toter-code": "node scripts/toten-code.mjs",
     "wortlisten:importieren": "node scripts/wortlisten-importieren.mjs",
     "beispielsatz:korpus": "node scripts/beispielsatz-korpus.mjs"
   },

@@ -114,13 +114,31 @@ test("Einschalten ohne Adresse speichert auch keine", () => {
 test("Einschalten haelt den alten Zeitstempel", () => {
   const s = mitSpeicher();
 
-  merkeAnmeldung("nora@beispiel.de", true);
-  const vorher = liesStand().zuletztAngemeldet;
-  setzeMerken(false);
-  setzeMerken(true, "nora@beispiel.de");
-  assert.equal(liesStand().zuletztAngemeldet, vorher, "der Zeitstempel darf nicht springen");
+  // Die Uhr laeuft hier absichtlich weiter. Ohne das besteht der Test nur,
+  // wenn alle drei Aufrufe in derselben Millisekunde passieren — er ist
+  // dann 28 von 30 Mal gruen gewesen und hat den Fehler nie gesehen. Ein
+  // Test, der manchmal danebenliegt, ist schlimmer als keiner: Man laesst
+  // ihn neu laufen, statt nachzusehen. Also wird `Date.now` hier ersetzt,
+  // sodass "ein Schalter ist keine Anmeldung" bei jedem Lauf falsch waere,
+  // wenn es falsch ist.
+  const echtesNow = Date.now;
+  let t = 1_700_000_000_000;
+  Date.now = () => (t += 1000);
 
-  s.zuruecksetzen();
+  try {
+    merkeAnmeldung("nora@beispiel.de", true);
+    const vorher = liesStand().zuletztAngemeldet;
+    setzeMerken(false);
+    setzeMerken(true, "nora@beispiel.de");
+    assert.equal(
+      liesStand().zuletztAngemeldet,
+      vorher,
+      "der Zeitstempel darf nicht springen",
+    );
+  } finally {
+    Date.now = echtesNow;
+    s.zuruecksetzen();
+  }
 });
 
 test("Abmelden loescht die Adresse, behält aber den Wunsch", () => {

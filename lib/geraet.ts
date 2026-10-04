@@ -128,7 +128,23 @@ export function setzeMerken(merken: boolean, email?: string): void {
   const alt = liesStand();
 
   if (!merken) {
-    schreibe({ v: 1, merken: false });
+    // Die Adresse verschwindet — das ist das Versprechen des Schalters, und
+    // dafür gibt es den Grund, ihn zu haben. `zuletztAngemeldet` bleibt
+    // dagegen stehen: es sagt, *wann* angemeldet wurde, und ein Schalter ist
+    // kein Login. Wird er hier weggeworfen und beim Einschalten durch
+    // `Date.now()` ersetzt, meldet das Geraet eine Anmeldung, die nie
+    // stattgefunden hat — und alles, was daraus einmal eine Sitzungsdauer
+    // ableitet, rechnet mit einem Alter, das es nicht gibt.
+    //
+    // `vergissAnmeldung()` bleibt der Ort, der alles Vergessliche loescht.
+    // Wer sich abmeldet, hat die Anmeldung tatsaechlich beendet.
+    schreibe({
+      v: 1,
+      merken: false,
+      ...(typeof alt.zuletztAngemeldet === "number"
+        ? { zuletztAngemeldet: alt.zuletztAngemeldet }
+        : {}),
+    });
     return;
   }
 
