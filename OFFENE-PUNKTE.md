@@ -492,6 +492,40 @@ der Löschung: **nichts**. (`app/**/page.tsx`, `app/api/**/route.ts`, Tests,
 Scripts und Config ausgenommen — die werden von Next bzw. npm aufgelöst, nicht
 per Import.)
 
+---
+
+## Nachtrag 2026-10-04 — was die Behebung von Punkt 10 aufgedeckt hat
+
+Beim Prüfen der Migrationen (also beim Versuch, „läuft sie?" überhaupt zu
+beantworten) kam ein zweiter Fund heraus, der nichts mit den Punkten 4 bis 11 zu
+tun hat und trotzdem Produktionsdaten betrifft.
+
+**Migration 011 ist eine Falle.** Sie löscht drei Demo-Sets per Slug, darunter
+`englisch-grundlagen`. Dieser Slug trägt heute die kuratierte Wortliste
+`ngsl-top100` mit **100 echten Karten** — importiert am 2026-10-04 mit
+`scripts/wortlisten-importieren.mjs`. Die Bedingung der Datei ist
+`user_id is null`, und genau das haben die Wortlisten auch. Ein erneuter Lauf
+würde 100 Karten samt Lernstand löschen.
+
+Belegt und nicht vermutet: `italienisch-urlaub` und `spanisch-alltag` sind
+weg, `englisch-grundlagen` steht mit seinen 100 Karten. Der heutige Zustand
+ist richtig — die Datei ist nur historisch und darf nicht wieder laufen.
+
+> **Kein Kommentar ersetzt eine Sperre.** In 011 steht jetzt oben eine fette
+> Warnung, und `scripts/db-pruefen.mjs` prüft für 011 aus genau diesem Grund
+> **nur** die beiden echten Platzhalter: hätte es `englisch-grundlagen`
+> mitgeprüft, hätte es „fehlt" gemeldet — und die naheliegende Reaktion auf
+> „fehlt" wäre `npm run db:migrieren -- 011`. Eine Prüfung, die zum Löschen
+> von Produktionsdaten auffordert, ist schlimmer als keine.
+
+Daraus folgt der Kern des Skripts: **es prüft Merkmale, keine Dateinamen**, und
+es verweigert den Dienst, wenn eine Datei ohne Eintrag dazukommt. Was beim
+Bau dieser Liste auffiel: die Marker mussten einzeln gegen die echte Datenbank
+geprüft werden. Zwei meiner ersten Versuche waren falsch — die Karten-Tabelle
+heißt `karten` und nicht `karteikarten`, und für 011 hätte ich fast das
+falsche Merkmal genommen. Eine Merkmalsliste, die man nicht gegen die Datenbank
+verifiziert, ist nur eine andere Behauptung.
+
 ## Geprüft und in Ordnung
 
 Damit man nicht nochmal suchen muss:

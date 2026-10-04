@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "node --import tsx --test tests/*.test.ts",
     "db:status": "node scripts/db-status.mjs",
+    "db:pruefen": "node scripts/db-pruefen.mjs",
     "db:migrieren": "node scripts/db-migrieren.mjs",
     "push:schluessel": "node scripts/push-schluessel.mjs",
     "push:senden": "node scripts/erinnerung-senden.mjs",

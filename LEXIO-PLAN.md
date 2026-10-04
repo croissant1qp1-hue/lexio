@@ -2012,3 +2012,54 @@ Phase 7 (React Native) ist nicht blockiert, aber nachrangig; ihr Abnahmeteil
 über die Wortlisten-Benennung ist inzwischen erledigt.
 
 Alle elf Punkte sind einzeln committen und nach `origin/main` gepusht.
+
+---
+
+## Nachtrag vom 2026-10-04 — `npm run db:pruefen`: „läuft sie?" ist eine Frage, die man stellen können muss
+
+Der Fund aus Punkt 10 war nicht die kaputte Migration, sondern die Tatsache,
+dass niemand es merken konnte. `db-migrieren.mjs` meldet eine Datei als
+`ok`, wenn die Anfrage durchging — und die Anfrage sieht nur, ob die **letzte**
+Anweisung keinen Fehler geworfen hat. Bricht eine Datei mittendrin ab, bleiben
+die vorherigen Anweisungen stehen und sie steht trotzdem im Protokoll als
+gelaufen. `db:status` prüft sechs Marker aus 002 und 003 und sagt danach
+„Datenbank ist bereit". Zwischen beidem liegen vierzehn Dateien.
+
+> **Neu: `npm run db:pruefen`** (`scripts/db-pruefen.mjs`, read-only über die
+> Management-API mit postgres-Rechten). Es fragt nicht nach Dateinamen, sondern
+> nach dem, was jede Datei in der Datenbank hinterlässt: eine Tabelle, eine
+> Spalte, einen Index, ein Funktionsrumpf-Muster, einen Datensatz, der weg sein
+> muss. Exit 1, wenn etwas fehlt, mit dem Aufruf, der es behebt.
+>
+> Zwei Regeln halten die Liste ehrlich. **Jede Datei braucht einen Eintrag** —
+> fehlt einer, bricht das Skript ab, sonst rutscht eine neue Migration unbemerkt
+> durch. Und **jeder Eintrag nennt einen Satz, wofür das Merkmal steht**: ein
+> Merkmal ohne Grund wird beim nächsten Umbau umbenannt.
+>
+> Gegenproben: 013 künstlich als fehlend markiert → exit 1 mit
+> `npm run db:migrieren -- 013-tagesziel-ehrlich`. Leere Datei
+> `099-testdatei.sql` angelegt → exit 1 mit der Liste der Dateien ohne Eintrag.
+> Beides wieder zurückgebaut.
+
+### Und eine Falle, die dabei sichtbar wurde
+
+Beim Bauen der Merkmalsliste fiel auf: **011 darf nicht erneut laufen.** Die
+Datei löscht drei Demo-Sets per Slug, und einer davon, `englisch-grundlagen`,
+trägt inzwischen `ngsl-top100` mit 100 kuratierten Karten. Die Bedingung ist
+`user_id is null` — die Wortlisten haben dieselbe. Der heutige Zustand ist
+richtig (die beiden anderen Slugs sind weg, `englisch-grundlagen` steht), aber
+die Datei ist eine geladene Waffe.
+
+In 011 steht jetzt eine Warnung im Kopf, und der Eintrag in `db-pruefen.mjs`
+prüft **nur die beiden echten Platzhalter**. Hätte er `englisch-grundlagen`
+mitgeprüft, hätte er „fehlt" gemeldet — und die naheliegende Reaktion auf
+„fehlt" wäre `npm run db:migrieren -- 011-platzhalter-entfernen`. Eine
+Prüfung, die zum Löschen von Produktionsdaten auffordert, ist schlimmer als
+keine.
+
+> **Und noch eine Lektion aus derselben Stunde:** Zwei meiner ersten Merkmale
+> waren falsch — die Karten-Tabelle heißt `karten`, nicht `karteikarten`.
+> Sie fielen nur auf, weil jedes Merkmal gegen die echte Datenbank läuft. Eine
+> Merkmalsliste, die man nicht verifiziert, ist nur eine andere Behauptung —
+> dieselbe Sorte Fehler wie die zwei veralteten Fundstellen in
+> `OFFENE-PUNKTE.md`.

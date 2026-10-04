@@ -1,6 +1,21 @@
 -- =============================================================================
 -- Lexio – Migration 011: Demo-Platzhalter entfernen
 -- =============================================================================
+-- ACHTUNG, 2026-10-04: DIESE DATEI NICHT ERNEUT LAUFEN LASSEN.
+--
+-- Der Slug `englisch-grundlagen` war zur Zeit dieser Migration ein
+-- Platzhalter-Set aus "Frage n"/"Antwort n". Heute trägt derselbe Slug die
+-- kuratierte Wortliste ngsl-top100 mit 100 echten Karten
+-- (scripts/wortlisten-importieren.mjs). Wortlisten stehen wie die alten
+-- Demo-Sets auf `user_id is null`, die Bedingung unten greift also bei ihnen
+-- genauso — ein zweiter Lauf löscht 100 Karten samt Lernstand.
+--
+-- Geprüft und gefunden: `italienisch-urlaub` und `spanisch-alltag` sind
+-- weg, `englisch-grundlagen` steht mit seinen 100 Karten. Der Zustand ist
+-- damit richtig; diese Datei ist nur historisch. Was wirklich fehlt, sagt
+-- `npm run db:pruefen` — und dessen Eintrag für 011 prüft aus genau diesem
+-- Grund nur die beiden echten Platzhalter.
+--
 -- Plan 2.1: Die drei globalen Demo-Sets (englisch-grundlagen,
 -- italienisch-urlaub, spanisch-alltag) bestehen nur aus Platzhalterkarten
 -- "Frage n" / "Antwort n". Frische Nutzer sehen darauf 65/32/48 % Fortschritt
