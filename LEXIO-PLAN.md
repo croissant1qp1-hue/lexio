@@ -1852,14 +1852,38 @@ Millisekunde passierten. Der Schalter beendet keine Anmeldung; er ist kein
 Login. Der Code ist entsprechend geändert, der Test bewegt jetzt die Uhr.
 Gegenprobe: ohne den Fix 10 von 10 rot, mit dem Fix 20 von 20 grün.
 
-Und als vierter Punkt, nicht behoben und nicht behoben werdend:
-`/karteikarten-hinzufuegen/sprache-auswählen` liefert 404, obwohl Next die Route
-im Manifest führt und die Geschwister ohne Umlaut 307 liefern. Auch Chromium
-sieht den 404; mit wiederhergestellter CSS-Datei bleibt er. Älter als alle
-Commits von heute, also kein Fund aus dieser Runde — aber eine Notiz, die man
-absichtlich stehen lässt, statt sie zu löschen, weil eine Umleitung nach einem
-Next-Upgrade zurückkommen kann.
+**4. Der 404 war ein Next-Problem, und es ist jetzt weg.** `/karteikarten-
+hinzufuegen/sprache-auswählen` lieferte 404, obwohl Next die Route im
+Manifest führte. Ursache: **Next 16.3.4 findet im App Router keine Route, deren
+Pfadsegment Nicht-ASCII-Zeichen enthält** — und `redirects()` in
+`next.config.ts` ebenso wenig. Nachgewiesen mit zwei Seiten, die bis auf den
+Ordnernamen identisch waren:
 
+| Pfad | Ergebnis |
+| --- | --- |
+| `/probe/ascii-redirect` (ASCII) | 307 |
+| `/prüfung/ascii-redirect` (Umlaut im Elternordner) | 404 |
+
+Es liegt nicht am `redirect()` — eine Seite mit Inhalt im Umlaut-Ordner ist
+genauso unerreichbar, und `next dev` verhält sich wie `next start`. Zwei
+Grenzen der Messung, weil man sie leicht mit dem Problem verwechselt:
+Next **kann** Nicht-ASCII-URLen ausliefern (eine Bilddatei aus `public/` mit
+Umlauten im Pfad liefert 200, deshalb ist `legacy/` kein Problem), und der
+`proxy` läuft **vor** der Routenzuordnung und kann solche Pfade umleiten
+(gemessen 308). „Geht im Framework nicht" stimmt also nur für die
+Routenzuordnung, nicht für Next insgesamt.
+
+Der Ordner ist gelöscht. Die Adresse liefert vorher wie nachher 404 — sie hat
+nie funktioniert, also kann niemand ein Lesezeichen darauf haben, und für
+eine URL, die es nie gab, baut man keine Proxy-Maschinerie. Was bleibt, ist
+eine Regel, und die steht als Test da: `tests/routen-ascii.test.ts` verbietet
+Umlaute in Ordnern unter `app/` **und** in `redirects()`-Quellen. Gegenproben:
+`app/(app)/probe-ü/` angelegt → rot; `source: "/mit-ü"` eingebaut → rot.
+Beide zurückgebaut.
+
+Die Regel ist wichtig, weil der Build den Fehler **nicht** zeigt: Next führt
+so einen Ordner fröhlich im Routenmanifest, erst die Anfrage liefert 404. Wer
+nicht misst, hält die Seite für erreichbar.
 Die drei ersten Punkte sind dieselbe Sorte Fehler wie die veralteten
 Fundstellen in `OFFENE-PUNKTE.md`: eine Aussage, die man irgendwann nicht
 mehr nachprüft. Der Unterschied ist nur, dass sie diesmal von einem Skript

@@ -539,15 +539,30 @@ importiert wird und nie über seinen Ordner.
 > sind getrennt geführt: die CSV-Exporte werden nie von einer Datei
 > referenziert und sind trotzdem kein toter Code.
 
-**Nebenbefund, nicht behoben:** `/karteikarten-hinzufuegen/sprache-auswählen`
-liefert **404**, obwohl dort eine `page.tsx` mit `redirect()` liegt und Next
-die Route im Manifest führt. Die beiden Geschwister ohne Umlaut im Namen
-(`sprache-hinzufuegen`, `vokabeln-hinzufuegen`) liefern 307. Auch Chromium
-sieht den 404, es ist also kein `curl`-Artefakt. Gegenprobe **ohne** die
-vorstehende Löschung: derselbe 404 — der Fehler ist älter als dieser Commit
-und hängt am Nicht-ASCII-Pfadsegment, nicht an toter CSS. Die Datei bleibt
-stehen: sie zu löschen würde eine Umleitung entfernen, die nach einem
-Next-Upgrade wieder funktionieren kann.
+**Nebenbefund, jetzt behoben:** `/karteikarten-hinzufuegen/sprache-auswählen`
+lieferte **404**, obwohl dort eine `page.tsx` mit `redirect()` lag und Next die
+Route im Manifest führte. Ursache ist Next 16.3.4 selbst: **der App Router
+findet keine Route, deren Pfadsegment Nicht-ASCII-Zeichen enthält** — und
+`redirects()` in `next.config.ts` ebenso wenig.
+
+Nachgewiesen mit zwei Seiten, die bis auf den Ordnernamen identisch waren:
+`/probe/ascii-redirect` → 307, `/prüfung/ascii-redirect` → 404. Also nicht am
+`redirect()` gelegen, und `next dev` verhält sich wie `next start`. Zur Grenze
+der Messung: Next *kann* Nicht-ASCII-URLen ausliefern (Bilddatei aus `public/`
+mit Umlauten: 200), und der `proxy` läuft vor der Routenzuordnung und kann sie
+umleiten (308). „Geht im Framework nicht" gilt also nur für die Zuordnung.
+
+Der Ordner ist gelöscht — die Adresse liefert vorher wie nachher 404, sie hat
+nie funktioniert, und für eine URL, die es nie gab, baut man keine
+Proxy-Maschinerie. Die Regel steht jetzt als Test da:
+`tests/routen-ascii.test.ts` verbietet Umlaute in Ordnern unter `app/` **und**
+in `redirects()`-Quellen. Gegenproben: `app/(app)/probe-ü/` angelegt → rot,
+`source: "/mit-ü"` eingebaut → rot. Beide zurückgebaut.
+
+> **Warum das ein Test sein muss und kein Kommentar.** Der Build zeigt den
+> Fehler nicht: Next führt einen Umlaut-Ordner fröhlich im Routenmanifest, erst
+> die Anfrage liefert 404. Wer nicht misst, hält die Seite für erreichbar und
+> legt einen toten Link darauf.
 
 ---
 
