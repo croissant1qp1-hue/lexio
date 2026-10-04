@@ -1684,3 +1684,106 @@ nichts, aber das Wenige lohnt sich:
 **Abnahme:** derselbe Nutzer meldet sich in der App an, sieht denselben
 Fortschritt wie im Web, und lernt eine Runde auf einem echten iPhone. Danach
 iOS-Erinnerungen, die auch wirklich ankommen.
+
+---
+
+## Nachtrag vom 2026-10-04 — die Wortlisten sind gemessen statt gelesen
+
+Bis hierher war die Qualitätssicherung der Wortlisten eine Stichprobe: ich habe
+Karten gelesen und entschieden, ob sie mir richtig vorkamen. Das findet
+Fehler, aber keine Fehlerklasse. Die 1.582 Karten im Produktivstand waren
+dadurch voller Karten, bei denen die Übersetzung zu einem Wort gehört, das der
+Satz gar nicht benutzt.
+
+### Das Werkzeug
+
+`scripts/wortlisten-qualitaet.mjs` prüft jede Karte auf neun Regeln. Der
+wichtigste Teil ist keine Fehlerregel, sondern eine Heuristik: Steht auf der
+Vorderseite ein Substantiv, kommt es aber im deutschen Beispielsatz nicht vor,
+ist die Übersetzung mit hoher Wahrscheinlichkeit die falsche Bedeutung. Über
+alle fünf Dateien waren das 130 Karten. Nach Durchsicht blieben rund 60 echte
+Fehler übrig — der Rest waren Synonyme und Paraphrasen, die bleiben dürfen.
+
+Die anderen harten Regeln fanden sofort einen Fehler in meinem eigenen
+Prüfskript: Grossbuchstaben wurden vor dem Vergleich nicht kleingeschrieben,
+`I` verschwand dabei aus jeder Liste. Ein Werkzeug, das sich selbst falsch
+versteckt, ist schlimmer als keines — deshalb stand dieser Fall hier im Plan.
+
+### Was in Produktion falsch war
+
+Ein Auszug, überraschenderweise gefundener in einem Set, das schon Monate live
+war:
+
+| Wort | Vorderseite war | deutscher Satz |
+|---|---|---|
+| `milk` | ausschöpfen | „Hast du Milch?" |
+| `please` | gefallen | „Wo sind bitte die Eier?" |
+| `mistake` | fehlen | „Jedem kann ein Fehler passieren." |
+| `except` | widersprechen | „Außer dir werden alle gehen." |
+| `finish` | Ende | „Wann warst du damit fertig?" |
+| `slight` | schlank | „Ich habe leichtes Fieber." |
+| `double` | doppel- | „Ich möchte ein Doppelzimmer." |
+
+Das Muster ist immer dasselbe: Kaikki nennt zuerst die Substantivbedeutung,
+der englische Satz braucht eine andere, und die Karte bekam trotzdem die erste.
+
+### Der Fehler steckte im Generator, nicht nur in den Daten
+
+Der Generator nahm je Wort **einen** Satz und **eine** Bedeutung und legte die
+Karte an, wenn der englische Satz das Wort enthielt. Passte die Übersetzung
+nicht zum deutschen Satz, war das Wort erledigt — auch wenn in den Quelldaten
+noch sieben brauchbare Sätze standen.
+
+Umgekehrt ist die strenge Prüfung allein teuer: sie hätte 215 Karten ersatzlos
+verworfen, davon viele gute (`yellow`, `few`, `single`, `classic`). Also macht
+der Generator jetzt zwei Dinge gleichzeitig: Er probiert bis zu acht Sätze je
+Wort und nimmt das erste Paar, bei dem die Übersetzung zum deutschen Satz
+passt. Das Ergebnis dieser einen Änderung:
+
+| Stand | Karten | davon falsche Bedeutung |
+|---|---:|---|
+| vorher (ein Satz je Wort) | 1.582 | ~60 bestätigt |
+| strenge Prüfung, ein Satz je Wort | 1.367 | 39 |
+| Satz und Bedeutung gemeinsam gewählt | **2.275** | 0 harte Befunde |
+
+181 Einträge in `SONDERFAELLE` und acht Wörter in `AUSSCHLUSS`, mit derselben
+Begründung wie im Werk: `matter` in „no matter what", `range` in „free-range
+chicken", `check` in „check out" und `bell` in „What was invented by Bell?"
+lassen sich nicht als Wortkarte unterrichten, sondern nur als Redewendung.
+
+### Was in der Datenbank passiert ist
+
+| Set | vorher | nachher |
+|---|---:|---:|
+| `englisch-grundlagen` | 100 | 100 |
+| `englisch-alltag-1` | 239 | 342 |
+| `englisch-alltag-2` | 286 | 412 |
+| `englisch-ausbau-1` | 436 | 648 |
+| `englisch-ausbau-2` | 521 | 773 |
+| **Summe** | **1.582** | **2.275** |
+
+Die acht Karten der Ausschlussliste wurden per SQL gelöscht, nachdem vorher
+geprüft war, dass keine davon eine Zeile in `karten_fortschritt` hat. Das war
+bei allen acht der Fall. `anzahl_karten` wurde danach für die globalen Sets
+nachgezogen — die Kachelzahlen in der Übersicht sind wieder deckungsgleich mit
+den tatsächlichen Zeilen. Lernfortschritt: 4 Zeilen im Starter-Set vor und nach
+dem Import, keine Dubletten in den globalen Sets.
+
+### Abnahme
+
+- `wortlisten-qualitaet.mjs` über alle fünf Dateien: 2.275 Karten, **0 harte
+  Befunde**, 521 weiche Hinweise (davon 218 Synonymfälle, die bleiben dürfen).
+- `npm test` 141/141, `tsc --noEmit` sauber, Lint 0 Fehler / 9 bekannte
+  Warnungen, Produktions-Build erfolgreich.
+- Responsive-Audit gegen den Produktionsserver: **72 Durchläufe, 0 Befunde,
+  0 Fehler**.
+- Live geprüft: Übersicht zeigt 100 / 342 / 412 / 648 / 773, die Lernansicht
+  zieht `brauchen = need | You need not have hurried.`
+
+Eine Korrektur an der Abnahme selbst: Die sechs „Befunde" aus dem Lauf vom
+2026-10-03 waren keine Layout-Fehler, sondern eine Umleitungsseite.
+`/karteikarten-hinzufuegen/sprache-hinzufuegen` ist seit dem Stand 1.0 ein
+`redirect()` ohne eigenen Inhalt. Das Audit hat den Pfad gemessen, die
+Umleitung bemerkt und jedes Mal gemeldet — 6 Befunde, die nur die echte Zahl
+verdeckten. Das Audit wartet jetzt das dokumentierte Ziel und meldet nur noch
+Umleitungen, die niemand erwartet hat.
