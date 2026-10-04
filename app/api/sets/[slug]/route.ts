@@ -203,7 +203,20 @@ export async function DELETE(
   if ("antwort" in geprueft) return geprueft.antwort;
   const set = geprueft.set;
 
-  const { count: kartenAnzahl } = await supabase
+  /*
+   * Die Zahl ist eine Beigabe: sie steht in der Antwort, damit der Aufrufer
+   * sagen kann, wieviel mitverschwunden ist. Sie ist aber kein Beweis fuer
+   * die Loeschung – das ist der `.select("id")` unten.
+   *
+   * Deshalb wird ein Fehler hier NICHT zum Fehler der ganzen Route. Die
+   * Loeschung ist zu diesem Zeitpunkt noch nicht passiert, und sie zu
+   * verweigern, nur weil eine Nebenabfrage ins Timeout gelaufen ist, waere die
+   * schlechtere Taeuschung: der Nutzer behaelt das Set und glaubt, es sei weg.
+   *
+   * `null` statt `0`. Eine erfundene Null ist schlimmer als eine fehlende Zahl:
+   * "0 Woerter geloescht" liest sich wie eine Tatsache.
+   */
+  const { count: kartenAnzahl, error: zaehlFehler } = await supabase
     .from("karten")
     .select("id", { count: "exact", head: true })
     .eq("set_id", set.id);
@@ -238,5 +251,11 @@ export async function DELETE(
     );
   }
 
-  return NextResponse.json({ geloescht: { slug, name: set.name, karten: kartenAnzahl ?? 0 } });
+  return NextResponse.json({
+    geloescht: {
+      slug,
+      name: set.name,
+      karten: zaehlFehler ? null : (kartenAnzahl ?? 0),
+    },
+  });
 }
