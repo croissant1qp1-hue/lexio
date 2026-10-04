@@ -35,12 +35,29 @@ function migrationen(): string[] {
     .sort();
 }
 
-/** Inhalt der letzten Datei, die `create ... function public.NAME` enthaelt. */
+/**
+ * Rumpf der LETZTEN Definition von public.NAME.
+ *
+ * Wichtig ist das "letzte", das eine Funktion tatsaechlich DEFINIERT – nicht
+ * die letzte Datei, die ihren Namen nur erwaehnt. Migration 015 etwa revoked
+ * die Rechte mit `revoke execute on function public.antwort_verbuchen(...)`
+ * und aendert den Rumpf nicht. Nimmt man dort die ganze Datei, prueft man
+ * Rechte-Zeilen gegen eine Bewertungsliste und der Test schlaegt fehl, ohne
+ * dass sich am Verhalten etwas geaendert haette.
+ *
+ * Gesucht wird deshalb `create [or replace] function public.NAME`, und der
+ * Block endet beim schliessenden $$ des Rumpfes.
+ */
 function letzteDefinition(name: string): string {
+  const muster = new RegExp(
+    `create\\s+(?:or\\s+replace\\s+)?function\\s+public\\.${name}\\s*\\([\\s\\S]*?\\$\\$;`,
+    "gi",
+  );
   const dateien = migrationen();
   for (let i = dateien.length - 1; i >= 0; i--) {
     const inhalt = readFileSync(join(MIGRATIONEN, dateien[i]), "utf8");
-    if (inhalt.includes(`function public.${name}`)) return inhalt;
+    const treffer = [...inhalt.matchAll(muster)];
+    if (treffer.length > 0) return treffer[treffer.length - 1][0];
   }
   throw new Error(`Keine Migration definiert public.${name}`);
 }

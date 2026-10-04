@@ -59,10 +59,18 @@ grant select, insert, update, delete on public.xp_tag_sets to authenticated;
 -- Tages traegt damit das Set, das die alte Spalte gefuehrt hat – mehr als
 -- das ist aus der Vergangenheit nicht rekonstruierbar. Ab jetzt zaehlt die
 -- Tabelle ehrlich.
+--
+-- on conflict do nothing, damit ein zweiter Lauf der Datei nicht am
+-- Primaerschluessel scheitert: das Projekt hat keine Tabelle mit
+-- angewandten Migrationen, jede Datei wird von Hand gelaufen und muss den
+-- zweiten Lauf aushalten. do nothing statt do update, weil Zeilen, die
+-- seitdem aus echten Antworten entstanden sind, den alten Tageswert nicht
+-- ueberschreiben duerfen.
 insert into public.xp_tag_sets (user_id, datum, set_id, xp_punktzahl)
 select user_id, datum, set_id, xp
 from public.xp_events
-where set_id is not null;
+where set_id is not null
+on conflict (user_id, datum, set_id) do nothing;
 
 
 -- -----------------------------------------------------------------------------

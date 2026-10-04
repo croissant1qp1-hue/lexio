@@ -3,9 +3,9 @@
 Gefunden am 2026-09-27, nach dem Einbau der sieben Anmeldeanbieter.
 
 **Die drei WICHTIG-Punkte sind inzwischen behoben** (siehe jeweiliger
-Absatz). Die KLEIN-Punkte sind weiterhin offen — dafür war die
-Reihenfolge „erst Auth, dann der Rest". Jeder Punkt nennt die Datei, den
-Grund und, wenn er erledigt ist, wie.
+Absatz). Von den KLEIN-Punkten ist die Mehrheit erledigt; offen sind nur noch
+Punkt 6 (zwei stille Typ-Casts) und Punkt 11 (toter Code). Jeder Punkt nennt
+die Datei, den Grund und, wenn er erledigt ist, wie.
 
 ## Kurzfassung
 
@@ -15,7 +15,8 @@ der Rest ist Haltung und Aufräumarbeit.
 
 ```
 WICHTIG   3   alle drei behoben
-KLEIN     7   davon 4 behoben (4, 5, 8, 9), 3 offen
+KLEIN     7   davon 6 behoben (4, 5, 7, 8, 9, 10), 1 offen (6)
+          +   11 toter Code, nicht gezählt
 ```
 
 Dazu gekommen: eine **neue Profilseite** `/profil`. Die Profilkarte in der
@@ -239,11 +240,28 @@ der Alias `fortschritt:` oder ändert sich der RPC-Return, liefert die
 Normalisierung stillschweigend `stufe: 0, gelernt: false` — die Karte gilt
 als **neu** und wird erneut angeboten, statt als Fehler aufzufallen.
 
-### 7. „Angemeldet bleiben" einschalten löscht die gemerkte E-Mail
+### 7. ~~„Angemeldet bleiben" einschalten löscht die gemerkte E-Mail~~ ✅
 
 `lib/geraet.ts:113-120` — `setzeMerken(true)` schreibt den Eintrag neu, ohne
 `alt.email` zu übernehmen. Wer den Schalter in den Einstellungen von nein auf
 ja stellt, verliert die vorgemerkte Adresse.
+
+**Erledigt** in zwei Teilen, weil das Auseinanderfallen von Absicht und
+Wirkung hier die eigentliche Ursache war:
+
+* `lib/geraet.ts:127` — `setzeMerken(merken: boolean, email?: string)`. Beim
+  Ausschalten fällt die Adresse weg (das war schon so und ist gewollt). Beim
+  Einschalten wird sie normalisiert übernommen, wenn sie mitkommt.
+* `app/(app)/einstellungen/page.tsx:147-166` — `merkenUmschalten` schaltet den
+  Eintrag sofort, und **nur beim Einschalten** holt es die Adresse asynchron
+  über `auth.getUser()`. Das ist Absicht: die Einstellungsseite wird auch
+  geladen, wenn niemand angemeldet ist, und das Nachpflegen gehört nicht in
+  einen Klick, der sofort.localStorage schreiben soll.
+
+Live geprüft mit zwei vollständigen Zyklen (Anmelden → ein → aus → ein →
+Abmelden): die Adresse kommt nach jedem Einschalten zurück und ist nach dem
+Abmelden weg. `tests/geraet.test.ts` deckt beide Richtungen ab (10 Tests); mit
+dem alten Rumpf schlägt der Test fehl, mit dem neuen nicht.
 
 ### 8. ~~Der öffentliche Endpunkt verrät den Fehlkonfigurationszustand~~ ✅
 
@@ -300,7 +318,7 @@ Neu: zweimal hintereinander reproduziert, zusätzlich der Normalfall ohne
 Abbruch (Set mit 1 Karte, Liste neu geladen). 141 Tests, Lint und Build sauber,
 Responsive-Audit 72 Durchläufe ohne Befund.
 
-### 10. `antwort_verbuchen` ist für `anon` ausführbar
+### 10. ~~`antwort_verbuchen` ist für `anon` ausführbar~~ ✅
 
 `supabase/migrations/014-sets-gelernt-reparieren.sql:73` (gefunden bei Phase 4,
 Teil 3 — beim Prüfen der SQL-Pendants zu `lib/lernlogik.ts`)
@@ -319,20 +337,92 @@ proacl → {postgres=X/postgres, anon=X/postgres, authenticated=X/postgres, …}
 003, 007, 009, 010 und 013 haben jeweils `revoke … from public` /
 `grant … to authenticated` mitgeschrieben; 014 fehlt es.
 
-**Warum das trotzdem kein Loch ist** (live gegengeprüft, nicht nur gelesen):
+**Warum das trotzdem kein Loch war** (live gegengeprüft, nicht nur gelesen):
 Die Funktion ist `security_definer = false` und beginnt mit
 `if v_user is null then raise exception 'Nicht angemeldet.' using errcode =
 '42501'`. Ein Aufruf ohne Sitzung kommt nicht zu den Schreibvorgängen, die RLS
-greift zusätzlich. Ein anonymer Aufruf liefert genau:
+greift zusätzlich. Ein anonymer Aufruf lieferte genau:
 
 ```json
 {"code":"42501","message":"Nicht angemeldet."}
 ```
 
-Es ist damit eine Abweichung von der beabsichtigten Härtung — die Funktion
-lässt sich ohne Sitzung aufrufen, statt sofort abzubrechen — und kein
-Datenleck. **Fix:** dieselben zwei Zeilen wie in 013 an das Ende von 014 (bzw.
-eine neue Migration 015, wenn 014 schon gelaufen ist).
+Es war damit eine Abweichung von der beabsichtigten Härtung und kein
+Datenleck.
+
+#### Beim Reparieren kam der eigentliche Fehler heraus
+
+Migration **015** (`supabase/migrations/015-antwort-verbuchen-rechte.sql`)
+`revoke`t beiden Funktionen — `antwort_verbuchen` **und**
+`antwort_rueckgaengig`, denn beide hatten dieselbe direkte `anon`-Vergabe —
+und `grant`t sie `authenticated`. Live danach:
+
+```
+antwort_verbuchen    anon=false  authenticated=true
+antwort_rueckgaengig anon=false  authenticated=true
+anonym aufgerufen → 42501 permission denied for function antwort_verbuchen
+```
+
+Beim anschließenden Testen des Rückgängig-Pfades antwortete
+`/api/lernen/antwort/rueckgaengig` dauerhaft mit `erledigt: false`. Das ist
+**kein** Rechtefehler — die Funktion lief, sie fand nur keinen Snapshot, weil
+sie nie einen bekam. Ursache: In der Produktionsdatenbank war nie eine
+Migration nach 010 vollständig angekommen. Belegt über die Merkmale jeder
+Migration:
+
+| Migration | Merkmal | live |
+| --- | --- | --- |
+| 008–012 | `push_abonnements`, `antwort_rueckgaengig`, `z_nochmal`, Beispielsatz-Cache | da |
+| 013 | `update xp_events set ziel = 100` | Datenupdate **da**, Funktionsersetzung **nein** (Funktion schrieb `ziel = 20`) |
+| 014 | Tabelle `xp_tag_sets` + Bestandsrückübertragung | **da**, Funktionsersetzung und View **nein** |
+
+Die Anweisungen waren also jeweils bis zur Funktionsdefinition gelaufen und
+dort abgebrochen — die Datei als Ganzes war nie durch. Zwei Konsequenzen, die
+der Plan als „erledigt" führt, waren live nie in Kraft:
+
+* **Rückgängig hat nie funktioniert.** `antwort_verbuchen` schrieb keinen
+  Snapshot in `letzte_antwort`, also hatte `antwort_rueckgaengig` nichts zum
+  Zurücksetzen und meldete jedes Mal „nichts rückgängig".
+* **Tagesziel und `sets_gelernt` waren falsch.** Die Funktion schrieb 20 statt
+  100, und `mein_fortschritt.sets_gelernt` zählte die Sets des Tages über das
+  Ein-Set-pro-Tag-Gedächtnis `xp_events` — wer an einem Tag zwei Sprachen
+  lernte, sah eines weniger.
+
+013 und 014 nachgelaufen. Live gegengeprüft, mit Testkonto:
+
+```
+Antwort „gut"        → xpGesamt 15, xpGespeichert true
+Rückgängig           → erledigt true, xpGesamt 10
+zweites Set heute    → setsGelernt 2   (vorher wäre 1 gewesen)
+karten_fortschritt   → 1 Zeile mit Snapshot (die zurückgenommene Zeile
+                       wurde gelöscht, wie vorhanden_vorher=false vorsieht)
+xp_tag_sets          → 2 Zeilen, eine je (Tag, Set)
+```
+
+Damit stimmt die Datenbank mit dem überein, was `LEXIO-PLAN.md` seit Phase 3
+behauptet.
+
+#### Nebenbei gefunden: der Migrationsrunner ist nicht idempotent
+
+`supabase/migrations/014-…sql` hat die Bestandsrückübertragung ohne
+`on conflict` — ein zweiter Lauf scheitert am Primärschlüssel. Da das Projekt
+keine Tabelle mit angewandten Migrationen hat und jede Datei von Hand läuft,
+wurde `on conflict (user_id, datum, set_id) do nothing` ergänzt. `do nothing`
+statt `do update`, weil Zeilen aus echten Antworten nicht vom alten
+Tageswert überschrieben werden dürfen.
+
+Und: `scripts/db-migrieren.mjs` hat eine fest verdrahtete Standardliste
+(`STAND`, 003–007) und liest nicht das Verzeichnis, auch wenn die
+Dokumentation das nahelegt. Deshalb wurde 013/014 ausdrücklich übergeben.
+
+#### Und ein Test, der auf die falsche Datei schaute
+
+`tests/sql-paritaet.test.ts` nimmt die **letzte Datei, die den Funktionsnamen
+enthält** — seit 015 war das die Rechte-Migration, und die Tests prüften
+`revoke`-Zeilen gegen eine Bewertungsliste. Der Helper sucht jetzt echte
+`create [or replace] function`-Blöcke und liefert den Rumpf. Gegenprobe: mit
+absichtlich kaputter Bewertungsliste (`'einfach'` → `'leicht'`) schlägt der
+Test wieder fehl, mit der richtigen Liste nicht.
 
 ### 11. Toter Code
 
@@ -379,18 +469,30 @@ Damit man nicht nochmal suchen muss:
 
 ## Was als Nächstes sinnvoll wäre
 
-Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 4, 5, 8 und 9.
-Offen sind die drei KLEIN-Punkte 6, 7 und 10 (dazu 11 toter Code) und diese
-drei:
+Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 4, 5, 7, 8, 9 und
+10. Offen sind noch Punkt 6 (zwei stille Typ-Casts) und Punkt 11 (toter Code)
+und diese vier:
 
-1. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** Die Stufenlogik
-   existiert in TypeScript *und* ihre Wirkung in SQL. Das ist genau die Art
-   von Doppelung, die beim Ändern einer Seite vergessen wird — und der Grund,
-   warum 003 sich so ausführlich zu diesem Punkt äußert. Ohne Tests ist das
-   nur eine höfliche Bitte an den nächsten Entwickler.
-2. **Versions-Tracking für die Migrationen.** *Erledigt (Phase 4):* die
-   Dateien liegen jetzt in `supabase/migrations/`, `scripts/db-migrieren.mjs`
-   liest von dort und führt sie über die Management-API aus.
-3. **`003b` enthält den Platzhalter `00000000-…`.** Die Datei wirft in diesem
+1. **Prüfen, welche Migrationen wirklich in der Datenbank stehen.** Erledigt
+   ist die *eine* Stichprobe aus Punkt 10 — und die hat gezeigt, dass 013 und
+   014 in Produktion nie fertig angekommen sind, obwohl der Plan sie als
+   abgehakt führt. Es gibt keine Tabelle mit angewandten Migrationen, also
+   ist „läuft" nur am Merkmal erkennbar. Ein `npm run db:status`, das alle
+   Migrationen nacheinander prüft, wäre die Abhilfe.
+2. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** *Erledigt (Phase 4):*
+   `tests/sql-paritaet.test.ts` vergleicht Bewertungsliste und Zähler der
+   jeweils letzten Funktionsdefinition mit den TypeScript-Konstanten. Genau
+   der Test hat beim Reparieren von Punkt 10 zuerst gegen die falsche Datei
+   geschaut — die Sache existiert also, sie muss nur auf die richtige Quelle
+   zeigen.
+3. **Versions-Tracking für die Migrationen.** *Teilweise erledigt (Phase 4):*
+   die Dateien liegen in `supabase/migrations/` und werden über die
+   Management-API ausgeführt. **Offen:** `scripts/db-migrieren.mjs` liest
+   weiterhin nicht das Verzeichnis, sondern eine fest verdrahtete Liste
+   (`STAND`, 003–007); jede Datei über 007 muss von Hand übergeben werden. Und
+   014 war nicht wiederholbar, bis ein `on conflict` dazukam. Beides gehört in
+   dieselbe Schale: eine Migration, die man nicht blind zweimal laufen lassen
+   kann, lädt zum Überspringen ein. Genau so ist es gekommen.
+4. **`003b` enthält den Platzhalter `00000000-…`.** Die Datei wirft in diesem
    Zustand absichtlich, aber wer sie später erneut ausführt, ohne die UUID
    einzutragen, hat eine Überraschung.

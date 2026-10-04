@@ -1839,3 +1839,82 @@ abgesichert; nur die Zahl war erfunden.
 **Noch offen:** 6, 7, 10 und 11. Punkt 10 braucht eine neue Migration, Punkt 7
 eine Entscheidung darüber, ob die E-Mail beim Einschalten wieder mitgespeichert
 werden soll — das ist eine Produktfrage und keine reine Codefrage.
+
+## Nachtrag vom 2026-10-04 — die KLEIN-Punkte 7 und 10, und ein Live-Fehler, den niemand erwartet hat
+
+**Punkt 7 — „Angemeldet bleiben" löschte die Adresse.** Der Schalter in den
+Einstellungen schrieb den Eintrag neu, ohne die alte E-Mail mitzunehmen. Die
+Ursache war nicht der Storage, sondern eine Absicht, die auseinandergefallen
+war: Der Server wollte die E-Mail nicht aus dem localStorage des Clients
+nehmen (sie ist ein Nutzergeheimnis), der Client wusste aber nichts davon, dass
+er sie beim Einschalten nachpflegen muss.
+
+> **Erledigt in zwei Teilen.** `setzeMerken(merken, email?)` nimmt die Adresse
+> beim Einschalten entgegen und legt sie normalisiert ab; die Einstellungsseite
+> holt sie genau dann asynchron über `auth.getUser()`, wenn der Schalter von
+> nein auf ja geht. Ausgeschaltet wird die Adresse weiterhin gelöscht, das war
+> nie der Fehler. `tests/geraet.test.ts` (10 Tests) prüft beide Richtungen und
+> schlägt mit dem alten Rumpf fehl. Live: zwei vollständige Zyklen
+> Anmelden → ein → aus → ein → Abmelden, die Adresse kommt jedes Mal wieder und
+> verschwindet beim Abmelden.
+
+**Punkt 10 — `antwort_verbuchen` war für `anon` aufrufbar.** Die Funktion hat
+in Produktion allerdings mit `Nicht angemeldet.` abgebrochen, also war es eine
+Abweichung von der beabsichtigten Härtung und kein Datenleck. Migration 015
+nimmt `anon` jetzt die Rechte, und gleich bei `antwort_rueckgaengig` mit — beide
+hatten dieselbe direkte Vergabe.
+
+> **Erledigt und gegengeprüft.** Anonymer Aufruf → `permission denied`,
+> authentifizierter Aufruf über `/api/lernen/antwort` → `xpGespeichert: true`.
+
+#### Und hier war der eigentliche Fund
+
+Beim Testen des Rückgängig-Pfades antwortete die Route dauerhaft
+`erledigt: false`. Kein Rechtefehler — die Funktion lief und fand keinen
+Snapshot, weil **nie einer geschrieben wurde**. In der Produktionsdatenbank
+war keine Migration nach 010 vollständig angekommen:
+
+| Migration | Merkmal | live |
+| --- | --- | --- |
+| 008–012 | Tabellen, `z_*`-Spalten, Beispielsatz-Cache | vollständig |
+| 013 | `ziel = 100` | Datenupdate ja, Funktionsersetzung **nein** |
+| 014 | `xp_tag_sets` + Rückübertragung | Tabelle ja, Funktion und View **nein** |
+
+Die Ausführung brach jeweils bei der Funktionsdefinition ab. Damit waren drei
+Punkte, die dieser Plan seit Phase 3 als erledigt führt, live nicht in Kraft:
+
+* **Rückgängig (1.7) hat nie funktioniert.** Ohne Snapshot gab es nichts
+  zurückzunehmen.
+* **Das Tagesziel war 20 statt 100**, weil die Live-Funktion den alten Wert
+  schrieb.
+* **`sets_gelernt` zählte falsch** — es zählte über das Ein-Set-pro-Tag-
+  Gedächtnis `xp_events`, also ein Set weniger an jedem Tag mit zwei Sprachen.
+
+013 und 014 nachgelaufen (014 vorher `on conflict do nothing` beigebracht, sonst
+scheitert der zweite Lauf am Primärschlüssel — das Projekt hat keine
+Tabelle angewandter Migrationen). Live gegengeprüft:
+
+```
+Antwort „gut"      → xpGesamt 15, xpGespeichert true
+Rückgängig         → erledigt true, xpGesamt 10
+zweites Set heute  → setsGelernt 2   (vorher 1)
+Snapshot-Zeile     → vorhanden, zurückgenommene Zeile gelöscht
+xp_tag_sets        → 2 Zeilen, eine je (Tag, Set)
+```
+
+**Merksatz für die Abnahme:** „Migration gelaufen" ist in diesem Projekt eine
+Annahme, kein Fakt. Es gibt keine Tabelle angewandter Migrationen, und eine
+Datei, die abbricht, lässt die vorherigen Anweisungen stehen — sieht aus wie
+erfolgreich. `scripts/db-migrieren.mjs` meldet das auch als `ok`, weil er nur
+die *letzte* Anweisung sieht. Zwei Nebenbefunde aus derselben Runde:
+
+* `scripts/db-migrieren.mjs` hat eine fest verdrahtete Standardliste (003–007)
+  und liest nicht das Verzeichnis, auch wenn die Doku das nahelegt. 013/014
+  mussten ausdrücklich übergeben werden.
+* `tests/sql-paritaet.test.ts` nahm die letzte Datei, die den Funktionsnamen
+  **erwähnt** — seit 015 also die Rechte-Migration, und die Tests prüften
+  `revoke`-Zeilen gegen eine Bewertungsliste. Der Helper sucht jetzt echte
+  `create [or replace] function`-Blöcke. Gegenprobe: mit kaputter
+  Bewertungsliste schlägt der Test wieder fehl.
+
+**Noch offen:** 6 (zwei stille Typ-Casts) und 11 (toter Code).
