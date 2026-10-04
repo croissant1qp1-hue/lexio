@@ -109,28 +109,20 @@ export async function POST(request: Request) {
        * Der Insert schreibt seit 0.1 auch `sprache_code`. Fehlt die Spalte
        * (005 nicht gelaufen), kommt 42703 mit dem Spaltennamen im Text – und
        * dann muss die Meldung 005 nennen, nicht 003.
+       *
+       * `migrationsMeldung` entscheidet das an EINER Stelle fuer die ganze
+       * App: 42501 (RLS), 42703 und PGRST204 (Spalte fehlt), PGRST205 (Tabelle
+       * fehlt). Auch 42501 ist damit schon behandelt – der Kommentar
+       * behauptete hier etwas anderes und rief eine Meldung auf, die nie
+       * erreicht wurde.
+       *
+       * Der 42501-Zweig ist deshalb weg. Nicht weil RLS nicht mehr zuschlagen
+       * koennte, sondern weil die Antwort dann zweimal an zwei Orten
+       * gepflegt wuerde und die Orte auseinanderlaufen.
        */
       const migration = migrationsMeldung(error);
       if (migration) {
         return NextResponse.json({ error: migration }, { status: 503 });
-      }
-
-      /*
-       * 42501 = insufficient_privilege, also RLS hat blockiert. Kommt vor,
-       * wenn 003 nicht gelaufen ist, denn dann kennt die Tabelle user_id
-       * noch gar nicht. Die Meldung sagt das so, statt "Internal Server
-       * Error" – der Nutzer kann mit "Serverfehler" nichts anfangen, mit dem
-       * Namen der Migration schon.
-       */
-      if (error.code === "42501") {
-        return NextResponse.json(
-          {
-            error:
-              "Set konnte nicht angelegt werden. Bitte die Migration " +
-              "supabase/003-auth-und-user-daten.sql ausführen.",
-          },
-          { status: 403 },
-        );
       }
 
       // 23505 = unique verletzt. Kann ein Wettlauf zweier Tabs sein; dann
