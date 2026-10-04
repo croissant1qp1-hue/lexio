@@ -127,8 +127,8 @@ const gelb = (t) => `\x1b[33m${t}\x1b[0m`;
 
 /*
  * `merkmal` ist der Satz, der erklaert, warum dieses Merkmal fuer die Datei
- * spricht. `moeglich: true` heisst: die Datei darf ungelaufen sein (003b wirft
- * absichtlich, bis die UUID eingesetzt ist).
+ * spricht. `optional: true` heisst: die Datei darf ungelaufen sein. Bei 003b
+ * ist das nicht nur erlaubt, sondern richtig: die Datei tut nichts mehr.
  */
 const PRUEFUNGEN = [
   {
@@ -151,8 +151,8 @@ const PRUEFUNGEN = [
   {
     datei: "003b-demofortschritt-uebernehmen.sql",
     merkmal:
-      "darf ungelaufen bleiben: die Datei enthält absichtlich den Platzhalter " +
-      "00000000-… und wirft, bis eine echte UUID eingesetzt ist",
+      "darf ungelaufen bleiben, und ist es auch: die Datei tut nichts mehr, " +
+      "sie meldet nur, warum (Stand 2026-10-04)",
     optional: true,
     sql: `select true as da`,
   },
@@ -382,4 +382,4 @@ if (fehlt.length > 0) {
 }
 
 console.log(ok(`Alle ${PRUEFUNGEN.filter((p) => !p.optional).length} geprüften Migrationen stehen in der Datenbank.`));
-console.log(gelb("003b darf ungelaufen bleiben – siehe Liste oben.\n"));
+console.log(gelb("003b tut nichts mehr und darf ungelaufen bleiben – siehe Liste oben.\n"));

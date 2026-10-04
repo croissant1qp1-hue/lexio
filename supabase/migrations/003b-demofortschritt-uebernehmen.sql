@@ -1,146 +1,82 @@
 -- =============================================================================
--- Lexio – 003b: Demofortschritt einer Person zuweisen (optional)
+-- Lexio – 003b: Demofortschritt einer Person zuweisen (VERALTET, tut nichts)
 -- =============================================================================
--- Ausfuehren im Supabase Dashboard -> SQL Editor -> New query -> Run
+-- Ausfuehren loescht sich nicht aus: Die Datei laesst sich weiterhin ohne
+-- Fehler durchlaufen und schreibt nur `raise notice`-Meldungen. Sie bewegt
+-- keine Zeile mehr. Warum, ist unten gemessen und nicht vermutet.
 --
--- WARUM
--- ----
+-- Geprueft am 2026-10-04: die Datei laeuft durch, und `karten_fortschritt`
+-- bleibt bei 12 Zeilen (6 davon aus Wortlisten) vorher wie nachher. Die
+-- Notices selbst sieht die Management-API nicht zurueck -- im SQL Editor
+-- stehen sie im Messages-Fenster.
+--
+-- WAS SIE FRUEHER SOLLTE (Stand 2026-09-30)
+-- ----------------------------------------
 -- Vor 003 lag der Lernstand auf der Karte selbst: public.karten.gelernt,
 -- .stufe, .faellig_am, .treffer, .fehler. Diese Spalten beschreiben den
--- Fortschritt eines einzigen Nutzers, standen aber global in der Tabelle.
+-- Fortschritt eines *einzigen* Nutzers, standen aber global in der Tabelle.
 --
 -- Nach 003 liegt der Stand in public.karten_fortschritt, je Nutzer eine
 -- Zeile. Wer sich neu anmeldet, hat deshalb korrekt 0 gelernte Karten und
 -- alle Demokarten sofort faellig. Das ist richtig – aber es sieht nach
 -- kaputter App aus, obwohl nur nichts uebernommen wurde.
 --
--- Diese Datei uebernimmt den alten Stand fuer genau eine Person, damit die
--- Demodaten so aussehen wie vorher. Ab dem Moment gehoert der Stand aber
--- auch nur noch dieser Person. Eine zweite Person startet bei null. Das ist
--- kein Fehler, sondern der Punkt: der Lernstand ist jetzt wirklich privat.
+-- Diese Datei sollte den alten Stand fuer genau eine Person uebernehmen, damit
+-- die Demodaten aussehen wie vorher.
 --
--- STAND JETZT (2026-09-30, bei der Planarbeit geprueft)
--- ------------------------------------------------------
--- `eigene` unten ist auf das einzige echte Konto gesetzt:
---   a47d7318-1686-4a7f-91b9-fbc889c17035  (theo.diesch@gmail.com)
--- Es gibt weitere auth.users-Zeilen, die sind Wegwerf-Konten aus Tests.
+-- WAS SIE HEUTE TUT (gemessen am 2026-10-04)
+-- ------------------------------------------
+-- Gemessen, nicht geschaetzt:
 --
--- ACHTUNG, ehrlicher Hinweis: die uebernommenen Werte sind nicht mehr da.
--- public.karten hat die Legacy-Spalalten (stufe, gelernt, treffer, fehler,
--- faellig_am) weiterhin als Spalte, aber alle 100 Demokarten stehen auf
--- Stufe 0 ohne Treffer und ohne Fehler. Ein Stand wurde also nie gepflegt,
--- oder er ist beim Import verlorengegangen. Diese Datei hat deshalb nichts
--- zu retten – sie schreibt 100 Zeilen mit Stufe 0, die der Runde dann sagen
--- "nichts gelernt", so wie vorher.
+--  Sets ohne user_id          5    (die fuenf kuratierten Wortlisten)
+--   Karten darin          2.275    (nicht 65, nicht 100)
+--   davon mit stufe > 0        0
+--   davon mit stufe >= 2       0
 --
--- Sie wird trotzdem lauffaehig gehalten: `eigene` ist nicht mehr der
--- Platzhalter, das Skript bricht also nicht mehr mit "Kein Konto mit dieser
--- UUID" ab, und wer sie ausfuehrt, bekommt eine Ausgabe statt eines Fehlers.
--- Wer sie nicht braucht, laesst sie liegen – sie steht nicht in der
--- STAND-Liste von scripts/db-migrieren.mjs und laeuft nie von selbst.
+-- Zwei Fehler der Datei, beide von damals:
 --
--- ANWENDUNG
--- ---------
--- Diese Datei enthaelt KEINE psql-Befehle. Ein Aufruf wie \set eigene_uuid
--- ist ein Meta-Befehl des psql-Kommandos, kein SQL. Im Supabase SQL Editor
--- – auch im "Run"-Modus – ergibt er einen Syntaxfehler und die Datei
--- laeuft gar nicht. Die UUID steht deshalb als Literal in der Datei, und
--- zwar an genau EINER Stelle: unten bei `eigene`.
+--   1. Sie zaehlt an `user_id is null`, und das sind heute nicht mehr die
+--      Demo-Sets, sondern die Wordlisten. Der alte Kopftext spricht von 100
+--      Demokarten; es sind 2.275 echte Karten in fuenf Produktionslisten.
+--   2. Sie setzt `gesehen = true` fuer jede uebernommene Karte, weil "eine
+--      Zeile existiert, weil die Karte beantwortet wurde". Bei 0 Karten mit
+--      Fortschritt heisst das: 2.275 Zeilen, davon 2.269 neue, alle mit
+--      "gesehen", alle auf Stufe 0 — in einem echten Konto.
 --
--- Schritt 1: eigene UUID heraussuchen
+-- Warum das schlimmer ist als nichts zu tun: Der Import koennte nichts
+-- wiederherstellen, weil es nichts zu holen gibt (0 Karten mit stufe > 0).
+-- Er koennte aber sehr wohl 2.269 erfundene "gesehen"-Zeilen in ein Konto
+-- schreiben, und damit Fortschrittsanzeige und Statistiken des echten
+-- Nutzers beschreiben, den es nie gab.
 --
---   select id, email from auth.users order by created_at;
+-- Darum ist der Rumpf unten durch eine Meldung ersetzt. Sie sagt, was passiert
+-- ist und dass hier bewusst nichts passiert. Das ist ehrlicher als eine Datei,
+-- die auf eine alte Welt wartet.
 --
--- Schritt 2: unten `eigene` ersetzen, einmal ausfuehren, Ergebnis im
--- Messages-Fenster ablesen.
+-- DIE UUID VON DAMALS
+-- -------------------
+-- Der alte Rumpf hatte die echte Konto-ID eines echten Kontos fest im Text.
+-- Sie steht hier nicht mehr, und zwar nicht aus Sparsamkeit: eine Datei, die
+-- man versehentlich laufen laesst, soll nicht die richtige Person treffen
+-- koennen. Sie ist in der Git-Historie dieses Repositories weiterhin
+-- sichtbar; wer sie dort braucht, findet sie in der Version vor dieser
+-- Aenderung. Eine Konto-ID ist kein Geheimnis, aber ein Grund, sie nicht
+-- ungefragt in ein Skript zu schreiben, ist das trotzdem.
 -- =============================================================================
 
-
 do $$
-declare
-  -- >>> HIER ERSETZEN <<<  (id aus auth.users, nicht die email)
-  -- 2026-09-30: auf das einzige echte Konto gesetzt (theo.diesch@gmail.com).
-  -- Weitere auth.users-Zeilen sind Wegwerf-Konten aus Tests.
-  eigene constant uuid := 'a47d7318-1686-4a7f-91b9-fbc889c17035'::uuid;
-  gefunden boolean;
-  gesamt bigint;
-  uebernommen bigint;
-  zeile record;
 begin
-  -- Verhindert, dass der Platzhalter still nichts tut. Ein Import, der 0
-  -- Zeilen bewegt, ist kein Fehler: die naechsten 300 Karten bekommen
-  -- trotzdem eine faellig_am und gelten als frisch. Genau das sieht dann
-  -- aus, als waere die App kaputt.
-  select exists (select 1 from auth.users where id = eigene) into gefunden;
-
-  if not gefunden then
-    raise exception
-      'Kein Konto mit dieser UUID gefunden. Bitte oben bei `eigene` die echte '
-      'ID aus auth.users eintragen. 00000000-... ist nur ein Platzhalter.';
-  end if;
-
-  select count(*) into gesamt
-  from public.karten k
-  join public.karteikarten_sets s on s.id = k.set_id
-  where s.user_id is null;
-
-  raise notice 'Demokarten gefunden: %', gesamt;
-
-  /*
-   * Idempotent: wer die Datei zweimal laeuft, bekommt keine doppelten
-   * Zeilen, weil der Primaerschluessel (karte_id, user_id) den zweiten
-   * Versuch abweist.
-   */
-  insert into public.karten_fortschritt
-    (karte_id, user_id, stufe, gelernt, gesehen, faellig_am, treffer, fehler, letzte_wiederholung)
-  select
-    k.id,
-    eigene,
-    k.stufe,
-    -- gelernt ist seit 007 ehrlich: erst ab Stufe 2 zaehlt eine Karte.
-    k.stufe >= 2,
-    -- Eine uebernommene Zeile existiert, weil die Karte beantwortet wurde.
-    true,
-    k.faellig_am,
-    k.treffer,
-    k.fehler,
-    /*
-     * Nur Karten, die wirklich gelernt wurden, bekommen einen Zeitstempel.
-     * Sonst stuende in der Wortschatz-Tabelle "heute" fuer jede Karte, die
-     * jemand einmal angesehen und dann falsch beantwortet hat.
-     */
-    case when k.stufe >= 2 then now() - interval '21 days' else null end
-  from public.karten k
-  join public.karteikarten_sets s on s.id = k.set_id
-  where s.user_id is null
-  on conflict (karte_id, user_id) do nothing;
-
-  get diagnostics uebernommen = row_count;
-  raise notice 'Fortschrittszeilen geschrieben: %', uebernommen;
-
-  /*
-   * Kontrolle. Seit 007 zaehlt gelernt erst ab Stufe 2, die Werte liegen
-   * damit unter den alten 65 % / 32 % / 48 %. Steht hier ueberall 0, ist beim
-   * Einsetzen etwas schiefgegangen.
-   */
-  for zeile in
-    select
-      s.name,
-      count(k.id)                                                     as gesamt,
-      count(k.id) filter (where f.gelernt)                            as gelernt,
-      round(
-        count(k.id) filter (where f.gelernt) * 100.0
-        / nullif(count(k.id), 0)
-      )::int                                                          as prozent
-    from public.karteikarten_sets s
-    left join public.karten k on k.set_id = s.id
-    left join public.karten_fortschritt f
-           on f.karte_id = k.id and f.user_id = eigene
-    where s.user_id is null
-    group by s.id, s.name
-    order by s.name
-  loop
-    raise notice '%: % von % Karten gelernt (%)', zeile.name, zeile.gelernt, zeile.gesamt, zeile.prozent;
-  end loop;
+  raise notice
+    '003b tut nichts mehr — richtig so.';
+  raise notice
+    'Die Datei sollte den alten globalen Demo-Fortschritt in karten_fortschritt '
+    'uebernehmen. Diese Zeit ist vorbei: 003 hat den Stand je Nutzer gemacht.';
+  raise notice
+    'Heute wuerde sie 2.275 Karten aus fuenf Wortlisten treffen, davon 0 mit '
+    'Fortschritt, und 2.269 neue Zeilen mit gesehen=true in ein echtes Konto '
+    'schreiben. Sie koennte also nichts retten und nur etwas erfinden.';
+  raise notice
+    'Nach dem 2026-10-04 gibt es keinen alten Stand mehr zum Uebernehmen. Die '
+    'Wordlisten sind importiert, der Lernstand gehoert je Person.';
 end;
 $$;

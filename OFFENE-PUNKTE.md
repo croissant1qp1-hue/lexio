@@ -665,6 +665,12 @@ an bestehendem Code ist, sondern Absicherung:
    014 war nicht wiederholbar, bis ein `on conflict` dazukam. Beides gehört in
    dieselbe Schale: eine Migration, die man nicht blind zweimal laufen lassen
    kann, lädt zum Überspringen ein. Genau so ist es gekommen.
-4. **`003b` enthält den Platzhalter `00000000-…`.** Die Datei wirft in diesem
-   Zustand absichtlich, aber wer sie später erneut ausführt, ohne die UUID
-   einzutragen, hat eine Überraschung.
+4. **`003b` — erledigt, und zwar durch Unschädlichmachen.** *Stand 2026-10-04:*
+   Die Datei enthielt nicht mehr den Platzhalter, sondern die echte Konto-ID
+   eines echten Kontos. Ausgeführt hätte sie **5 Wortlisten mit 2.275 Karten**
+   getroffen, davon **0 mit Fortschritt** — und für jede Karte `gesehen = true`
+   gesetzt, also 2.269 neue Zeilen in einem Konto, das sie nicht kennt. Nichts
+   gerettet, etwas erfunden. Der Rumpf ist jetzt eine `raise notice`, die genau
+   das erklärt; ausgeführt und gegengeprüft (läuft fehlerfrei, `karten_fortschritt`
+   bleibt bei 12 Zeilen, davon 6 aus Wortlisten). Die Konto-ID steht nicht mehr im
+   Text.

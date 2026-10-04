@@ -28,8 +28,9 @@ Streak, Statistiken.
 `eigenes_set` selbst an und setzt die Policies, die es braucht, mit eigenen.
 
 Wer 003 erneut ausführen will: mehrfach ausführbar, `if not exists` überall.
-Danach optional `supabase/004-leistung.sql` (nur Indizes) und
-`supabase/003b-demofortschritt-uebernehmen.sql` (Fortschritt übernehmen).
+Danach optional `supabase/migrations/004-leistung.sql` (nur Indizes).
+`003b-demofortschritt-uebernehmen.sql` tut nichts mehr (Stand 2026-10-04) und wird
+nicht ausgeführt.
 
 Prüfen:
 
@@ -48,11 +49,11 @@ neu erzeugen.
 
 ```bash
 PGPASSWORD="…" psql "host=db.<ref>.supabase.co user=postgres dbname=postgres sslmode=require" \
-  -f supabase/003-auth-und-user-daten.sql \
-  -f supabase/004-leistung.sql
+  -f supabase/migrations/003-auth-und-user-daten.sql \
+  -f supabase/migrations/004-leistung.sql
 ```
 
-003 ist mehrfach ausführbar (`if not exists` überall), 003b und 004 ebenso.
+003 ist mehrfach ausführbar (`if not exists` überall), 004 ebenso.
 
 ---
 

@@ -34,10 +34,14 @@ xclip -selection clipboard -i supabase/migrations/004-leistung.sql
 
 Dann Dashboard → **SQL Editor** → `Strg+V` → **Run**.
 
-### 3. Optional: Migration 003b (Fortschritt übernehmen)
+### 3. Migration 003b — nicht ausführen, sie tut nichts mehr
 
-Übernimmt Lernfortschritt aus der Demo auf ein echtes Konto. Setzt eine konkrete
-User-UUID voraus, deshalb nur wenn du wirklich ein Altkonto übernehmen willst.
+Der alte Rumpf sollte Lernfortschritt aus der Demo auf ein echtes Konto
+übernehmen. Dafür gibt es keine Daten mehr. Gemessen am 2026-10-04: `003b` würde
+**2.275 Karten aus fünf Wortlisten** treffen, davon **0** mit Fortschritt, und
+2.269 erfundene „gesehen"-Zeilen in ein echtes Konto schreiben. Es rettet nichts
+und erfindet etwas — deshalb ist der Rumpf seit 2026-10-04 eine Meldung, die
+genau das sagt. **Nicht ausführen.**
 
 ### 4. Optional: Anmeldeanbieter einschalten
 

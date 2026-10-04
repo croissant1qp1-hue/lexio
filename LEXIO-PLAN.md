@@ -1005,17 +1005,26 @@ von selbst weg.
 >
 > **Befund: es gibt nichts zu übernehmen.** `public.karten` hat die Legacy-Spalten
 > (`stufe`, `gelernt`, `treffer`, `fehler`, `faellig_am`) weiterhin als Spalte, aber
-> alle 100 Demokarten stehen auf Stufe 0 ohne Treffer und ohne Fehler. Der alte
-> Stand wurde nie gepflegt oder ist beim Import verlorengegangen. 003b würde 100
-> Zeilen mit Stufe 0 schreiben — genau das, was vorher schon da war.
+> **keine** Karte steht über Stufe 0. Der alte Stand wurde nie gepflegt oder ist beim
+> Import verlorengegangen.
 >
-> Geprüft, nicht behauptet: mit eingetragener UUID läuft die Datei in `BEGIN/ROLLBACK`
-> durch, mit dem alten Platzhalter bricht sie mit der erwarteten Meldung ab.
-> Zeilenzahl in der Datenbank danach unverändert (6 gesamt, 5 davon deine).
+> **Nachtrag 2026-10-04, nachgemessen — die damalige Zahlenangabe war zu klein.** Der
+> Befund hieß „100 Demokarten, 003b würde 100 Zeilen mit Stufe 0 schreiben". Was
+> `003b` heute träfe, gemessen statt geschätzt: **5 Sets, 2.275 Karten, davon 0 mit
+> `stufe > 0`.** Das `s.user_id is null` trifft heute die fünf Wortlisten, nicht die
+> inzwischen ersetzten Demo-Sets. Und die Datei hätte nicht 100 neutrale Zeilen
+> geschrieben, sondern für **jede** Karte `gesehen = true` gesetzt — 2.269 neue
+> Zeilen in einem echten Konto. „Nichts zu retten, aber etwas zu erfinden" ist
+> schlechter, als der ursprüngliche Befund nahelegte.
+>
+> **Deshalb ist `003b` jetzt unschädlich.** Der Rumpf ist eine `raise notice`, die
+> sagt, was passiert ist und dass hier bewusst nichts passiert. Geprüft, nicht
+> behauptet: die Datei läuft fehlerfrei durch, `karten_fortschritt` bleibt bei 12
+> Zeilen (6 davon aus Wortlisten) vorher wie nachher. Die echte Konto-ID steht nicht
+> mehr in der Datei.
 >
 > **Teil 4 ist damit inhaltlich erledigt.** `003b` steht weiterhin nicht in der
-> `STAND`-Liste von `scripts/db-migrieren.mjs` und läuft nie von selbst — richtig so
-> für eine Einmal-Aktion.
+> `STAND`-Liste von `scripts/db-migrieren.mjs` und läuft nie von selbst.
 >
 > **SEO gehört zu Phase 4 (Nutzerauftrag). Teil 1 (Basistechnik) erledigt:**
 >
