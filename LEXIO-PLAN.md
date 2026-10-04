@@ -1816,5 +1816,26 @@ den Punkt trotzdem noch als offen. Am laufenden Produktionsbuild nachgemessen:
 `GET /api/gesundheit` meldet nur noch `oauth` als offenen Dashboard-Schalter,
 `service-key` kommt nicht mehr vor.
 
-**Noch offen:** 4, 5, 6, 7, 10, 11 — Punkte 4 und 5 liegen in denselben zwei
-Routen und werden zusammen angefasst, Punkt 10 braucht eine neue Migration.
+**Punkt 5 — toter Zweig in `/api/sets`.** Der eigene 42501-Zweig mit dem
+Kommentar "kommt vor, wenn 003 nicht gelaufen ist" konnte nie laufen:
+`migrationsMeldung` zwei Zeilen darüber beantwortet 42501 bereits. Weg damit.
+
+> **Erledigt.** Die Zuordnung bleibt an einer Stelle, `lib/db-fehler.ts`.
+> `tests/db-fehler.test.ts` nagelt sie fest: 42703/PGRST204 mit `user_id` → 003,
+> mit `sprache_code` → 005+006, PGRST205 → 005 bzw. 003, 42501 → 003, alles ohne
+> Migrationsbezug → `null`. Der Test ist das Gegenstück zur Entfernung: er
+> verhindert, dass eine zweite Meinung wieder eingebaut wird. Suite 149/149.
+
+**Punkt 4 — erfundene Null nach dem Löschen.** Ging die Zählung der Karten ins
+Timeout, meldete die Route `karten: 0`. Die Löschung selbst war korrekt
+abgesichert; nur die Zahl war erfunden.
+
+> **Erledigt.** `null` statt `0`, wenn das Zählen scheitert. Bewusst kein
+> Fehler der ganzen Route: Die Löschung passiert danach — sie zu verweigern,
+> weil eine Nebenabfrage ausgefallen ist, ließe das Set stehen und meldete
+> Erfolg. Live am Produktionsbuild geprüft: Set mit 3 Karten anlegen und
+> löschen → `karten: 3`.
+
+**Noch offen:** 6, 7, 10 und 11. Punkt 10 braucht eine neue Migration, Punkt 7
+eine Entscheidung darüber, ob die E-Mail beim Einschalten wieder mitgespeichert
+werden soll — das ist eine Produktfrage und keine reine Codefrage.

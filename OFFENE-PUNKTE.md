@@ -15,7 +15,7 @@ der Rest ist Haltung und Aufräumarbeit.
 
 ```
 WICHTIG   3   alle drei behoben
-KLEIN     7   davon 2 behoben (8 und 9), 5 offen
+KLEIN     7   davon 4 behoben (4, 5, 8, 9), 3 offen
 ```
 
 Dazu gekommen: eine **neue Profilseite** `/profil`. Die Profilkarte in der
@@ -192,20 +192,39 @@ und meldet Nicht-Objekte als `Wortpaar fehlt` → 400 statt 500.
 
 ## KLEIN
 
-### 4. Erfolgsmeldung nach dem Löschen kann falsch zählen
+### 4. ~~Erfolgsmeldung nach dem Löschen kann falsch zählen~~ ✅
 
-`app/api/sets/[slug]/route.ts:67` — `error` wird bei der Zählung nicht
-geprüft. Bei Timeout meldet die Route Erfolg mit `karten: 0`. Die Löschung
-selbst ist korrekt abgesichert; nur die Zahl in der Antwort ist unzuverlässig.
+`app/api/sets/[slug]/route.ts` (DELETE) — `error` wurde bei der Zählung nicht
+geprüft. Bei Timeout meldete die Route Erfolg mit `karten: 0`. Die Löschung
+selbst ist korrekt abgesichert; nur die Zahl in der Antwort war unzuverlässig.
 
-### 5. Toter Fehlerzweig in `/api/sets`
+**Erledigt.** `null` statt `0`, wenn das Zählen scheitert. Bewusst **kein**
+Fehler der ganzen Route: Die Löschung passiert danach, und sie zu verweigern,
+weil eine Nebenabfrage ins Timeout gelaufen ist, hieße: Das Set bleibt, und
+der Nutzer glaubt, es sei weg. Das ist die schlimmere Lüge. Eine erfundene
+Null ist ohnehin keine Information, "0 Wörter gelöscht" liest sich wie eine
+Tatsache.
 
-`app/api/sets/route.ts:86-102` — der Kommentar beschreibt `42501`
+Live am Produktionsbuild geprüft, der Normalfall: Set mit 3 Karten anlegen und
+löschen → `{"geloescht":{"slug":"punkt-4-probe","name":"Punkt 4 Probe","karten":3}}`.
+Der Fehlerfall lässt sich live nicht erzwingen; der ist im Code geprüft.
+
+### 5. ~~Toter Fehlerzweig in `/api/sets`~~ ✅
+
+`app/api/sets/route.ts` — der Kommentar beschrieb `42501`
 (insufficient_privilege) als Folge einer fehlenden Migration. Tatsächlich
-kommt ohne 003 ein `42703 column "user_id" does not exist`. Folge: Der Nutzer
-bekommt statt der hilfreichen Meldung einen 500 mit der rohen
-Postgres-Meldung. `app/api/karteikarten/route.ts:71-80` behandelt `42703`
-bereits richtig — dieselbe Prüfung fehlt hier.
+kommt ohne 003 ein `42703 column "user_id" does not exist`.
+
+**Schlimmer als beschrieben: der Zweig war unerreichbar.** `migrationsMeldung`
+steht zwei Zeilen darüber und beantwortet 42501 bereits — mit derselben
+Migration 003, nur als 503 statt 403. Der eigene Zweig konnte nie laufen.
+
+**Erledigt.** Zweig entfernt. Die Zuordnung bleibt an einer Stelle
+(`lib/db-fehler.ts`), damit sie nicht an zwei Orten auseinanderläuft. Damit
+der Befund nicht wiederkehrt, nagelt `tests/db-fehler.test.ts` die Zuordnung
+fest: 42703/PGRST204 mit `user_id` → 003, mit `sprache_code` → 005+006,
+PGRST205 → 005 bzw. 003, 42501 → 003, und alles ohne Migrationsbezug → `null`,
+weil die Route dafür eine bessere Meldung hat. 8 Tests, Gesamtsuite 149.
 
 ### 6. Zwei bewusste, aber stille Typ-Casts
 
@@ -360,8 +379,9 @@ Damit man nicht nochmal suchen muss:
 
 ## Was als Nächstes sinnvoll wäre
 
-Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 8 und 9.
-Offen sind die fünf KLEIN-Punkte und diese drei:
+Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 4, 5, 8 und 9.
+Offen sind die drei KLEIN-Punkte 6, 7 und 10 (dazu 11 toter Code) und diese
+drei:
 
 1. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** Die Stufenlogik
    existiert in TypeScript *und* ihre Wirkung in SQL. Das ist genau die Art
