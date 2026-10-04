@@ -145,6 +145,28 @@ export default function Einstellungen() {
     function merkenUmschalten(neu: boolean) {
         setMerken(neu);
         setzeMerken(neu);
+        /*
+         * Beim Einschalten die Adresse nachholen. "Angemeldet bleiben"
+         * verspricht zweierlei: dass die Sitzung den Browser-Neustart
+         * ueberlebt und dass das Anmeldeformular nicht leer ist. Die erste
+         * Haelfte erledigt `setzeMerken`, die zweite braucht die Adresse –
+         * und die stand vorher nur im localStorage, wo sie nach einem
+         * Aus-Schalten-Ein-Schalten-Kreis niemand mehr nachgetragen hat.
+         *
+         * Bewusst asynchron und absichtlich ohne Fehlermeldung: Der Schalter
+         * ist schon gespeichert, bevor die Adresse da ist. Scheitert der
+         * Aufruf, bleibt der Stand wie vorher – schlechter als vorher, aber
+         * kein Grund, dem Nutzer eine Meldung zu zeigen, die er nicht
+         * verursacht hat.
+         */
+        if (neu) {
+            void createClient()
+                .auth.getUser()
+                .then(({ data }) => {
+                    if (data.user?.email) setzeMerken(true, data.user.email);
+                })
+                .catch(() => undefined);
+        }
         // Wirkt sofort, nicht erst beim naechsten Anmelden: das Cookie
         // bekommt seine Lebensdauer jetzt.
         setzeSessionDauer(neu);

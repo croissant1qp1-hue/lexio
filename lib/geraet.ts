@@ -109,14 +109,36 @@ export function merkeAnmeldung(email: string, merken: boolean): void {
   });
 }
 
-/** Umschalten, ohne den Nutzer abzumelden. */
-export function setzeMerken(merken: boolean): void {
+/**
+ * Umschalten, ohne den Nutzer abzumelden.
+ *
+ * `email` wird nur beim Einschalten gebraucht, und nur, wenn es die gerade
+ * angemeldete Adresse ist. Grund: Der Schalter verspricht zwei Dinge
+ * zugleich – dass die Sitzung den Neustart des Browsers ueberlebt *und* dass
+ * das Anmeldeformular nicht leer ist. Beides steht im Kopf dieser Datei, und
+ * `merkeAnmeldung` liefert beim Anmelden genau beides. Ging der Schalter
+ * einmal aus und wieder an, war die Adresse weg und nichts holte sie
+ * zurueck: "Angemeldet bleiben" tat dann nur noch die Haelfte.
+ *
+ * Das Halten der Adresse bleibt ein aktives Einschalten. Ohne Argument
+ * verhaelt sich die Funktion wie vorher, damit Aufrufer, die nichts
+ * uebergeben, nichts aendern.
+ */
+export function setzeMerken(merken: boolean, email?: string): void {
   const alt = liesStand();
-  schreibe(
-    merken
-      ? { v: 1, merken: true, zuletztAngemeldet: alt.zuletztAngemeldet ?? Date.now() }
-      : { v: 1, merken: false },
-  );
+
+  if (!merken) {
+    schreibe({ v: 1, merken: false });
+    return;
+  }
+
+  const adresse = email?.trim().toLowerCase();
+  schreibe({
+    v: 1,
+    merken: true,
+    zuletztAngemeldet: alt.zuletztAngemeldet ?? Date.now(),
+    ...(adresse ? { email: adresse } : {}),
+  });
 }
 
 /**
