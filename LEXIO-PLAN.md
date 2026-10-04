@@ -1918,3 +1918,47 @@ die *letzte* Anweisung sieht. Zwei Nebenbefunde aus derselben Runde:
   Bewertungsliste schlägt der Test wieder fehl.
 
 **Noch offen:** 6 (zwei stille Typ-Casts) und 11 (toter Code).
+
+## Nachtrag vom 2026-10-04 — Punkt 6: der stille Cast ist weg
+
+`GET /api/lernen` holt die Karten mit ihrem Fortschritt in einer Abfrage und
+liest das Ergebnis mit `as unknown as RohKarte[]` in TypeScript. Der Cast war
+begründet, aber er beschrieb eine Absicht, nicht die Wirklichkeit: der Alias im
+select-String ist ein String, `data` ist `any`, und TypeScript sieht in die
+Lücke nicht hinein.
+
+Der Schaden im schlechtesten Fall ist nicht hässlich, sondern falsch: Fällt der
+Alias oder die Form des Embeds aus, macht `zeile?.stufe ?? 0` aus jeder Karte
+eine neue. Der Nutzer bekommt sein gesamtes Set noch einmal als Anfangsrunde,
+alles auf Stufe 0, nichts gelernt, nichts fällig — und keine Fehlermeldung.
+
+> **Erledigt.** `lib/fortschritts-form.ts` prüft, was ankommt, und unterscheidet
+> zwei Dinge, die bisher verwechselt wurden: „diese Karte hat keine
+> Fortschrittszeile" (Normalfall bei jedem neuen Set) und „das ist nicht das,
+> wonach ich gefragt habe" (Fehler im Code). Geprüft wird `id` und — weil
+> daran der gesamte Lernstand hängt — die numerische `stufe`. Bewusst nicht
+> geprüft werden Nebensachen wie `z_gut`: ein falscher Zähler dort ist eine
+> schlechtere Sortierung, kein falscher Lernstand, und zu strenge Prüfungen
+> erzeugen nur Lärm. Bei Abweichung: HTTP 500 mit Grund und Position, nicht
+> eine Runde, die falsch aussieht.
+>
+> Nebenbefund: Von den zwei in `OFFENE-PUNKTE.md` genannten Fundstellen war nur
+> noch eine übrig. `antwort/route.ts` war inzwischen umgeschrieben. Die Liste im
+> Fund war veraltet — dieselbe Art von Fehler wie in Punkt 10: eine Beschreibung,
+> die nicht mehr nachgeprüft wurde.
+
+Live am Produktionsbuild mit einer eigenen Karte geprüft, und zwar der ganze
+Kreis, den vorher niemand prüfen konnte, weil das Rückgängig nichts tat:
+
+```
+vor der Antwort   stufe 0  gelernt false  faellig 2026-10-04
+nach „gut"        stufe 1  gelernt false  faellig 2026-10-05
+nach Rückgängig   stufe 0  gelernt false  faellig 2026-10-04
+```
+
+`tests/fortschritts-form.test.ts`, 14 Tests. Gegenprobe: nimmt man die
+`stufe`-Prüfung heraus, fallen 4 Tests um — darunter der Fall, um den es geht.
+
+Suite 173/173, tsc sauber, lint 0 Fehler, Build erfolgreich.
+
+**Offen:** nur noch Punkt 11 (toter Code).

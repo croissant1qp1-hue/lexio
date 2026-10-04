@@ -2,10 +2,10 @@
 
 Gefunden am 2026-09-27, nach dem Einbau der sieben Anmeldeanbieter.
 
-**Die drei WICHTIG-Punkte sind inzwischen behoben** (siehe jeweiliger
-Absatz). Von den KLEIN-Punkten ist die Mehrheit erledigt; offen sind nur noch
-Punkt 6 (zwei stille Typ-Casts) und Punkt 11 (toter Code). Jeder Punkt nennt
-die Datei, den Grund und, wenn er erledigt ist, wie.
+**Alle drei WICHTIG-Punkte sind behoben, ebenso alle sieben
+KLEIN-Punkte** (siehe jeweiliger Absatz). Offen ist nur noch Punkt 11, toter
+Code — dort steht nichts, was den Nutzer erreicht, nur Unbenutztes. Jeder Punkt
+nennt die Datei, den Grund und, wenn er erledigt ist, wie.
 
 ## Kurzfassung
 
@@ -15,7 +15,7 @@ der Rest ist Haltung und Aufräumarbeit.
 
 ```
 WICHTIG   3   alle drei behoben
-KLEIN     7   davon 6 behoben (4, 5, 7, 8, 9, 10), 1 offen (6)
+KLEIN     7   alle 7 behoben (4, 5, 6, 7, 8, 9, 10)
           +   11 toter Code, nicht gezählt
 ```
 
@@ -227,7 +227,7 @@ fest: 42703/PGRST204 mit `user_id` → 003, mit `sprache_code` → 005+006,
 PGRST205 → 005 bzw. 003, 42501 → 003, und alles ohne Migrationsbezug → `null`,
 weil die Route dafür eine bessere Meldung hat. 8 Tests, Gesamtsuite 149.
 
-### 6. Zwei bewusste, aber stille Typ-Casts
+### 6. ~~Zwei bewusste, aber stille Typ-Casts~~ ✅
 
 `app/api/lernen/route.ts:171`, `app/api/lernen/antwort/route.ts:126`
 
@@ -239,6 +239,39 @@ Beide sind begründet und kommentiert. Das Restrisiko ist aber konkret: Bricht
 der Alias `fortschritt:` oder ändert sich der RPC-Return, liefert die
 Normalisierung stillschweigend `stufe: 0, gelernt: false` — die Karte gilt
 als **neu** und wird erneut angeboten, statt als Fehler aufzufallen.
+
+> **Nachtrag bei der Abarbeitung:** Von den beiden genannten Stellen war nur
+> noch eine übrig. `antwort/route.ts` wurde seither umgeschrieben und hat
+> dort keinen Cast mehr — die Fundstellenliste war veraltet.
+
+**Erledigt** mit `lib/fortschritts-form.ts` (`pruefeRohKarten`), benutzt in
+`app/api/lernen/route.ts:258`:
+
+* Der Cast ist weg. Was ankommt, wird geprüft, und im Zweifel wird gemeldet.
+* Geprüft wird genau das, woran der Lernstand hängt: `id` ist ein String, und
+  eine vorhandene Fortschrittszeile hat eine **numerische `stufe`**. Fehlt das
+  Feld oder ist es ein String, ist das ein Fehler im Code und keine neue Karte.
+* Der Normalfall bleibt unangetastet: `fortschritt: null`, `undefined` oder ein
+  leeres Array bedeutet „nie gesehen" und ist keine Fehlermeldung. Sonst würde
+  jedes neue Set als Fehler begrüßt.
+* Bewusst *nicht* geprüft werden Nebensachen wie `z_gut`. Ein falscher Wert in
+  der Lernreihenfolge ist eine schlechtere Sortierung, kein falscher
+  Lernstand. Zu strenge Prüfungen erzeugen nur Lärm, den niemand liest.
+* Bei Abweichung: **HTTP 500** mit Grund und Kartenposition, statt einer Runde,
+  die falsch aussieht. Das war der ganze Unterschied — vorher bekam der Nutzer
+  sein gesamtes Set noch einmal präsentiert und keine Fehlermeldung.
+
+Live am Produktionsbuild, eigenes Set mit einer Karte:
+
+```
+vor der Antwort   stufe 0  gelernt false  faellig 2026-10-04
+nach „gut"        stufe 1  gelernt false  faellig 2026-10-05
+nach Rückgängig   stufe 0  gelernt false  faellig 2026-10-04
+```
+
+`tests/fortschritts-form.test.ts` (14 Tests) hält die erlaubten Formen fest.
+Gegenprobe: ohne die `stufe`-Prüfung fallen 4 der 14 Tests um, darunter der
+wichtigste — eine Zeile ohne `stufe` darf nicht als Stufe 0 durchgehen.
 
 ### 7. ~~„Angemeldet bleiben" einschalten löscht die gemerkte E-Mail~~ ✅
 
@@ -469,9 +502,9 @@ Damit man nicht nochmal suchen muss:
 
 ## Was als Nächstes sinnvoll wäre
 
-Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 4, 5, 7, 8, 9 und
-10. Offen sind noch Punkt 6 (zwei stille Typ-Casts) und Punkt 11 (toter Code)
-und diese vier:
+Die drei WICHTIG-Punkte sind erledigt, und aus den KLEIN-Punkten 4, 5, 6, 7,
+8, 9 und 10 ist keiner mehr offen. Es bleibt Punkt 11 (toter Code) und diese
+vier:
 
 1. **Prüfen, welche Migrationen wirklich in der Datenbank stehen.** Erledigt
    ist die *eine* Stichprobe aus Punkt 10 — und die hat gezeigt, dass 013 und

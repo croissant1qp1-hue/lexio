@@ -5,6 +5,7 @@ import { UNBEKANNTE_SPRACHE, type SpracheInfo } from "@/lib/sprachen";
 import { migrationsMeldung } from "@/lib/db-fehler";
 import { LEECH_FEHLER } from "@/lib/lernlogik";
 import { trainiereModell, schwierigkeit } from "@/lib/reihenfolge";
+import { pruefeRohKarten } from "@/lib/fortschritts-form";
 
 const MAX_KARTEN = 20;
 
@@ -37,27 +38,6 @@ const MAX_SET_KARTEN = 1000;
  * Stapelwechsel lohnt, kurz genug, dass man ihn beendet.
  */
 const MAX_WIEDERHOLUNG = 40;
-
-/** Eine Fortschrittszeile, wie die eingebettete Abfrage sie zurueckgibt. */
-type FortschrittsZeile = {
-  stufe: number;
-  gelernt: boolean;
-  faellig_am: string;
-  /** Seit 003 vorhanden; seit 1.7 für Leech-Erkennung im Einsatz. */
-  fehler?: number;
-  treffer?: number;
-  /** Seit 010: Bewertungs-Zaehler für die schlaue Reihenfolge (1.8). */
-  z_nochmal?: number;
-  z_schwer?: number;
-  z_gut?: number;
-  z_einfach?: number;
-};
-
-/** Eine Karte mit ihrem Fortschritt. Leer heisst: noch nie gesehen. */
-type RohKarte = {
-  id: string;
-  fortschritt: FortschrittsZeile[] | FortschrittsZeile | null;
-};
 
 /**
  * Liefert die Karten, die fuer diese Person heute faellig sind.
@@ -252,7 +232,36 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: kartenFehler.message }, { status: 500 });
   }
 
-  const roh = (data ?? []) as unknown as RohKarte[];
+  /*
+   * Die eingebetteten Fortschrittszeilen prüfen, statt sie zu behaupten.
+   *
+   * Vorher stand hier `as unknown as RohKarte[]`. Der Cast war nicht falsch,
+   * aber er sagte nichts über das, was tatsächlich ankommt: der Alias im
+   * select-String ist ein String, und `data` ist `any`. Änderte sich der
+   * Alias oder die Form des Embeds, wäre `zeile?.stufe ?? 0` stillschweigend
+   * 0 gewesen – und jede Karte als neu erschienen, mit Stufe 0, ohne
+   * Fälligkeit und ohne Fehlermeldung. Der Nutzer hätte sein gesamtes Set
+   * noch einmal gelernt und keinen Grund gesehen.
+   *
+   * Deshalb `pruefeRohKarten`. Sie unterscheidet "keine Zeile" (Normalfall bei
+   * einem neuen Set) von "etwas anderes als erwartet" (Fehler im Code) und gibt
+   * im zweiten Fall einen Grund mit, statt eine Runde zu liefern, die falsch
+   * ist. Siehe lib/fortschritts-form.ts für die ausführliche Begründung.
+   */
+  const form = pruefeRohKarten(data);
+  if (!form.ok) {
+    return NextResponse.json(
+      {
+        error:
+          "Die Lernrunde kann nicht gelesen werden: Die Fortschrittsdaten " +
+          "kommen unerwartet zurück. Bitte einmal neu laden; bleibt es dabei, " +
+          "ist es ein Fehler und gehört gemeldet.",
+        detail: form.grund,
+      },
+      { status: 500 },
+    );
+  }
+  const roh = form.karten;
 
   /*
    * Plan 3.10 – Texte der servierten Karten nachladen.
