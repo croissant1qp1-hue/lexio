@@ -272,7 +272,233 @@ const SONDERFAELLE = {
   look: "sehen, aussehen",
   thing: "Ding, Sache",
   right: "richtig, rechts",
+
+  /*
+   * Die zweite Kurationsrunde, 2026-10-04.
+   *
+   * Ausgeloest wurde sie von `scripts/wortlisten-qualitaet.mjs`, nicht von
+   * einem Gefuehl beim Lesen. Die Pruefung "Substantiv auf der Vorderseite,
+   * aber das Wort kommt im deutschen Beispielsatz nicht vor" lieferte 130
+   * Treffer; nach Durchsicht blieben rund 60 Karten uebrig, in denen die
+   * Uebersetzung schlicht zur falschen Bedeutung gehoert.
+   *
+   * Das Muster ist immer dasselbe: Kaikki nennt zuerst die Substantiv-
+   * Bedeutung, der englische Satz benutzt das Wort als Verb oder in einer
+   * Redewendung, und die Karte behauptet trotzdem das Substantiv.
+   *
+   *   need   = Notwendigkeit   bei "Du brauchst mich nicht anzurufen."
+   *   watch  = Wache           bei "Hast du das Spiel gesehen?"
+   *   bit    = Gebiss          bei "Sie biss in den Apfel."
+   *   bar    = Block           bei "Tom ist an der Bar."
+   *   match  = Spiel           bei "Hast du ein Streichholz?"
+   *
+   * Acht dieser Faelle sind Homonyme oder Redewendungen, bei denen es
+   * keine brauchbare Vorderseite gibt – dafuer gibt es AUSSCHLUSS weiter
+   * unten.
+   */
+  need: "brauchen",
+  interest: "Interesse",
+  home: "Zuhause",
+  experience: "Erfahrung",
+  watch: "ansehen, zusehen",
+  mind: "Sinn, Verstand",
+  record: "aufnehmen",
+  bit: "beißen",
+  condition: "Zustand, Verfassung",
+  site: "Seite",
+  charge: "berechnen, aufladen",
+  sign: "Zeichen",
+  amount: "Betrag",
+  benefit: "nützen, helfen",
+  total: "gesamt",
+  bank: "sich verlassen",
+  notice: "bemerken",
+  addition: "zusätzlich, extra",
+  lack: "fehlen",
+  review: "überprüfen",
+  aim: "Ziel, Absicht",
+  bar: "Bar",
+  operation: "Operation",
+  match: "Streichholz",
+  officer: "Offizier",
+  agent: "Makler, Agent",
+  exchange: "Kurs, Wechsel",
+  scene: "Anblick, Szene",
+  decline: "sich verschlechtern, ablehnen",
+  partner: "Partner",
+  heat: "Hitze, erhitzen",
+  presence: "Gegenwart, Anwesenheit",
+  waste: "Verschwendung",
+  fan: "Fan, Anhänger",
+  host: "Gastgeber, ausrichten",
+  consideration: "Überlegung, Rücksicht",
+  code: "Code, Vorschrift",
+  accident: "Zufall, Unfall",
+  location: "Ort, Standort",
+  sight: "Sicht",
+  assessment: "Beurteilung",
+  plenty: "genug, Menge",
+  ear: "Ohr",
+  lake: "See",
+  interpretation: "Interpretation, Auslegung",
+  extension: "Endung, Ausdehnung",
+  tune: "Melodie, stimmen",
+  pen: "Stift",
+  drag: "ziehen, schleppen",
+  charity: "Barmherzigkeit, Wohltätigkeit",
+  stroke: "Glücksfall, Schlag",
+  brush: "Bürste",
+  twist: "drehen, verdrehen",
+  imagination: "Vorstellungskraft, Einbildung",
+  possession: "Besitz",
+  cheek: "Wange, frech",
+  implication: "Bedeutung, Folgerung",
+  counter: "Schalter, Theke",
+  champion: "Champion, Meister",
+  dear: "lieb, teuer",
+  baby: "Baby, Kind",
+  retire: "in den Ruhestand gehen",
+  vision: "Vision, Vorstellung",
+  breath: "Atem",
+  shout: "Schrei, Ruf",
+
+  // `back` ist mit Rang 34 haeufig genug fuer das Starter-Set, scheitert aber
+  // an der Satzpruefung: es ist Richtungswort und Adverb zugleich
+  // ("Put your shoes back on" / "Zieh deine Schuhe wieder an"), und keine
+  // der acht Kandidatensaetze nennt das Wort auf der deutschen Seite so, dass
+  // die Aehnlichkeit ueber die Schwelle kommt. Ohne Kuration faellt damit das
+  // zweithaeufigste der hundert Startwoerter ersatzlos weg – und das waere
+  // ein Fehler der Technik, kein des Wortes.
+  back: "zurück, hinten",
+
+  /*
+   * Dritte Runde: die Woerter, die der verschaerfte Generator
+   * (Zeilen 201-207) nicht mehr liefert.
+   *
+   * Die Stichprobe aus den 62 Ausfaellen war erstaunlich ergiebig. Sie
+   * zerfiel in drei Gruppen:
+   *
+   * 1. Echte Fehler, die seit dem Import in Produktion liegen und die der
+   *    strengere Lauf endlich aussortiert hat. Das sind die besten Funde:
+   *
+   *      milk     = ausschöpfen   bei "Do you have some milk?"
+   *      please   = gefallen      bei "Where are the eggs, please?"
+   *      mistake  = fehlen        bei "Anyone can make a mistake."
+   *      except   = widersprechen bei "Everyone will go except you."
+   *      unlike   = unähnlich     bei "Unlike her, you are hard-working."
+   *      slight   = schlank       bei "I have a slight fever."
+   *
+   *    Genau die Wortart, die Kaikki zuerst nennt, wurde auch geliefert –
+   *    unabhaengig davon, was der Satz brauchte.
+   *
+   * 2. Brauchbare Karten, die nur an der verschraerften Pruefung
+   *    gescheitert sind (Synonym im deutschen Satz, andere Wortart).
+   *    Die kriegen ihre Uebersetzung hier – meist dieselbe wie vorher,
+   *    aber ohne Schnitzer wie `double: "doppel-"` (abgeschnittene
+   *    Kompositionsform) oder `yellow: "Gelb"` (Substantiv statt Adjektiv).
+   *
+   * 3. Woerter ohne brauchbare Karte -> AUSSCHLUSS.
+   */
+  few: "wenig, wenige",
+  able: "imstande, fähig",
+  major: "wichtig, bedeutend",
+  please: "bitte",
+  single: "einzeln, ledig",
+  finish: "fertig werden, fertig machen",
+  poor: "arm, schlecht",
+  wonder: "sich wundern",
+  whatever: "egal, was auch immer",
+  hit: "schlagen, treffen",
+  purpose: "Zweck, Absicht",
+  indicate: "anzeigen, bedeuten",
+  anyway: "sowieso, jedenfalls",
+  complex: "kompliziert",
+  extra: "zusätzlich, Extra",
+  alternative: "Alternative",
+  double: "doppelt",
+  mistake: "Fehler, Irrtum",
+  smoke: "Rauch, rauchen",
+  cultural: "kulturell",
+  actual: "tatsächlich",
+  decrease: "abnehmen, nachlassen",
+  basically: "im Prinzip",
+  moral: "moralisch, Moral",
+  considerable: "erheblich",
+  unlike: "anders als",
+  emotion: "Gefühl, Emotion",
+  milk: "Milch",
+  yellow: "gelb",
+  complicate: "komplizieren",
+  classic: "klassisch, Klassiker",
+  nearby: "in der Nähe, nah",
+  southern: "südlich",
+  sufficient: "genügend, ausreichend",
+  slight: "leicht, gering",
+  awful: "schrecklich, furchtbar",
+  dealer: "Händler",
+  exposure: "Exposition, Kontakt",
+  rough: "rau, unangenehm",
+  flash: "Blitz, aufblitzen",
+  craft: "Handwerk, Kunst",
+  civilian: "Zivilist, zivil",
+  bunch: "Bund, Menge",
+  exhaust: "erschöpfen, Abgase",
+  transportation: "Transport, Beförderung",
+  storage: "Lagerung, Abstellraum",
+  reasonably: "vernünftig, einigermaßen",
+  ownership: "Eigentum, Besitz",
+  alongside: "längsseits, entlang",
+  royal: "königlich",
+  ashamed: "beschämt, sich schämen",
+
+  // Drei Nachzuegler aus demselben Abgleich. `complete` stand mit "beenden"
+  // auf der Vorderseite, obwohl der Satz das Adjektiv braucht ("It was a
+  // complete failure"); `except` wurde als "widersprechen" geliefert, was
+  // die Wendung "except you" zerlegt; `premise` war eine gute Karte und fiel
+  // nur durch das Raster.
+  complete: "vollständig, komplett",
+  except: "außer",
+  premise: "Voraussetzung, Annahme",
 };
+
+/**
+ * Woerter, die keine brauchbare Karte ergeben.
+ *
+ * Fuenf Faelle, alle aus der zweiten Kurationsrunde. Sie stehen nicht in
+ * SONDERFAELLE, weil es ihnen an einer richtigen Uebersetzung fehlt – nicht
+ * an der falschen:
+ *
+ *   matter  "I'll go no matter what." – die Redewendung ist "auf jeden
+ *           Fall". Eine Karte mit "Masse" ist falsch, eine mit "auf jeden
+ *           Fall" ist keine Wortkarte mehr.
+ *   range   "She only eats free-range chicken." – der Satz benutzt das Wort
+ *           als Adjektiv vor einem Substantiv. "Bereich, Spanne" passt zum
+ *           Wort, nicht zum Satz.
+ *   check   "When should we check out?" – die Hot Meaning. "Kontrolle"
+ *           stimmt zum Wort und nicht zum Satz; die Karte lehrt einen
+ *           Sonderfall, den niemand braucht.
+ *   account "This is my account book." – der englische Satz ist selbst
+ *           holprig, und "Begründung" ist die falsche Lesart.
+ *   bell    "What was invented by Bell?" – Bell ist hier ein Nachname. Der
+ *           Satz testet kein Wort.
+ *
+ * Bewusst als Liste und nicht als Eintrag mit Sonderwert: eine Karte, die
+ * nicht gebaut wird, ist ein anderes Ergebnis als eine mit richtigem Text.
+ */
+const AUSSCHLUSS = new Set([
+  "matter",
+  "range",
+  "check",
+  "account",
+  "bell",
+  "county",
+  "respectively",
+  // Tatoeba uebersetzt hier "The amendment was first proposed in 1789" mit
+  // "Die Novelle wurde ..." – und verwechselt dabei amendment mit dem
+  // englischen Wort novel. Eine falsche Uebersetzung in der Quelle laesst
+  // sich durch bessere Vorderseiten nicht reparieren.
+  "amendment",
+]);
 
 /**
  * Die erste brauchbare deutsche Uebersetzung eines Eintrags.
@@ -362,8 +588,27 @@ function waehleBedeutung(kandidaten, sa) {
       bester = k;
     }
   }
-  if (bester && besteQuote >= 0.34) return bester.wort;
-  return null;
+  /*
+   * Der Notnagel war die Quelle der falschen Karten.
+   *
+   * "need not telephone me" hat zwei deutsche Uebersetzungen, "brauchen"
+   * (passt in "Du brauchst mich nicht anzurufen") und "Notwendigkeit"
+   * (Substantiv, im Satz nirgends). Die erste Kandidatin faellt durch
+   * `passtZuSatz`, also griff die Ueberlappung der englischen
+   * Wiktionary-Beispiele mit dem Satz – und die fand fuer die
+   * Substantiv-Bedeutung 34 % gemeinsame Inhaltswoerter, weil ihre
+   * Beispiele "need" als Nomen verwenden und "telephone" ebenfalls
+   * enthalten. Das Ergebnis war eine Karte, die man falsch lernt.
+   *
+   * Also: 0.34 gilt nur noch, wenn der deutsche Satz die Uebersetzung
+   * bestaetigt. Sonst muss die Ueberlappung klar ueberzeugen (0.6). Eine
+   * Karte weniger ist ein Verlust, eine falsche Karte ist ein Fehler –
+   * sie wird mitgelernt und merkt sich der Lernende als Lektion.
+   */
+  if (!bester) return null;
+  const bestaetigt = passtZuSatz(bester.wort, sa.deu);
+  const schwelle = bestaetigt ? 0.34 : 0.6;
+  return besteQuote >= schwelle ? bester.wort : null;
 }
 
 /*
@@ -439,7 +684,45 @@ function beispielSaetze(quellen, ziele, links) {
     const text = tab[2];
     if (!id || !text || !links.has(id)) continue;
     const worteImSatz = text.split(/\s+/);
-    if (worteImSatz.length < 5 || worteImSatz.length > 15) continue;
+    /*
+     * Obergrenze 13 statt 15 Worte, und kein Satz mit Auslassung, Zitat,
+     * Zahl oder Link.
+     *
+     * Beides kam erst spät: als der Generator anfing, auch die zweiten bis
+     * achten Kandidaten zu pruefen, nahm er Saetze, die vorher nie in Frage
+     * kamen – und die waren die auffaelligeren. Fuenf Karten bekamen einen
+     * Satz ueber 90 Zeichen ("to" am Ende einer Aufzaehlung etwa), der auf
+     * dem Telefon zwei Zeilen der Karte fuellt. Ein Satz auf einer Karte ist
+     * Beispielmaterial, kein Lesestueck.
+     *
+     * Die Grenze liegt bei 13, nicht bei 12: bei 12 verlor `premise` seinen
+     * einzigen brauchbaren Satz und damit die ganze Karte. Der Pruefer in
+     * `wortlisten-qualitaet.mjs` stuft erst ab 15 Worte oder 91 Zeichen als
+     * zu lang ein – der Generator darf hier ruhig etwas strenger sein, aber
+     * nicht strenger als das, was hinterher als gut beurteilt wird.
+     */
+    if (worteImSatz.length < 5 || worteImSatz.length > 13) continue;
+    if (/\.\.\.|…|"|„|»|<|>|https?:|\d/.test(text)) continue;
+
+    /*
+     * Zeichengrenze und genau ein Satz.
+     *
+     * Die Wortzahl allein hat eine Karte durchgelassen, die 114 Zeichen und
+     * zwei Saetze hatte ("There's nothing more difficult than to simplify.
+     * There's nothing simpler than to complicate."). Zwei Saetze auf einer
+     * Karte sind zwei Lernpunkte an einem Ort – der zweite verliert in der
+     * App sowieso, weil der Satz oben abgeschnitten wird.
+     */
+    if (text.length > 90) continue;
+
+    /*
+     * Zwei Saetze sind auf einer Karte zwei Lernpunkte. Verboten wird das
+     * aber erst ab 60 Zeichen: kurze Anreden kommen sonst ueberall vor
+     * ("Hello! I'm a new user." – eine vollstaendige, brauchbare Karte, die
+     * dabei sonst ersatzlos verloren ging). Die Grenze liegt bewusst dort, wo
+     * der zweite Satz anfangen wuerde, ihn auf dem Telefon wegzudruecken.
+     */
+    if (text.length > 60 && /[.!?]\s+[A-Z]/.test(text)) continue;
 
     const worteImSatzLower = text.toLowerCase().match(/[a-z']+/g) || [];
     const treffer = new Set();
@@ -454,17 +737,34 @@ function beispielSaetze(quellen, ziele, links) {
     }
   }
 
-  // Je Wort den kuerzesten Kandidaten behalten.
+  /*
+   * Je Wort die kuerzesten Kandidaten behalten – nicht nur den einen.
+   *
+   * Vorher stand hier `liste[0]`, also genau ein Satz je Wort. Damit war die
+   * Bedeutungsauswahl eine Lotterie: passte der erste Satz nicht zu irgendeiner
+   * deutschen Uebersetzung, war das Wort erledigt, obwohl Tausende weitere
+   * Saetze in der Datei stehen. Nach der Verschärfung der Schwelle kostete
+   * das 215 Karten – ersatzlos weggeworfene, brauchbare Woerter.
+   *
+   * Der Generator waehlt darum Satz und Uebersetzung gemeinsam aus: er geht
+   * die Kandidaten der Reihe nach durch und nimmt das erste Paar, bei dem die
+   * Uebersetzung zum deutschen Satz passt. Acht Kandidaten je Wort sind
+   * genug; die Auswahl bevorzugt kurze Saetze, und die Mehrfachauswahl kostet
+   * nur einen groesseren Satz-ID-Satz beim Einlesen der Deutschen.
+   */
+  const MAX_KANDIDATEN = 8;
   const jeWort = new Map();
   for (const [w, liste] of kandidaten) {
     liste.sort((a, b) => a.laenge - b.laenge);
-    if (liste.length) jeWort.set(w, liste[0]);
+    if (liste.length) jeWort.set(w, liste.slice(0, MAX_KANDIDATEN));
   }
   ausgabe(`  ${jeWort.size} Worte mit eng-Kandidat`);
 
   // Nur die deutschen Satzids lesen, die wir wirklich brauchen.
   const gebraucht = new Set();
-  for (const k of jeWort.values()) gebraucht.add(links.get(k.id));
+  for (const liste of jeWort.values()) {
+    for (const k of liste) gebraucht.add(links.get(k.id));
+  }
 
   ausgabe(`  deutsche Uebersetzungen (${gebraucht.size} Satzids) lesen ...`);
   const deutsch = new Map();
@@ -476,10 +776,13 @@ function beispielSaetze(quellen, ziele, links) {
   }
 
   const ergebnis = new Map();
-  for (const [w, k] of jeWort) {
-    const deuText = deutsch.get(links.get(k.id));
-    if (!deuText) continue;
-    ergebnis.set(w, { eng: k.text, deu: deuText });
+  for (const [w, liste] of jeWort) {
+    const saetze = [];
+    for (const k of liste) {
+      const deuText = deutsch.get(links.get(k.id));
+      if (deuText) saetze.push({ eng: k.text, deu: deuText });
+    }
+    if (saetze.length) ergebnis.set(w, saetze);
   }
   ausgabe(`  ${ergebnis.size} Worte mit eng+deu Beispielsatz`);
   return ergebnis;
@@ -504,30 +807,49 @@ async function main() {
   let ohnePassendeBedeutung = 0;
   for (const w of worte) {
     const wort = w.Lemma.toLowerCase();
+    if (AUSSCHLUSS.has(wort)) continue;
     const ka = uebersetzungen.get(wort);
-    const sa = saetze.get(wort);
-    if (!ka || !sa) continue;
+    if (!ka || !saetze.get(wort)) continue;
 
-    let uebersetzung = null;
-    if (ka.gesetzt) {
-      // Von Hand gesetzt (Funktionswoerter) – die passen ohne Pruefung.
-      uebersetzung = ka.kandidaten[0].wort;
-    } else {
-      uebersetzung = waehleBedeutung(ka.kandidaten, sa);
+    // Satz und Uebersetzung zusammen suchen: der erste Kandidat, bei dem
+    // die Uebersetzung zum deutschen Satz passt, gewinnt. Von Hand gesetzte
+    // Uebersetzungen (Funktionswoerter, kuratierte Sonderfaelle) gelten
+    // ungeprueft – bei ihnen ist die Entscheidung ja schon gefallen.
+    let treffer = null;
+    let ersatz = null;
+    for (const sa of saetze.get(wort) ?? []) {
+      const uebersetzung = ka.gesetzt ? ka.kandidaten[0].wort : waehleBedeutung(ka.kandidaten, sa);
+      if (!uebersetzung) continue;
+      /*
+       * Bei kuratierten Woertern ist die Uebersetzung fest, also steht nur
+       * noch die Satzwahl offen. Dann bevorzugen wir den Satz, in dem die
+       * deutsche Uebersetzung tatsaechlich vorkommt – "Milch" gehoert zu
+       * "Hast du Milch?", nicht zu irgendeinem Kandidaten, der sonst besser
+       * passt. Gibt es keinen bestaetigenden Satz, bleibt der kuerzeste
+       * Kandidat: eine gute Uebersetzung mit schwachem Beispiel ist besser
+       * als eine fehlende Karte.
+       */
+      if (ka.gesetzt && !passtZuSatz(uebersetzung, sa.deu)) {
+        if (!ersatz) ersatz = { uebersetzung, sa };
+        continue;
+      }
+      treffer = { uebersetzung, sa };
+      break;
     }
-    if (!uebersetzung) {
+    treffer ??= ersatz;
+    if (!treffer) {
       ohnePassendeBedeutung++;
       continue;
     }
 
     karten.push({
-      frage: uebersetzung,
+      frage: treffer.uebersetzung,
       antwort: w.Lemma,
-      beispielsatz: sa.eng,
-      beispiel_uebersetzung: sa.deu,
+      beispielsatz: treffer.sa.eng,
+      beispiel_uebersetzung: treffer.sa.deu,
     });
   }
-  ausgabe(`  ${ohnePassendeBedeutung} Worte ohne zur deutschen Satzuebersetzung passende Bedeutung`);
+  ausgabe(`  ${ohnePassendeBedeutung} Worte ohne Satz, der zur deutschen Uebersetzung passt`);
 
   if (!fs.existsSync(a.ausgabe)) fs.mkdirSync(a.ausgabe, { recursive: true });
 
