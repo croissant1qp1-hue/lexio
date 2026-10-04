@@ -2,10 +2,10 @@
 
 Gefunden am 2026-09-27, nach dem Einbau der sieben Anmeldeanbieter.
 
-**Alle drei WICHTIG-Punkte sind behoben, ebenso alle sieben
-KLEIN-Punkte** (siehe jeweiliger Absatz). Offen ist nur noch Punkt 11, toter
-Code — dort steht nichts, was den Nutzer erreicht, nur Unbenutztes. Jeder Punkt
-nennt die Datei, den Grund und, wenn er erledigt ist, wie.
+**Alle elf Punkte sind behoben** (siehe jeweiliger Absatz). Keiner davon stand
+im Weg — keiner fiel in einer Testabnahme auf, keiner in einem
+Migrationslauf. Jeder Punkt nennt die Datei, den Grund und, wie er erledigt
+wurde.
 
 ## Kurzfassung
 
@@ -15,8 +15,7 @@ der Rest ist Haltung und Aufräumarbeit.
 
 ```
 WICHTIG   3   alle drei behoben
-KLEIN     7   alle 7 behoben (4, 5, 6, 7, 8, 9, 10)
-          +   11 toter Code, nicht gezählt
+KLEIN     8   alle 8 behoben (4, 5, 6, 7, 8, 9, 10, 11)
 ```
 
 Dazu gekommen: eine **neue Profilseite** `/profil`. Die Profilkarte in der
@@ -457,7 +456,7 @@ enthält** — seit 015 war das die Rechte-Migration, und die Tests prüften
 absichtlich kaputter Bewertungsliste (`'einfach'` → `'leicht'`) schlägt der
 Test wieder fehl, mit der richtigen Liste nicht.
 
-### 11. Toter Code
+### 11. ~~Toter Code~~ ✅
 
 Vollständig unbenutzt, über den gesamten Importgraph geprüft:
 
@@ -473,7 +472,25 @@ Vollständig unbenutzt, über den gesamten Importgraph geprüft:
 Kein Laufzeitrisiko. Aber: Wer `components/stats` reaktiviert, erbt
 `xp-pro-tag-pie-chart.tsx:29-30` mit einem Loader, der bei `null` nie endet.
 
----
+> **Nachtrag bei der Abarbeitung:** Außer der Tabelle gab es nur noch eine
+> Stelle, und die stand in keiner Liste: Fast alles hiervon ist bereits
+> entfernt — Commit `4a6d61c` („Phase 4: toten Code entfernen") hat die
+> Mock-Dateien, den Stats-Baum und die ungenutzten Bausteine gelöscht. Die
+> Tabelle oben beschrieb einen Stand, den es nicht mehr gab.
+
+**Gefunden und gelöscht:** `app/(app)/karteikarten-hinzufuegen/page.module.css`
+(110 Zeilen). Der Ordner hat nur noch ein `page.tsx`, das auf
+`/karteikarten-hinzufuegen/vokabeln-hinzufuegen` umleitet und außer
+`next/navigation` nichts importiert. Keine einzige Klasse der Datei kommt
+sonstwo im Projekt vor — der Ein-Schritt-Bildschirm hat seinen eigenen
+Aufbau. Eine Datei, die niemand laden kann, wieder zu löschen ist die
+billigste Aufräumarbeit, die es gibt.
+
+**Gegenprobe:** ein Skript über alle versionierten Dateien, die weder von
+Next-Routing noch von einem anderen Modul referenziert werden. Ergebnis nach
+der Löschung: **nichts**. (`app/**/page.tsx`, `app/api/**/route.ts`, Tests,
+Scripts und Config ausgenommen — die werden von Next bzw. npm aufgelöst, nicht
+per Import.)
 
 ## Geprüft und in Ordnung
 
@@ -502,9 +519,8 @@ Damit man nicht nochmal suchen muss:
 
 ## Was als Nächstes sinnvoll wäre
 
-Die drei WICHTIG-Punkte sind erledigt, und aus den KLEIN-Punkten 4, 5, 6, 7,
-8, 9 und 10 ist keiner mehr offen. Es bleibt Punkt 11 (toter Code) und diese
-vier:
+Alle elf Punkte sind erledigt. Was bleibt, ist Arbeit, die keine Korrektur
+an bestehendem Code ist, sondern Absicherung:
 
 1. **Prüfen, welche Migrationen wirklich in der Datenbank stehen.** Erledigt
    ist die *eine* Stichprobe aus Punkt 10 — und die hat gezeigt, dass 013 und

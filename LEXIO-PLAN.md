@@ -1962,3 +1962,53 @@ nach Rückgängig   stufe 0  gelernt false  faellig 2026-10-04
 Suite 173/173, tsc sauber, lint 0 Fehler, Build erfolgreich.
 
 **Offen:** nur noch Punkt 11 (toter Code).
+
+## Nachtrag vom 2026-10-04 — Punkt 11: die Liste war alt, der Rest war echt
+
+`OFFENE-PUNKTE.md` Punkt 11 nannte sieben Stellen toten Codes: vier
+`lib/mock-*.ts`, den `components/stats`-Baum, `loading-state-div`, vier
+`top-of-page`-Seiten, `button-element-navbar` und zwei CSS-Module. Beim
+Nachsehen existierte davon **nichts mehr** — entfernt in `4a6d61c` („Phase 4:
+toten Code entfernen").
+
+> **Merksatz:** Ein Fund, der niemand nachprüft, ist eine Behauptung mit
+> Dateinamen. Zwei Tage alt war die Liste noch fast richtig, und trotzdem
+> falsch. Dasselbe Muster wie bei Punkt 10 (Migrationen) und Punkt 6
+> (zwei Fundstellen, eine übrig).
+
+**Tatsächlich gefunden und gelöscht:** `app/(app)/karteikarten-hinzufuegen/page.module.css`
+(110 Zeilen). Der Ordner enthält nur noch ein `page.tsx`, das auf
+`/karteikarten-hinzufuegen/vokabeln-hinzufuegen` umleitet und außer
+`next/navigation` nichts importiert. Keine der Klassen kommt im Projekt sonst
+vor. Build ohne die Datei fehlerfrei.
+
+**Gegenprobe:** ein Skript über alle versionierten Dateien, die von keinem
+anderen Modul referenziert werden (Next-Routing, Tests, Scripts und Config
+ausgenommen, weil die nicht per Import aufgelöst werden). Nach der Löschung:
+**keine** Datei ohne Referenz. Der Bestand ist damit nachweislich frei von
+totem Code — geprüft, nicht behauptet.
+
+---
+
+## Stand der Abarbeitung
+
+| Punkt | Thema | Zustand |
+| --- | --- | --- |
+| 1 | „Alles gelernt" bei Netzausfall | erledigt |
+| 2 | Supabase-Ausfall als Abmeldung | erledigt |
+| 3 | `POST /api/karten` 500 statt 400 | erledigt |
+| 4 | Erfundene Karten-Zahl nach dem Löschen | erledigt |
+| 5 | Toter 42501-Zweig in `/api/sets` | erledigt |
+| 6 | Stille Typ-Casts in der Lernrunde | erledigt |
+| 7 | „Angemeldet bleiben" löschte die E-Mail | erledigt |
+| 8 | Endpunkt verrät den Fehlkonfigurationszustand | erledigt |
+| 9 | Erfolg trotz fehlgeschlagenem Nachladen | erledigt |
+| 10 | Antwort-Funktionen für `anon` aufrufbar | erledigt |
+| 11 | Toter Code | erledigt |
+
+Offen sind aus `LEXIO-PLAN.md` nur noch die extern blockierten Punkte:
+SMTP/OAuth-Zugangsdaten und der Deployment-Wert von `NEXT_PUBLIC_SITE_URL`.
+Phase 7 (React Native) ist nicht blockiert, aber nachrangig; ihr Abnahmeteil
+über die Wortlisten-Benennung ist inzwischen erledigt.
+
+Alle elf Punkte sind einzeln committen und nach `origin/main` gepusht.
