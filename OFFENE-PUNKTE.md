@@ -511,12 +511,29 @@ Belegt und nicht vermutet: `italienisch-urlaub` und `spanisch-alltag` sind
 weg, `englisch-grundlagen` steht mit seinen 100 Karten. Der heutige Zustand
 ist richtig — die Datei ist nur historisch und darf nicht wieder laufen.
 
-> **Kein Kommentar ersetzt eine Sperre.** In 011 steht jetzt oben eine fette
-> Warnung, und `scripts/db-pruefen.mjs` prüft für 011 aus genau diesem Grund
-> **nur** die beiden echten Platzhalter: hätte es `englisch-grundlagen`
-> mitgeprüft, hätte es „fehlt" gemeldet — und die naheliegende Reaktion auf
-> „fehlt" wäre `npm run db:migrieren -- 011`. Eine Prüfung, die zum Löschen
-> von Produktionsdaten auffordert, ist schlimmer als keine.
+> **Ein Kommentar ersetzt keine Sperre.** Also: 011 hat jetzt eine
+> **Löschsperre im Code** (Stand 2026-10-04). Ein Set wird nur noch gelöscht,
+> wenn *jede* seiner Karten dem Platzhalter-Muster `Frage n`/`Antwort n`
+> entspricht — also der Invariante, die diese Migration ohnehin meint. Nicht
+> als Slug-Sperre (`not in` mit den fünf Wortlisten): die müsste bei jedem Import
+> nachgezogen werden und schützt keine sechste, die morgen kommt. Und die
+> Fehlrichtung ist die harmlose: zu streng gefasst wird nichts gelöscht und man
+> merkt es an der Kontrolle am Dateiende; zu weit gefasst verschwinden
+> Wortlisten.
+>
+> Zwei Gegenproben, beide live und ohne etwas zu löschen:
+>
+> - echter Datensatz: `englisch-grundlagen` mit 100 Karten → **würde nicht**
+>   gelöscht
+> - Logiktest an synthetischen Daten: echter Platzhalter → gelöscht;
+>   fast-Platzhalter mit *einer* echten Karte → bleibt; Wortliste → bleibt;
+>   leeres Set → gelöscht
+>
+> `scripts/db-pruefen.mjs` prüft für 011 trotzdem **nur** die beiden echten
+> Platzhalter: hätte es `englisch-grundlagen` mitgeprüft, hätte es „fehlt"
+> gemeldet — und die naheliegende Reaktion auf „fehlt" wäre
+> `npm run db:migrieren -- 011`. Eine Prüfung, die zum Löschen von
+> Produktionsdaten auffordert, ist schlimmer als keine.
 
 Daraus folgt der Kern des Skripts: **es prüft Merkmale, keine Dateinamen**, und
 es verweigert den Dienst, wenn eine Datei ohne Eintrag dazukommt. Was beim

@@ -2050,12 +2050,25 @@ trägt inzwischen `ngsl-top100` mit 100 kuratierten Karten. Die Bedingung ist
 richtig (die beiden anderen Slugs sind weg, `englisch-grundlagen` steht), aber
 die Datei ist eine geladene Waffe.
 
-In 011 steht jetzt eine Warnung im Kopf, und der Eintrag in `db-pruefen.mjs`
-prüft **nur die beiden echten Platzhalter**. Hätte er `englisch-grundlagen`
-mitgeprüft, hätte er „fehlt" gemeldet — und die naheliegende Reaktion auf
-„fehlt" wäre `npm run db:migrieren -- 011-platzhalter-entfernen`. Eine
-Prüfung, die zum Löschen von Produktionsdaten auffordert, ist schlimmer als
-keine.
+011 hat jetzt eine **Löschsperre im Code**: gelöscht wird nur noch, wer
+*jede* Karte als `Frage n`/`Antwort n` daherbringt. Gegenproben live und ohne
+Löschung — ein echter Platzhalter würde gelöscht, `englisch-grundlagen` (100
+Wortlist-Karten) nicht, und ein fast-Platzhalter mit einer einzigen echten
+Karte ebenso wenig.
+
+Der Eintrag in `db-pruefen.mjs` prüft für 011 trotzdem **nur die beiden echten
+Platzhalter**. Hätte er `englisch-grundlagen` mitgeprüft, hätte er „fehlt"
+gemeldet — und die naheliegende Reaktion auf „fehlt" wäre
+`npm run db:migrieren -- 011-platzhalter-entfernen`. Eine Prüfung, die zum
+Löschen von Produktionsdaten auffordert, ist schlimmer als keine.
+
+> **Die Lehre ist allgemeiner als 011.** Ein Kommentar an einer geladenen Wanne
+> hält keinen auf, der sie anhebt. Also: sobald eine Operation irgendwann
+> Produktionsdaten *löschen* soll, gehört ihre Berechtigung in den Code und
+> nicht in eine Liste, die man irgendwann nachzieht. Eine Slug-Sperre
+> (`not in` mit den fünf Wortlisten) wäre hier auch schutzlos gewesen — sie
+> kannte nur die fünf Listen von heute und hätte die sechste von morgen
+> durchgelassen.
 
 > **Und noch eine Lektion aus derselben Stunde:** Zwei meiner ersten Merkmale
 > waren falsch — die Karten-Tabelle heißt `karten`, nicht `karteikarten`.

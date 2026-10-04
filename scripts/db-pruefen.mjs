@@ -224,30 +224,35 @@ const PRUEFUNGEN = [
                        and column_name='z_einfach')
           ) as da`,
   },
-  {
+{
     /*
-     * Vorsicht bei diesem Eintrag. 011 löscht drei Demo-Sets, und einer der drei
+     * Vorsicht bei diesem Eintrag. 011 löscht drei Demo-Sets per Slug, und einer der drei
      * Slugs ist inzwischen eine kuratierte Wortliste: `englisch-grundlagen`
      * trägt ngsl-top100 mit 100 Karten (siehe scripts/wortlisten-importieren.mjs).
-     * Ein erneuter Lauf von 011 würde sie mit löschen, denn die Wortlisten haben
-     * wie die alten Demo-Sets `user_id is null`.
      *
-     * Geprüft wird deshalb nur, was tatsächlich Platzhalter war und immer
-     * Platzhalter bleibt. `englisch-grundlagen` gehört nicht mehr dazu und ist
-     * hier ausdrücklich *nicht* als Merkmal geführt: würde man es prüfen,
-     * meldete die Prüfung „fehlt" und-rate hier zu einem Löschen der 100 Karten.
+     * Ein Lauf ist heute nicht mehr gefährlich: 011 hat inzwischen eine Löschsperre
+     * und löscht ein Set nur noch, wenn *jede* Karte dem Platzhalter-Muster
+     * `Frage n` / `Antwort n` entspricht. Gegenprobe am echten Datensatz:
+     * `englisch-grundlagen` (100 Karten) käme nicht infrage.
+     *
+     * Geprüft wird hier trotzdem nur, was tatsächlich Platzhalter war und immer
+     * Platzhalter bleibt: `englisch-grundlagen` gehört nicht mehr dazu. Hätte man
+     * es mitgeprüft, meldete diese Prüfung „fehlt" — und die naheliegende Reaktion
+     * auf „fehlt" wäre `npm run db:migrieren -- 011`, also genau die Sache, vor der
+     * wir sie bewahren. Ein Eintrag, der zum Löschen von Produktionsdaten
+     * auffordert, ist schlimmer als keiner.
      */
     datei: "011-platzhalter-entfernen.sql",
     merkmal:
       "die beiden echten Demo-Sets sind weg (italienisch-urlaub, spanisch-alltag). " +
-      "Der dritte Slug, englisch-grundlagen, ist heute eine Wortliste und darf " +
-      "nicht als Merkmal gelten – 011 nicht erneut laufen lassen",
+      "englisch-grundlagen ist heute eine Wortliste und wäre als Merkmal falsch",
     sql: `select not exists (
             select 1 from public.karteikarten_sets
              where slug in ('italienisch-urlaub','spanisch-alltag')
                and user_id is null
           ) as da`,
   },
+
   {
     datei: "012-beispielsatz-korpus-und-cache.sql",
     merkmal: "der Beispielsatz-Cache – ohne ihn fragt die App jedes Mal den Korpus ab",
