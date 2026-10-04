@@ -771,11 +771,28 @@ export default function VokabelnHinzufuegenSeite() {
 
             /*
              * Liste neu laden, damit "Noch mehr Wörter" in Schritt 2 den
-             * gerade angelegten Set-Namen zeigt. Ohne Ersatzwert: ein stilles
-             * "[]" wuerde hier als Erfolg durchgehen, und die Meldung waere
-             * "gespeichert", obwohl die Anzeige danach leer ist.
+             * gerade angelegten Set-Namen zeigt.
+             *
+             * Eigenes try/catch, und das ist der ganze Punkt: die Wörter sind
+             * zu diesem Zeitpunkt gespeichert. Schlaegt nur dieser Aufruf fehl
+             * — kein Netz, 503, Session weg —, landete der Fehler im catch
+             * weiter unten, die Meldung lautete "Fehler", und wer die Meldung
+             * ernst nimmt, wiederholt: ein zweites Set mit denselben Wörtern.
+             *
+             * Bewusst kein `abfall`-Wert an holeJson: der greift nur bei
+             * HTTP-Fehlern, nicht wenn die Verbindung abbricht (der häufigere
+             * Fall) — und ein stilles `[]` waere die schlechtere Taeuschung,
+             * weil danach keine eigene Kachel mehr da ist.
+             *
+             * Bleibt das Nachladen aus, steht die Liste so, wie sie war. Das
+             * neue Set erscheint darin beim naechsten Aufruf der Seite; der
+             * Erfolg wird trotzdem gemeldet, weil er einer ist.
              */
-            setSets(await holeJson<SetZeile[]>("/api/karteikarten"));
+            try {
+                setSets(await holeJson<SetZeile[]>("/api/karteikarten"));
+            } catch {
+                setSetsGeladen(true);
+            }
             setZaehler((z) => z + gefuelltePaare.length);
             setFertig({ name, slug, anzahl: gefuelltePaare.length });
             setAuswahl(slug);

@@ -1787,3 +1787,34 @@ Eine Korrektur an der Abnahme selbst: Die sechs „Befunde" aus dem Lauf vom
 Umleitung bemerkt und jedes Mal gemeldet — 6 Befunde, die nur die echte Zahl
 verdeckten. Das Audit wartet jetzt das dokumentierte Ziel und meldet nur noch
 Umleitungen, die niemand erwartet hat.
+
+---
+
+## Nachtrag vom 2026-10-04 — zwei KLEIN-Punkte sind erledigt
+
+Die Wortlisten sind gemessen und importiert; danach sind die KLEIN-Punkte aus
+`OFFENE-PUNKTE.md` dran. Zwei davon sind jetzt weg.
+
+**Punkt 9 — Erfolg nach dem Speichern.** Das Nachladen der Set-Liste stand im
+gleichen `try` wie das eigentliche Speichern. Fiel nur dieser Aufruf aus, sagte
+die Seite „Keine Verbindung zum Server." — bei Wörtern, die längst in der
+Datenbank lagen. Wer die Meldung ernst nimmt, speichert erneut und hat sie
+doppelt.
+
+> **Erledigt.** Eigenes `try`/`catch` nur um das Nachladen. Kein `abfall`-Wert:
+> der greift bei HTTP-Fehlern, nicht beim Verbindungsabbruch, und ein stilles
+> `[]` wäre schlimmer — danach fehlte die eigene Kachel. Vorher und nachher
+> am laufenden System gegengemessen (Playwright bricht gezielt den zweiten
+> Aufruf von `/api/karteikarten` ab): alt „Fehler" bei gespeicherten Wörtern,
+> neu „Gespeichert" mit Set und 1 Karte in der Datenbank. Zweimal reproduziert,
+> Normalfall ohne Abbruch zusätzlich. Tests 141/141, Lint und Build sauber,
+> Responsive-Audit 72 Durchläufe ohne Befund.
+
+**Punkt 8 — öffentlicher Endpunkt.** Die Env-Diagnosen waren in Phase 3.8
+bereits hinter `inklusiveServerKonfiguration` gelegt; `OFFENE-PUNKTE.md` führte
+den Punkt trotzdem noch als offen. Am laufenden Produktionsbuild nachgemessen:
+`GET /api/gesundheit` meldet nur noch `oauth` als offenen Dashboard-Schalter,
+`service-key` kommt nicht mehr vor.
+
+**Noch offen:** 4, 5, 6, 7, 10, 11 — Punkte 4 und 5 liegen in denselben zwei
+Routen und werden zusammen angefasst, Punkt 10 braucht eine neue Migration.

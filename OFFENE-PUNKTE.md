@@ -15,7 +15,7 @@ der Rest ist Haltung und Aufräumarbeit.
 
 ```
 WICHTIG   3   alle drei behoben
-KLEIN     7   offen
+KLEIN     7   davon 2 behoben (8 und 9), 5 offen
 ```
 
 Dazu gekommen: eine **neue Profilseite** `/profil`. Die Profilkarte in der
@@ -226,7 +226,7 @@ als **neu** und wird erneut angeboten, statt als Fehler aufzufallen.
 `alt.email` zu übernehmen. Wer den Schalter in den Einstellungen von nein auf
 ja stellt, verliert die vorgemerkte Adresse.
 
-### 8. Der öffentliche Endpunkt verrät den Fehlkonfigurationszustand
+### 8. ~~Der öffentliche Endpunkt verrät den Fehlkonfigurationszustand~~ ✅
 
 `app/api/gesundheit/route.ts:16` → `lib/gesundheit.ts:194-273`
 
@@ -235,18 +235,51 @@ anon-Keys ist ohnehin aus dem öffentlichen Key decodierbar. Was bleibt: Die
 Antwort verrät, ob `SUPABASE_SERVICE_ROLE_KEY` gesetzt ist. Bei korrekter
 Konfiguration ist die Antwort leer — unkritisch, aber bewusst entscheidbar.
 
-### 9. Der Assistent meldet Erfolg, obwohl das Nachladen fehlschlug
+**Erledigt in Phase 3.8** (hier nur noch als offen geführt). Die drei
+Server-Diagnosen hängen an `optionen.inklusiveServerKonfiguration`, und die
+Route schaltet sie nur außerhalb der Produktion zu. Live am laufenden
+Produktionsbuild geprüft, nicht nur im Code gelesen:
 
-`app/(app)/karteikarten-hinzufuegen/vokabeln-hinzufuegen/vokabeln-hinzufuegen-seite.tsx:324`
+```
+GET /api/gesundheit → aufgaben: ["oauth"]   (nur der Dashboard-Schalter)
+                     "service-key" kommt nicht vor
+```
+
+### 9. ~~Der Assistent meldet Erfolg, obwohl das Nachladen fehlschlug~~ ✅
+
+`app/(app)/karteikarten-hinzufuegen/vokabeln-hinzufuegen/vokabeln-hinzufuegen-seite.tsx:772`
 
 ```ts
 setSets(await holeJson<SetZeile[]>("/api/karteikarten"));   // ohne Fallback
 ```
 
 Schlägt **nach** erfolgreichem Speichern nur dieses Nachladen fehl, landet der
-Fehler im `catch`: Formularmeldung „Fehler", obwohl die Wörter in der
-Datenbank sind. Der Nutzer wiederholt und erzeugt ein zweites Set. Randfall,
-aber die Reihenfolge ist die Ursache.
+Fehler im `catch`: Formularmeldung „Keine Verbindung zum Server.", obwohl die
+Wörter in der Datenbank sind. Der Nutzer wiederholt und erzeugt ein zweites
+Set. Randfall, aber die Reihenfolge ist die Ursache.
+
+**Fix:** eigenes `try`/`catch` nur um das Nachladen. Der Erfolg wird gemeldet,
+weil einer ist; die Liste zeigt beim nächsten Aufruf den neuen Stand.
+
+Kein `abfall`-Wert: der greift nur bei HTTP-Fehlern, nicht wenn die Verbindung
+abbricht — und ein stilles `[]` wäre die schlechtere Täuschung, weil danach
+keine eigene Kachel mehr da ist.
+
+**Erledigt und beides gemessen.** Mit Playwright den Abruch des Nachladens
+erzwungen (zweiter Aufruf von `/api/karteikarten` wird abgeworfen), vorher
+und nachher am laufenden System:
+
+| | alt | neu |
+|---|---|---|
+| `POST /api/sets` | 201 | 201 |
+| `POST /api/karten` | 201 | 201 |
+| Anzeige | „Keine Verbindung zum Server." | „Gespeichert" |
+| Set in der DB | 1 Karte | 1 Karte |
+
+Alte Fassung: Wort gespeichert, Meldung „Fehler" — die Falle stand wirklich.
+Neu: zweimal hintereinander reproduziert, zusätzlich der Normalfall ohne
+Abbruch (Set mit 1 Karte, Liste neu geladen). 141 Tests, Lint und Build sauber,
+Responsive-Audit 72 Durchläufe ohne Befund.
 
 ### 10. `antwort_verbuchen` ist für `anon` ausführbar
 
@@ -327,8 +360,8 @@ Damit man nicht nochmal suchen muss:
 
 ## Was als Nächstes sinnvoll wäre
 
-Die drei WICHTIG-Punkte sind erledigt. Offen sind die sieben KLEIN-Punkte
-und diese drei:
+Die drei WICHTIG-Punkte sind erledigt, aus den KLEIN-Punkten 8 und 9.
+Offen sind die fünf KLEIN-Punkte und diese drei:
 
 1. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** Die Stufenlogik
    existiert in TypeScript *und* ihre Wirkung in SQL. Das ist genau die Art
