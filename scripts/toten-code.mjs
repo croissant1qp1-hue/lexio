@@ -112,8 +112,8 @@ const gelb = (t) => `\x1b[33m${t}\x1b[0m`;
 const dateien = alleDateien();
 const koerper = suchkoerper(dateien);
 
-// npm-Skripte zaehlen als Verweis: `scripts/xyz.mjs` wird ueber package.json
-// aufgerufen, nicht ueber einen Import.
+// npm-Skripte zaehlen als Verweis: sie werden ueber package.json aufgerufen,
+// nicht ueber einen Import.
 try {
   const pkg = JSON.parse(readFileSync(join(WURZEL, "package.json"), "utf8"));
   for (const wert of Object.values(pkg.scripts ?? {})) {

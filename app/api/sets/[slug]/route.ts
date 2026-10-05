@@ -130,7 +130,7 @@ export async function PATCH(
         {
           error:
             "Die Sprachliste konnte nicht geladen werden. Bitte " +
-            "supabase/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
+            "supabase/migrations/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
         },
         { status: 503 },
       );
@@ -169,7 +169,7 @@ export async function PATCH(
         {
           error:
             "Set konnte nicht geändert werden. Bitte die Migration " +
-            "supabase/003-auth-und-user-daten.sql ausführen.",
+            "supabase/migrations/003-auth-und-user-daten.sql ausführen.",
         },
         { status: 403 },
       );
@@ -245,7 +245,7 @@ export async function DELETE(
       {
         error:
           "Set konnte nicht gelöscht werden. Die Löschrechte fehlen – bitte die " +
-          "Migration supabase/003-auth-und-user-daten.sql ausführen.",
+          "Migration supabase/migrations/003-auth-und-user-daten.sql ausführen.",
       },
       { status: 403 },
     );

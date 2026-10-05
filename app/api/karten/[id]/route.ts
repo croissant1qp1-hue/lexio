@@ -206,7 +206,7 @@ export async function PATCH(
         {
           error:
             "Die Karte konnte nicht geändert werden. Bitte die Migration " +
-            "supabase/003-auth-und-user-daten.sql ausführen.",
+            "supabase/migrations/003-auth-und-user-daten.sql ausführen.",
         },
         { status: 403 },
       );
@@ -222,7 +222,7 @@ export async function PATCH(
         {
           error:
             "Die Karte konnte nicht geändert werden – der Datenbank fehlen " +
-            "die Beispielsatz-Spalten. Bitte supabase/005-sprachen-und-beisatz.sql " +
+            "die Beispielsatz-Spalten. Bitte supabase/migrations/005-sprachen-und-beisatz.sql " +
             "im Supabase SQL Editor ausführen.",
         },
         { status: 503 },
@@ -282,7 +282,7 @@ export async function DELETE(
       {
         error:
           "Karte konnte nicht gelöscht werden. Die Löschrechte fehlen – bitte die " +
-          "Migration supabase/003-auth-und-user-daten.sql ausführen.",
+          "Migration supabase/migrations/003-auth-und-user-daten.sql ausführen.",
       },
       { status: 403 },
     );

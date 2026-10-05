@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       {
         error:
           "Die Sprachliste konnte nicht geladen werden. Bitte " +
-          "supabase/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
+          "supabase/migrations/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
       },
       { status: 503 },
     );

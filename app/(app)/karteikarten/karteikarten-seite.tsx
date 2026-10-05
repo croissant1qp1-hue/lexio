@@ -135,10 +135,11 @@ export default function KarteikartenSeite() {
    * Die XP einer Sprache an ihrem Code, nicht an ihrem Namen.
    *
    * Vorher stand hier `eintrag.sprache.trim().toLowerCase().split(...)[0]` –
-   * dieselbe Umformung wie in lib/sprachen-farbe.ts, ein zweites Mal an einer
-   * zweiten Stelle. Jetzt ist der Code der Schluessel, und beide Seiten
-   * kommen aus derselben Sprachliste: ein Fehler ist nicht mehr an zwei Orten
-   * gleichzeitig noetig.
+   * dieselbe Umformung wie in lib/sprachen-farbe.ts — die Datei ist geloescht,
+   * seitdem gibt es den Sprachcode. Ein zweites Mal an einer zweiten Stelle.
+   *
+   * Jetzt ist der Code der Schluessel, und beide Seiten kommen aus derselben
+   * Sprachliste: ein Fehler ist nicht mehr an zwei Orten gleichzeitig noetig.
    */
   const xpNachSprache = useMemo(() => {
     const karte: Record<string, number> = {};

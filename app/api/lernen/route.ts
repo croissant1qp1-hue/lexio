@@ -212,7 +212,7 @@ export async function GET(request: Request) {
           {
             error:
               "Die Tabelle für den eigenen Lernstand fehlt. Bitte " +
-              "supabase/003-auth-und-user-daten.sql im Supabase SQL Editor " +
+              "supabase/migrations/003-auth-und-user-daten.sql im Supabase SQL Editor " +
               "ausführen – ohne sie gibt es keine persönlichen Fortschritte.",
           },
           { status: 503 },

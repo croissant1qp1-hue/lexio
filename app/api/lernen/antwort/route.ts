@@ -118,7 +118,7 @@ export async function POST(request: Request) {
         {
           error:
             "Antwort konnte nicht gespeichert werden. Bitte die Migration " +
-            "supabase/003-auth-und-user-daten.sql ausführen.",
+            "supabase/migrations/003-auth-und-user-daten.sql ausführen.",
         },
         { status: 403 },
       );

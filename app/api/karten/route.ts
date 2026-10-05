@@ -393,7 +393,7 @@ export async function POST(request: Request) {
         {
           error:
             "Karten konnten nicht gespeichert werden. Bitte die Migration " +
-            "supabase/003-auth-und-user-daten.sql ausführen.",
+            "supabase/migrations/003-auth-und-user-daten.sql ausführen.",
         },
         { status: 403 },
       );
@@ -409,7 +409,7 @@ export async function POST(request: Request) {
         {
           error:
             "Die Karten konnten nicht gespeichert werden – der Datenbank fehlen " +
-            "die Beispielsatz-Spalten. Bitte supabase/005-sprachen-und-beisatz.sql " +
+            "die Beispielsatz-Spalten. Bitte supabase/migrations/005-sprachen-und-beisatz.sql " +
             "im Supabase SQL Editor ausführen.",
         },
         { status: 503 },

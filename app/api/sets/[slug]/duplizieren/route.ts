@@ -197,7 +197,7 @@ export async function POST(
           {
             error:
               "Die Kopie konnte nicht angelegt werden. Bitte die Migration " +
-              "supabase/003-auth-und-user-daten.sql ausführen.",
+              "supabase/migrations/003-auth-und-user-daten.sql ausführen.",
           },
           { status: 403 },
         );

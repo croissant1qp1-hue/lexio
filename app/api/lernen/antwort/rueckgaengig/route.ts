@@ -48,7 +48,7 @@ export async function POST(request: Request) {
         {
           error:
             "Antwort konnte nicht zurückgenommen werden. Bitte die Migration " +
-            "supabase/009-leech-und-rueckgaengig.sql ausführen.",
+            "supabase/migrations/009-leech-und-rueckgaengig.sql ausführen.",
         },
         { status: 403 },
       );

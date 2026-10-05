@@ -313,6 +313,10 @@ Code). Nebeneffekt: Zwei fragile String-Hacks fallen weg —
 `schluessel()` in `lib/sprachen-farbe.ts:34-36` und die Dublette in
 `karteikarten-seite.tsx:114,130`. Beide nehmen „nur das erste Wort" und
 kollidieren bei „Chinesisch (Mandarin)".
+>
+> Erledigt in `75104ca` („Sprachen auf Sprachcode umstellen"): `lib/sprachen-farbe.ts`
+> ist gelöscht, die Farbe kommt aus der Sprachliste, die Dublette aus
+> `karteikarten-seite.tsx` ist raus.
 
 > Erledigt als `public.sprachen` mit `flaeche` und `akzent` (die Spalten
 > heißen so, weil `farbe` in Postgres kein Kollisionsproblem hat, aber der
@@ -1893,6 +1897,41 @@ Beide zurückgebaut.
 Die Regel ist wichtig, weil der Build den Fehler **nicht** zeigt: Next führt
 so einen Ordner fröhlich im Routenmanifest, erst die Anfrage liefert 404. Wer
 nicht misst, hält die Seite für erreichbar.
+
+**Ein dritter Fund derselben Sorte: 19 Dateipfade, die ins Leere zeigen.** Als
+die Migrationen nach `supabase/migrations/` umgezogen sind (Phase 4), sind die
+Pfade in `SUPABASE-SETPUT.md` mitgewandert — die in ausgeliefertem Code nicht.
+Sie stehen in Fehlermeldungen, die Nutzern angezeigt werden, in
+`lib/db-fehler.ts`, `lib/gesundheit.ts` und sieben API-Routen:
+
+    "Datenbank ist nicht aktuell. Bitte supabase/003-auth-und-user-daten.sql
+     im Supabase SQL Editor ausführen."                    (lib/db-fehler.ts:29)
+    (So stand es. Diese Datei existiert nicht.)
+
+Genau dann, wenn jemand auf einen Datenbankfehler stößt und der Anleitung folgt,
+gibt es die genannte Datei nicht. 19 Stellen, vier Dateien, seit Phase 4
+kaputt. Gefunden habe ich das nicht durch Suchen, sondern weil ich zufällig
+`SUPABASE-SETUP.md` gelesen hatte, um vier andere kaputte Pfade dort zu
+reparieren. Zufallsfunde sind keine Strategie.
+
+> **Erledigt.** Die 19 Stellen zeigen auf `supabase/migrations/`. Am
+> Produktionsbuild gegengeprüft, was sich prüfen lässt: `/api/gesundheit`
+> liefert weiterhin 200, `fehlend: []`, nur `oauth` offen. Die Meldungstexte
+> selbst habe ich **nicht** live ausgelöst — das hieße, eine Abfrage
+> kaputtzumachen, und dafür ist ein Test der richtige Ort.
+>
+> Damit es nicht wieder verfällt: `tests/dateiverweise.test.ts` prüft jeden
+> pfadartigen Verweis im Quellcode und in den Dokumenten (über 120
+> eindeutige Verweise). Gegenproben, beide rot: ein erfundener Pfad in `lib/db-fehler.ts`
+> und einer in `OFFENE-PUNKTE.md` — der Test nennt Datei und Zeile.
+>
+> Zwei bewusste Lücken, damit das Gate nicht nervt und man es nicht wegdrückt:
+> Verweise auf absichtlich fehlende Dateien sind erlaubt, wenn im Absatz „gelöscht",
+> „Gegenprobe" oder „angelegt … entfernt" steht — sichtbar für jeden Leser statt
+> in einer Ausnahmeliste, die verrottet. Kurzformen wie `lernen/route.ts` bleiben
+> ungeprüft, weil sie sich nur durch Raten auflösen lassen. Und ein dritter Test
+> zählt die gefundenen Verweise, damit der Prüfer nicht grün ist, weil er nichts
+> mehr findet.
 Die drei ersten Punkte sind dieselbe Sorte Fehler wie die veralteten
 Fundstellen in `OFFENE-PUNKTE.md`: eine Aussage, die man irgendwann nicht
 mehr nachprüft. Der Unterschied ist nur, dass sie diesmal von einem Skript

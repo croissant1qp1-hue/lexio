@@ -26,18 +26,18 @@ type PostgrestFehler = { code?: string | null; message?: string | null } | null 
 
 /** Die Basisrechte fehlen: 003 ist nicht gelaufen. */
 const M_003 =
-  "Datenbank ist nicht aktuell. Bitte supabase/003-auth-und-user-daten.sql " +
+  "Datenbank ist nicht aktuell. Bitte supabase/migrations/003-auth-und-user-daten.sql " +
   "im Supabase SQL Editor ausführen.";
 
 /** Die Sprachliste fehlt: 005. */
 const M_005 =
-  "Sprachliste fehlt in der Datenbank. Bitte supabase/005-sprachen-und-beisatz.sql " +
+  "Sprachliste fehlt in der Datenbank. Bitte supabase/migrations/005-sprachen-und-beisatz.sql " +
   "im Supabase SQL Editor ausführen.";
 
 /** Die Spalten fehlen, die 005 bringt: 005, bei der View auch 006. */
 const M_005_006 =
-  "Datenbank ist nicht aktuell. Bitte supabase/005-sprachen-und-beisatz.sql und " +
-  "supabase/006-views-auf-sprachcode.sql im Supabase SQL Editor ausführen.";
+  "Datenbank ist nicht aktuell. Bitte supabase/migrations/005-sprachen-und-beisatz.sql und " +
+  "supabase/migrations/006-views-auf-sprachcode.sql im Supabase SQL Editor ausführen.";
 
 /** Woran man 005 bzw. 006 im Text erkennt. */
 const SPALTEN_005 = ["sprache_code", "beispielsatz", "beispiel_uebersetzung", "sprachen"];

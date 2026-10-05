@@ -1,7 +1,8 @@
 /**
  * Die Sprachliste – ein Typ, eine Farbregel, ein Rückfall.
  *
- * Vorher standen die Farben als zwei Objekte in lib/sprachen-farbe.ts, und
+ * Vorher standen die Farben als zwei Objekte in lib/sprachen-farbe.ts (die
+ * Datei ist geloescht, die Farben stehen jetzt hier), und
  * welche Farbe zu welchem Set gehörte, entschied eine Funktion, die nur das
  * erste Wort des Freitextes nahm. Daraus folgten drei Fehler, die alle
  * stillschweigend aussahen:

@@ -280,7 +280,7 @@ export async function pruefeGesundheit(optionen: {
       warum:
         "Ohne sie hat die Tabelle karteikarten_sets keine Spalte user_id. " +
         "Jedes Set gehört dann niemandem, und jede Lernantwort scheitert.",
-      ort: "SQL Editor → Inhalt von supabase/003-auth-und-user-daten.sql einfügen → Run",
+      ort: "SQL Editor → Inhalt von supabase/migrations/003-auth-und-user-daten.sql einfügen → Run",
       schwerwiegend: true,
     });
   }

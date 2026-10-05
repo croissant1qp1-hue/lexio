@@ -31,7 +31,7 @@ export async function GET() {
         {
           error:
             "Die Sprachliste fehlt in der Datenbank. Bitte " +
-            "supabase/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
+            "supabase/migrations/005-sprachen-und-beisatz.sql im Supabase SQL Editor ausführen.",
         },
         { status: 503 },
       );
