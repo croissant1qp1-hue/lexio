@@ -29,9 +29,28 @@
  *
  * Aufruf
  * ------
- *   npm run db:migrieren                  # 003, 004, 005, 006 in dieser Reihenfolge
+ *   npm run db:migrieren                  # fragt die Datenbank und laeuft nur, was fehlt
  *   npm run db:migrieren 005 006          # nur die genannten, in dieser Reihenfolge
- *   npm run db:migrieren -- --trocken     # zeigt, was laufen wuerde, fuehrt nichts aus
+ *   npm run db:migrieren -- --trocken     # zeigt den Plan, fuehrt nichts aus
+ *   npm run db:migrieren -- --alle        # jede Datei erneut, auch die schon steht
+ *
+ * Warum es die Datenbank fragt
+ * ----------------------------
+ * Bis 2026-10-04 stand hier eine fest verdrahtete Liste von fuenf Dateien
+ * (003 bis 007), waehrend auf der Platte fuenfzehn lagen. `npm run
+ * db:migrieren` ohne Argumente fuehrte also nur diese fuenf aus und schloss mit
+ * "Alle Dateien gelaufen" — 008 bis 015 wuerden nie laufen, darunter die
+ * Rechte-Reparatur aus 015. Nachgewiesen mit `--trocken`.
+ *
+ * Eine Datei, die schon steht, ist nicht harmlos wiederholbar: 014 musste dafuer
+ * erst ein `on conflict` bekommen, und eine abgebrochene Datei laesst alles
+ * stehen, was vorher in ihr passiert ist, und meldet trotzdem `ok`. Deshalb
+ * wird der Stand gemessen (Merkmale aus `scripts/migrationen.mjs`) statt
+ * geraten, und es laeuft nur, was nachweislich fehlt.
+ *
+ * Zwei Dinge laeuft dieses Skript nie: eine Datei ohne Merkmalspruefung — es
+ * weiss dann nicht, ob sie steht — und eine Datei ohne Messergebnis, weil die
+ * Abfrage fehlschlug. Beides waere geraten.
  *
  * Abbruch
  * -------
@@ -41,69 +60,27 @@
  * Neustart an der naechsten Datei moeglich.
  */
 
-import fs from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const API = "https://api.supabase.com/v1";
+import {
+  MIGRATIONEN,
+  PRUEFUNGEN,
+  dateienAufPlatte,
+  frage,
+  liesEnv,
+  projektRef,
+} from "./migrationen.mjs";
 
-/** Reihenfolge ist Absicht: 003 legt user_id an, 004 indiziert darauf,
- *  005 braucht 003, 006 braucht 005, 007 braucht 006. */
-const STAND = ["003-auth-und-user-daten.sql", "004-leistung.sql", "005-sprachen-und-beisatz.sql", "006-views-auf-sprachcode.sql", "007-gelernt-und-gesehen.sql"];
+const argumente = process.argv.slice(2);
+const trocken = argumente.includes("--trocken");
+const alle = argumente.includes("--alle");
+const genannt = argumente.filter((a) => !a.startsWith("--")).map((a) => `${a}.sql`);
 
-/** Liest .env ohne Bibliothek: keine Abhaengigkeit, keine Auswertung von Code. */
-function liesEnv() {
-  const datei = path.join(WURZEL, ".env");
-  if (!fs.existsSync(datei)) {
-    console.error(".env nicht gefunden.");
-    process.exit(1);
-  }
-  const raus = {};
-  for (const zeile of fs.readFileSync(datei, "utf8").split("\n")) {
-    const t = zeile.trim();
-    if (!t || t.startsWith("#")) continue;
-    const i = t.indexOf("=");
-    if (i < 1) continue;
-    let wert = t.slice(i + 1).trim();
-    if (wert.startsWith('"') && wert.endsWith('"')) wert = wert.slice(1, -1);
-    raus[t.slice(0, i).trim()] = wert;
-  }
-  return raus;
-}
-
-function projektRef(env) {
-  // Aus der Projekt-URL. https://<ref>.supabase.co -> <ref>
-  const u = env.NEXT_PUBLIC_SUPABASE_URL || "";
-  const m = u.match(/^https:\/\/([a-z0-9]+)\.supabase\./i);
-  if (!m) {
-    console.error("NEXT_PUBLIC_SUPABASE_URL in .env hat kein https://<ref>.supabase.co");
-    process.exit(1);
-  }
-  return m[1];
-}
-
-async function fuehrenAus(ref, token, sql) {
-  const antwort = await fetch(`${API}/projects/${ref}/database/query`, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ query: sql }),
-  });
-  const text = await antwort.text();
-  let daten = null;
-  try {
-    daten = JSON.parse(text);
-  } catch {
-    /* keine JSON-Antwort: siehe unten */
-  }
-  if (!antwort.ok) {
-    const detail = daten?.message || daten?.error || text.slice(0, 400);
-    const neuer = new Error(detail);
-    neuer.status = antwort.status;
-    throw neuer;
-  }
-  return daten;
-}
+const ok = (t) => `\x1b[32m${t}\x1b[0m`;
+const schlecht = (t) => `\x1b[31m${t}\x1b[0m`;
+const gelb = (t) => `\x1b[33m${t}\x1b[0m`;
+const dick = (t) => `\x1b[1m${t}\x1b[0m`;
 
 /** Kuerzt sehr lange Ausgaben, damit ein Terminal nicht zuschwimmt. */
 function kurz(text, max = 400) {
@@ -111,57 +88,225 @@ function kurz(text, max = 400) {
   return s.length > max ? `${s.slice(0, max)}…` : s;
 }
 
-const argumente = process.argv.slice(2);
-const trocken = argumente.includes("--trocken");
-const dateien = argumente.filter((a) => !a.startsWith("--")).map((a) => `${a}.sql`);
-const liste = dateien.length ? dateien : STAND;
+function zeigeZeile(datei, zustand) {
+  const p = path.join(MIGRATIONEN, datei);
+  const gross = existsSync(p) ? statSync(p).size : 0;
+  const zeilen = existsSync(p) ? readFileSync(p, "utf8").split("\n").length : 0;
+  const zustandsText = {
+    da: ok("da      "),
+    fehlt: schlecht("FEHLT   "),
+    egal: gelb("egal    "),
+    unbekannt: gelb("?       "),
+  }[zustand] ?? gelb("offen   ");
+  console.log(`  ${zustandsText} supabase/migrations/${datei}  ${zeilen} Zeilen, ${gross} Byte`);
+}
+
+/**
+ * Wiederholung fuer Leseabfragen, mit wachsender Wartezeit.
+ *
+ * Bewusst NICHT in `frage()` und bewusst nur fuer Messungen: die Management-API
+ * drosselt, und beim ersten Durchlauf nach einer Pause flog genau eine der
+ * fuenfzehn Abfragen heraus. Eine Migrationsanfrage darf man dagegen nicht
+ * wiederholen — bricht sie nach dem Senden ab, kann die Datei halb gelaufen
+ * sein, und derselbe Aufruf koennte sie ein zweites Mal anwenden.
+ */
+async function messeMitWiederholung(ref, token, sql) {
+  let letzter;
+  for (let versuch = 1; versuch <= 3; versuch += 1) {
+    try {
+      return await frage(ref, token, sql);
+    } catch (fehler) {
+      letzter = fehler;
+      if (versuch < 3) await new Promise((r) => setTimeout(r, 400 * versuch));
+    }
+  }
+  throw letzter;
+}
+
+/** Misst jede Merkmalspruefung. null heisst: Abfrage fehlgeschlagen, also unbekannt. */
+async function messe(ref, token, vorhanden) {
+  const stand = new Map();
+  for (const p of PRUEFUNGEN) {
+    if (!vorhanden.includes(p.datei)) continue;
+    try {
+      stand.set(p.datei, {
+        zustand: (await messeMitWiederholung(ref, token, p.sql)).da === true,
+        merkmal: p.merkmal,
+        optional: !!p.optional,
+      });
+    } catch (fehler) {
+      stand.set(p.datei, { zustand: null, merkmal: p.merkmal, optional: !!p.optional, fehler: fehler.message });
+    }
+  }
+  return stand;
+}
 
 const env = liesEnv();
 const token = env.SUPABASE_ACCESS_TOKEN;
-const ref = projektRef(env);
 
-console.log(`Projekt  ${ref}`);
-console.log(`Dateien  ${liste.length ? liste.join(" -> ") : "keine"}`);
-
-if (!token) {
+if (!env.NEXT_PUBLIC_SUPABASE_URL || !token) {
   console.error(
-    "\nSUPABASE_ACCESS_TOKEN fehlt in .env.\n" +
-      "  Supabase → Settings → Account → Access Tokens → Generate new token,\n" +
-      "  dann die Zeile SUPABASE_ACCESS_TOKEN=sbp_... in .env eintragen.",
+    "\nEs fehlt eine der beiden Angaben:\n" +
+      "  NEXT_PUBLIC_SUPABASE_URL   aus .env\n" +
+      "  SUPABASE_ACCESS_TOKEN      aus den Supabase-Projekteinstellungen\n",
   );
   process.exit(1);
 }
+
+let ref;
+try {
+  ref = projektRef(env);
+} catch (fehler) {
+  console.error(fehler.message);
+  process.exit(1);
+}
+
 if (/^dein|^\s*$|xxx|platzhalter/i.test(token)) {
   console.error("\nSUPABASE_ACCESS_TOKEN sieht noch nach einem Platzhalter aus. Bitte einen echten Token eintragen.");
   process.exit(1);
 }
-if (trocken) {
-  console.log("\n--trocken: es wird nichts ausgeführt. Die Dateien sind:");
-  for (const d of liste) {
-    const p = path.join(WURZEL, "supabase", "migrations", d);
-    const da = fs.existsSync(p);
-    const gross = da ? fs.statSync(p).size : 0;
-    const zeilen = da ? fs.readFileSync(p, "utf8").split("\n").length : 0;
-    console.log(`  ${da ? "  " : "! "}supabase/migrations/${d}  ${da ? `${zeilen} Zeilen, ${gross} Byte` : "FEHLT"}`);
+
+console.log(`Projekt  ${ref}`);
+
+/* -------------------------------------------------- Was steht ueberhaupt da */
+
+const vorhanden = dateienAufPlatte();
+const bekannt = new Set(PRUEFUNGEN.map((p) => p.datei));
+const ohnePruefung = vorhanden.filter((f) => !bekannt.has(f));
+
+if (ohnePruefung.length > 0) {
+  console.error(
+    schlecht("\nDateien ohne Merkmalspruefung in scripts/migrationen.mjs:") +
+      `\n  ${ohnePruefung.join("\n  ")}\n` +
+      gelb(
+        "\n  Ohne Pruefung weiss dieses Skript nicht, ob die Datei schon steht, und\n" +
+          "  wuerde sie nach einem Zufall ausfuehren oder ueberspringen. Beides ist\n" +
+          "  geraten. Bitte erst einen Eintrag mit Merkmal ergaenzen — mit einem\n" +
+          "  Satz, wofuer das Merkmal steht.",
+      ),
+  );
+  process.exit(1);
+}
+
+const eintraegeOhneDatei = [...bekannt].filter((f) => !vorhanden.includes(f));
+if (eintraegeOhneDatei.length > 0) {
+  console.error(
+    schlecht("\nPruefungen ohne Datei: " + eintraegeOhneDatei.join(", ")) +
+      gelb("\n  Umbenannt oder geloescht? Eintrag mit anpassen."),
+  );
+  process.exit(1);
+}
+
+/* -------------------------------------------------------------- Der Plan */
+
+const stand = await messe(ref, token, vorhanden);
+
+/*
+ * "egal" heisst: die Datei darf ungelaufen sein (003b tut nichts mehr). Sie wird
+ * gezeigt, aber nicht ausgefuehrt — sonst laeuft bei jedem Aufruf ein migration
+ * ohne Wirkung und das Log sieht nach Arbeit aus.
+ */
+function zustandVon(datei) {
+  const e = stand.get(datei);
+  if (!e) return "unbekannt";
+  if (e.zustand === true) return "da";
+  if (e.zustand === false) return e.optional ? "egal" : "fehlt";
+  return "unbekannt";
+}
+
+const fehlend = vorhanden.filter((d) => zustandVon(d) === "fehlt");
+const unbestimmt = vorhanden.filter((d) => zustandVon(d) === "unbekannt");
+
+if (alle) {
+  /* nichts zu validieren: --alle nimmt jede Datei auf der Platte */
+} else if (genannt.length > 0) {
+  for (const d of genannt) {
+    if (!vorhanden.includes(d)) {
+      console.error(schlecht(`FEHLER  supabase/migrations/${d} gibt es nicht.`));
+      process.exit(1);
+    }
   }
+  /* genannte Dateien sind bereits auf Existenz geprueft */
+}
+
+console.log(`Dateien  ${vorhanden.length} auf der Platte, ${fehlend.length} fehlen laut Messung\n`);
+
+if (unbestimmt.length > 0) {
+  console.error(
+    gelb(`${unbestimmt.length} Pruefung(en) fehlgeschlagen, Stand unbekannt:`) +
+      `\n${unbestimmt
+        .map((d) => `  ${d}\n    ${kurz(stand.get(d).fehler, 200)}`)
+        .join("\n")}\n` +
+      gelb(
+        "  Sie werden weder ausgefuehrt noch als erledigt gemeldet — dreimal " +
+          "versucht.\n  `npm run db:pruefen` sagt mehr.\n",
+      ),
+  );
+}
+
+/*
+ * Wer laeuft, steht genau einmal hier fest. Sonst zeigen Anzeige und Ausfuehrung
+ * leicht verschiedene Dateien — und das waere genau die Sorte Fehler, die dieses
+ * Projekt gerade abstellt.
+ */
+/*
+ * Gezeigt wird immer der ganze Bestand, nicht nur die Auswahl: der Wert von
+ * --trocken ist gerade, dass man sieht, was steht und was fehlt. Angezeigt wird
+ * jede Datei; "→ laeuft" steht nur an den, die diese Runde wirklich trifft.
+ */
+const gezeigt = genannt.length > 0 ? vorhanden.filter((d) => genannt.includes(d)) : vorhanden;
+const plan = gezeigt.map((datei) => {
+  const zustand = zustandVon(datei);
+  const ausdruecklich = genannt.length > 0 && genannt.includes(datei);
+  const laeuft = (alle || ausdruecklich || zustand === "fehlt") && zustand !== "unbekannt";
+  return { datei, zustand, laeuft };
+});
+
+console.log(dick("Plan"));
+for (const eintrag of plan) {
+  zeigeZeile(eintrag.datei, eintrag.laeuft ? "fehlt" : eintrag.zustand);
+  if (eintrag.laeuft) {
+    console.log(`         ${gelb("→ laeuft")}`);
+  } else if (eintrag.zustand === "da" && (alle || genannt.length > 0)) {
+    console.log(`         ${gelb("→ steht bereits, wird nur auf ausdruecklichen Wunsch wiederholt")}`);
+  }
+}
+
+const laufende = plan.filter((e) => e.laeuft);
+
+if (alle) {
+  console.log(
+    gelb(
+      "\n--alle: jede Datei laeuft erneut, auch die, die schon steht. Ein erneuter Lauf\n" +
+        "  kann Daten veraendern (015 setzt Rechte zurueck, 014 rechnet Bestand um).\n" +
+        "  Nur mit Absicht.",
+    ),
+  );
+} else if (fehlend.length === 0) {
+  console.log(ok("\nEs fehlt nichts. Nichts auszufuehren."));
+}
+
+if (trocken) {
+  console.log("\n--trocken: es wird nichts ausgefuehrt.");
   process.exit(0);
 }
 
-console.log(`Token    vorhanden (${token.length} Zeichen, wird nicht ausgegeben)\n`);
+if (laufende.length === 0) {
+  console.log(ok("\nNichts ausgefuehrt."));
+  process.exit(0);
+}
+
+console.log(`\nToken    vorhanden (${token.length} Zeichen, wird nicht ausgegeben)\n`);
 
 let schritt = 0;
-for (const datei of liste) {
+for (const { datei } of laufende) {
   schritt += 1;
-  const pfad = path.join(WURZEL, "supabase", "migrations", datei);
-  if (!fs.existsSync(pfad)) {
-    console.error(`FEHLER  supabase/migrations/${datei} gibt es nicht.`);
-    process.exit(1);
-  }
-  const sql = fs.readFileSync(pfad, "utf8");
+  const pfad = path.join(MIGRATIONEN, datei);
+  const sql = readFileSync(pfad, "utf8");
   const t0 = Date.now();
-  process.stdout.write(`[${schritt}/${liste.length}] ${datei} … `);
+  process.stdout.write(`[${schritt}/${laufende.length}] ${datei} … `);
   try {
-    const ergebnis = await fuehrenAus(ref, token, sql);
+    const ergebnis = await frage(ref, token, sql);
     const dauer = ((Date.now() - t0) / 1000).toFixed(1);
     const anzahl = Array.isArray(ergebnis) ? `${ergebnis.length} Zeilen` : kurz(ergebnis);
     console.log(`ok (${dauer}s)${anzahl ? ` — ${anzahl}` : ""}`);
@@ -171,16 +316,20 @@ for (const datei of liste) {
     if (fehler.status === 401) {
       console.error("  Der Token wurde abgelehnt. Wahrscheinlich ist er abgelaufen oder widerrufen.");
     }
+    const rest = laufende.slice(schritt).map((d) => d.datei.replace(/\.sql$/, ""));
     console.error(
-      `  Ab hier laeuft nichts mehr. ${liste.length - schritt} Datei(en) wurden nicht ausgefuehrt.\n` +
+      `  Ab hier laeuft nichts mehr. ${rest.length} Datei(en) wurden nicht ausgefuehrt.\n` +
         `  Nach dem Beheben erneut starten:\n` +
-        `    npm run db:migrieren -- ${liste.slice(schritt).map((d) => d.replace(/\.sql$/, "")).join(" ")}`,
+        `    npm run db:migrieren -- ${rest.join(" ")}\n` +
+        gelb(
+          "  Danach bitte `npm run db:pruefen` — ob eine Datei wirklich steht, zeigt\n" +
+            "  erst ihr Merkmal, nicht ihre Protokollzeile.",
+        ),
     );
     process.exit(1);
   }
 }
 
-console.log("\nAlle Dateien gelaufen. Jetzt pruefen, ob die Datenbank wirklich das zeigt:");
-console.log("  npm run db:status");
-console.log("  curl -s \"$NEXT_PUBLIC_SUPABASE_URL/rest/v1/sprachen?select=code,name&limit=3\" \\");
-console.log("    -H \"apikey: $NEXT_PUBLIC_SUPABASE_ANON_KEY\"");
+console.log(ok(`\n${laufende.length} Datei(en) gelaufen. Jetzt das, was wirklich zaehlt:`));
+console.log("  npm run db:pruefen");
+console.log(gelb("  Und danach `npm run db:status` fuer die Daten selbst.\n"));

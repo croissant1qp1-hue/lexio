@@ -659,12 +659,21 @@ an bestehendem Code ist, sondern Absicherung:
    zeigen.
 3. **Versions-Tracking für die Migrationen.** *Teilweise erledigt (Phase 4):*
    die Dateien liegen in `supabase/migrations/` und werden über die
-   Management-API ausgeführt. **Offen:** `scripts/db-migrieren.mjs` liest
-   weiterhin nicht das Verzeichnis, sondern eine fest verdrahtete Liste
-   (`STAND`, 003–007); jede Datei über 007 muss von Hand übergeben werden. Und
-   014 war nicht wiederholbar, bis ein `on conflict` dazukam. Beides gehört in
-   dieselbe Schale: eine Migration, die man nicht blind zweimal laufen lassen
-   kann, lädt zum Überspringen ein. Genau so ist es gekommen.
+   Management-API ausgeführt. **Erledigt am 2026-10-04, und es war schlimmer
+   als notiert:** `scripts/db-migrieren.mjs` führte nicht nur „nur die genannten
+   Dateien" aus, sondern **fünf von fünfzehn** — eine fest verdrahtete Konstante
+   `STAND` mit 003 bis 007. `npm run db:migrieren` ohne Argumente meldete danach
+   „Alle Dateien gelaufen", darunter wäre 015 nie gelaufen, die Rechte-Reparatur
+   aus Punkt 10. Nachgewiesen mit `--trocken`.
+   Das Skript liest jetzt das Verzeichnis und fragt die Datenbank, statt zu
+   raten: `scripts/migrationen.mjs` hält Verzeichnis und Merkmalsproben
+   gemeinsam, `db:migrieren.mjs` führt nur aus, was nachweislich fehlt, verweigert
+   Dateien ohne Probe und meldet eine abgebrochene Messung als unbekannt
+   statt als erledigt. Sieben Tests in `tests/migrationen.test.ts`.
+   **Offen bleibt:** es gibt weiterhin keine Tabelle angewandter Migrationen —
+   014 war nur nach einem `on conflict` wiederholbar, und das ist von Hand
+   entstanden. Gemessen statt gespeichert ist besser als geraten, aber kein
+   Verlauf.
 4. **`003b` — erledigt, und zwar durch Unschädlichmachen.**
 5. **Der Wortlisten-Import legt doppelte Karten an — und der Kommentar im
    Skript behauptet, er verhindere genau das.** Gefunden am 2026-10-04 durch

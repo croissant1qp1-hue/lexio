@@ -2070,14 +2070,57 @@ Datei, die abbricht, lässt die vorherigen Anweisungen stehen — sieht aus wie
 erfolgreich. `scripts/db-migrieren.mjs` meldet das auch als `ok`, weil er nur
 die *letzte* Anweisung sieht. Zwei Nebenbefunde aus derselben Runde:
 
-* `scripts/db-migrieren.mjs` hat eine fest verdrahtete Standardliste (003–007)
-  und liest nicht das Verzeichnis, auch wenn die Doku das nahelegt. 013/014
-  mussten ausdrücklich übergeben werden.
+* ~~`scripts/db-migrieren.mjs` hat eine fest verdrahtete Standardliste
+  (003–007) und liest nicht das Verzeichnis.~~ **Erledigt**, siehe Nachtrag
+  unten: Das Skript liest heute das Verzeichnis und fragt die Datenbank.
 * `tests/sql-paritaet.test.ts` nahm die letzte Datei, die den Funktionsnamen
   **erwähnt** — seit 015 also die Rechte-Migration, und die Tests prüften
   `revoke`-Zeilen gegen eine Bewertungsliste. Der Helper sucht jetzt echte
   `create [or replace] function`-Blöcke. Gegenprobe: mit kaputter
   Bewertungsliste schlägt der Test wieder fehl.
+
+## Nachtrag vom 2026-10-04 — `db:migrieren` führt keine Liste mehr, sondern misst
+
+Der Nebenbefund oben war ernster, als er in einem Absatz nebenbei klang. Nachgewiesen
+mit `--trocken`: `npm run db:migrieren` **ohne Argumente** führt fünf Dateien aus
+(003 bis 007, fest verdrahtet in einer Konstante namens `STAND`) und schließt mit
+„Alle Dateien gelaufen". Auf der Platte lagen zu dem Zeitpunkt **fünfzehn**.
+Alles ab 008 wäre nie gelaufen — darunter 015, die Rechte-Reparatur aus Punkt 10,
+deren Fehlen live messbar war. Auf einer frischen Datenbank wäre die App danach
+gestanden, "Migration gelaufen" hätte gesagt, und gefehlt hätte fast alles.
+
+> **Erledigt, ohne Datenbankänderung.** `scripts/migrationen.mjs` hält jetzt
+> beides: das Verzeichnis und die Merkmalsproben aus `scripts/db-pruefen.mjs`.
+> `db-migrieren.mjs` liest daraus und macht drei Dinge anders:
+>
+> 1. **Ohne Argument misst es.** Es fragt jede Merkmalsprobe ab und führt nur aus,
+>    was nachweislich fehlt. Auf der Live-Datenbank: „15 auf der Platte, 0 fehlen
+>    laut Messung", exit 0, ohne einen Schreibzugriff.
+> 2. **Eine Datei ohne Probe führt es nie aus** — sie weicht nicht, ob sie steht.
+>    Gegenprobe mit `016-test.sql`: exit 1 mit der Begründung, statt zu raten.
+> 3. **Eine abgebrochene Messung gilt nicht als „steht"**, sondern als unbekannt
+>    und wird weder ausgeführt noch als erledigt gemeldet.
+>
+> Und die `STAND`-Konstante ist weg, der Zahlensortierer ist numerisch (der
+> String-Sort hätte „10-x" vor „9-x" gelegt) — beides mit sieben Tests in
+> `tests/migrationen.test.ts`, die ohne Token und ohne Projekt auskommen.
+
+Zwei eigene Fehler sind dabei aufgefallen und mitgefixt: der Plan-Block zeigte
+zunächst **gar nichts** an, weil er nur die leere Arbeitsliste darstellte, und
+eine Abfrage flog beim ersten Durchlauf nach einer Pause heraus (die
+Management-API drosselt). Die Wiederholung sitzt deshalb **nur** in der Messung,
+nicht in der gemeinsamen Abfrage — eine Migrationsanfrage darf man nicht
+wiederholen, sonst wendet man dieselbe Datei nach einem Verbindungsabriss ein
+zweites Mal an.
+
+`db:pruefen` wurde auf das gemeinsame Modul umgestellt; die Ausgabe ist
+byteidentisch geblieben (`diff` gegen den Stand davor), sonst wäre es kein
+Umbau, sondern ein Austausch.
+
+**Bewusst nicht gemacht:** eine Tabelle angewandter Migrationen. Sie wäre die
+sauberere Lösung, ändert aber das Schema an einer Datenbank, in der gerade
+alles läuft, und der Aufwand ist nicht abgeschnitten. Das Skript misst jetzt
+statt zu speichern — das ist ehrlicher als vorher und immer noch kein Verlauf.
 
 **Noch offen:** 6 (zwei stille Typ-Casts) und 11 (toter Code).
 
