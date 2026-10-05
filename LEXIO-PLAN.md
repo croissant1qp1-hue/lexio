@@ -114,6 +114,14 @@ gegenfrags erweitert werden.
 | Erinnerung | **Web-Push** |
 | Reihenfolge | Erst Lerneffekt, dann Reichweite |
 
+**Nachtrag 2026-10-05, vom Nutzer entschieden:** Doppelte Wortpaar sind ein
+Fehler, kein Zufall. `POST /api/karten` und `PATCH /api/karten/{id}` lehnen ein
+Paar ab, das im Set schon steht — getrimmt, ohne Beachtung der Groß-/Kleinschreibung,
+gegen den Bestand und gegen den eigenen Stapel. Die Meldung erscheint **sichtbar
+an der betroffenen Formularzeile**, nicht als allgemeiner Fehler. Ersetzt keine
+Datenbank-Eindeutigkeit; die wäre zusätzlich nötig, um gleichzeitige Anfragen
+abzudecken, und ist eine eigene Entscheidung (siehe `OFFENE-PUNKTE.md`).
+
 ---
 
 ## Verifizierter Zustand (2026-09-27)

@@ -796,6 +796,18 @@ export default function VokabelnHinzufuegenSeite() {
             setZaehler((z) => z + gefuelltePaare.length);
             setFertig({ name, slug, anzahl: gefuelltePaare.length });
             setAuswahl(slug);
+
+            /*
+             * Der Erfolg ist vorbei, also ist auch der Status vorbei. Ohne
+             * diesen Zuruecksetzen bleibt `status` auf "speichert" stehen –
+             * die Erfolgsseite zeigt den Knopf nicht, der Zustand lebt aber
+             * weiter. "Noch mehr Woerter" landet dann in Schritt 2 und 3 mit
+             * einem Knopf, der dauerhaft "Speichert…" anzeigt und `disabled`
+             * ist, und `speichern()` steigt ueber ihre eigene erste Bedingung
+             * sofort aus. Symptom: nach dem ersten Speichern laesst sich kein
+             * weiteres Wort mehr eintragen – gueltige wie doppelte.
+             */
+            setStatus("idle");
         } catch (fehler) {
             /*
              * Bei einem Feldfehler (unvollstaendiges Paar) zurueck in Schritt

@@ -615,6 +615,43 @@ heißt `karten` und nicht `karteikarten`, und für 011 hätte ich fast das
 falsche Merkmal genommen. Eine Merkmalsliste, die man nicht gegen die Datenbank
 verifiziert, ist nur eine andere Behauptung.
 
+## Nachtrag 2026-10-05 — beim Prüfen des Dublettenschutzes gefunden
+
+Beim Testen von „doppelte Paare werden abgelehnt" (siehe Punkt 5) hing das
+Formular nach dem ersten Speichern fest. Knopf auf **„Speichert…"**, dauerhaft
+`disabled`, und **kein einziger Request** ging raus — der Server bekam nichts zu
+sehen. Betroffen war jede weitere Karte, nicht nur doppelte: auch ein gültiges
+„Fisch/fish" blieb hängen.
+
+Ursache: `status` wird nach dem Erfolg nicht zurückgesetzt. Der Erfolgsbildschirm
+zeigt den Speichern-Knopf nicht, der Zustand lebt aber weiter. „Noch mehr Wörter"
+führt zurück in die Eingabe, wo derselbe Zustand den Knopf sperrt — und
+`speichern()` steigt über ihre erste Zeile sofort aus:
+
+```ts
+if (status === "speichert" || gefuelltePaare.length === 0) return;
+```
+
+Behoben im Erfolgszweig von `speichern()` (`setStatus("idle")` nach `setFertig`),
+mit `tests/hinzufuegen-status.test.ts` als Regressionstest.
+
+Bemerkenswert an der Suche: Es sah aus wie ein Fehler des neuen Dublettenschutzes
+und war es nicht. Zwei Dinge haben in die Irre geführt, beide überzeugend
+plausibel:
+
+- Ein `pkill -f "next-server"` hat die eigene Shell mitgetroffen, weil das Muster
+  in ihrer Kommandozeile stand. Der Befehl lief ins Zeitlimit und lieferte
+  keinerlei Ausgabe — nach einem Timeout ist das erst einmal kein Beweis für
+  irgendeine Ursache.
+- `ss -tn | grep 3000` zeigte keine Verbindung, was nach „der Request ist
+  abgeschickt und hängt" aussah. Die Gegenprobe im Proxy auf Port 3002 zeigte
+  die Wahrheit: es war **nie** ein Request rausgegangen.
+
+Die eigentliche Diagnose war dann billig: **ein gültiges Paar statt eines
+doppelten** testen. Damit fiel sofort auf, dass es nicht am Dublettenschutz
+liegen konnte — der Hänger war älter als die Änderung, die ihn ausgelöst zu
+haben schien.
+
 ## Geprüft und in Ordnung
 
 Damit man nicht nochmal suchen muss:
@@ -707,11 +744,31 @@ an bestehendem Code ist, sondern Absicherung:
    Der Import fasst auf der **englischen Seite** zusammen. „Köter" und „Hund"
    bedeuten beide „dog" — zwei woertlich verschiedene Karten, von denen der
    Import stillschweigend eine wegwirft. Ob das gewollt ist, entscheidet der
-   Nutzer. Ebenso: Über `POST /api/karten` kann ein Nutzer dasselbe Paar
-   zweimal anlegen, ohne dass etwas stoppt — belegt am eigenen Testset
-   `englisch-testlauf` (2 doppelte Paare: *dog/Hund* und *cat/Katze*, 4
-   überzählige Karten, kein Fortschritt daran). Das Set gehört dem Nutzer,
-   deshalb wird es hier nicht angefasst.
+   Nutzer.
+
+   Die zweite Hälfte ist erledigt. `POST /api/karten` und `PATCH
+   /api/karten/{id}` lehnen ein Wortpaar jetzt ab, das im Set schon steht —
+   getrimmt und ohne Beachtung der Groß-/Kleinschreibung, gegen den Bestand
+   und gegen den eigenen Stapel. Die Ablehnung nennt das betroffene Feld
+   (`frage` bzw. `frage.N`), sodass der Formularzeile eine sichtbare Meldung
+   folgt: *„Pferd / horse" steht schon in diesem Set*. Beides am laufenden
+   System über ein Wegwerf-Konto geprüft, sowohl im Formular als auch gegen
+   die Datenbank. Der Bestand des Testsets blieb dabei unverändert.
+
+   `englisch-testlauf` hatte zwei überzählige Karten (*dog/Hund* und
+   *cat/Katze*). Sie sind entfernt, das Set hat 5 statt 7 Karten, an keiner
+   davon hing Fortschritt. Der Nutzer hat die Bereinigung ausdrücklich
+   freigegeben.
+
+   **Nicht gelöst, weil es eine Entscheidung ist:** die Prüfung läuft in der
+   Route, nicht in der Datenbank. Zwei gleichzeitig eingehende Anfragen können
+   sich zwischen Prüfung und Schreiben noch ins Gehege kommen. Eine
+   Eindeutigkeit je Set wäre die saubere Gegenmassnahme und braucht eine
+   Migration plus die Entscheidung, was mit den bestehenden Sets passiert.
+   Eine SET-Variante auf Basis normalisierter Paare wäre über einen Ausdruck
+   möglich und würde ohne Datenbereinigung auskommen, weil global keine
+   Dublette innerhalb eines Sets existiert — sie müsste nur wieder entfernt
+   werden, sobald die App Zugriff bekommt.
 
    Nebenbefund derselben Messung, unkritisch: vier Sets haben
    `anzahl_karten = 0`, obwohl sie Karten enthalten. Kein Fehler — die Anzeige
