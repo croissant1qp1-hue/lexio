@@ -665,7 +665,50 @@ an bestehendem Code ist, sondern Absicherung:
    014 war nicht wiederholbar, bis ein `on conflict` dazukam. Beides gehört in
    dieselbe Schale: eine Migration, die man nicht blind zweimal laufen lassen
    kann, lädt zum Überspringen ein. Genau so ist es gekommen.
-4. **`003b` — erledigt, und zwar durch Unschädlichmachen.** *Stand 2026-10-04:*
+4. **`003b` — erledigt, und zwar durch Unschädlichmachen.**
+5. **Der Wortlisten-Import legt doppelte Karten an — und der Kommentar im
+   Skript behauptet, er verhindere genau das.** Gefunden am 2026-10-04 durch
+   eine Gegenprobe, nicht durch Lesen: eine Probedatei mit sechs Einträgen,
+   davon einer doppelt, und das Skript meldete „6 Karten".
+
+   Der `NOT EXISTS`-Block im SQL vergleicht `lower(k.antwort)` mit dem, was
+   schon in der Datenbank steht — und sieht die Zeilen **nicht**, die sein
+   eigenes Statement gerade einfügt. Postgres wertet gegen den Zustand *vor*
+   dem Statement aus. Die Sperre wirkt also über Läufe hinweg, nicht innerhalb
+   einer Datei. Dasselbe Statement im Kommentar darüber:
+
+   > Der Schluessel ist die englische Seite, nicht das Paar aus beiden Seiten.
+   > … das Set wuchs von 100 auf 127 Karten – jede doppelt
+
+   Genau dieser Fall ist die Lücke, und `public.karten` fängt nichts auf:
+   geprüft in `pg_constraint` und `pg_indexes`, es gibt außer
+   `karten_pkey (id)` **keine** Eindeutigkeitsbedingung.
+
+   > **Erledigt.** `dateiBefund()` in `scripts/wortlisten-importieren.mjs` prüft
+   > die Datei **vor** dem Schreiben auf doppelte Paare (Groß-/Kleinschreibung
+   > und Randleerzeichen mit) und bricht mit exit 1 ab. Das ist die einzige
+   > Stelle, an der noch nichts in der Datenbank passiert ist. Live belegt:
+   > Gegenprobe exit 1 und `karteikarten_sets`/`karten` unverändert bei 5/2275;
+   > grüner Weg mit `ngsl-top100.json` exit 0 und 100/100. Acht Tests in
+   > `tests/wortlisten-mengen.test.ts`. Nebenbei die versprochene, aber nie
+   > vorhandene Mengenprüfung eingebaut (`Die Mengengleichheit pruefen wir
+   > abschliessend` — Tat: Zahl aus der Datenbank gedruckt).
+
+   **Offen, weil es eine Produktentscheidung ist, nicht ein Fehler:**
+   Der Import fasst auf der **englischen Seite** zusammen. „Köter" und „Hund"
+   bedeuten beide „dog" — zwei woertlich verschiedene Karten, von denen der
+   Import stillschweigend eine wegwirft. Ob das gewollt ist, entscheidet der
+   Nutzer. Ebenso: Über `POST /api/karten` kann ein Nutzer dasselbe Paar
+   zweimal anlegen, ohne dass etwas stoppt — belegt am eigenen Testset
+   `englisch-testlauf` (2 doppelte Paare: *dog/Hund* und *cat/Katze*, 4
+   überzählige Karten, kein Fortschritt daran). Das Set gehört dem Nutzer,
+   deshalb wird es hier nicht angefasst.
+
+   Nebenbefund derselben Messung, unkritisch: vier Sets haben
+   `anzahl_karten = 0`, obwohl sie Karten enthalten. Kein Fehler — die Anzeige
+   nutzt `karten_gesamt`, und `zielKarten` hat gar keinen Leser. Die
+   Migrationen 005 und 006 halten die Unzuverlässigkeit der Spalte bereits
+   fest. *Stand 2026-10-04:*
    Die Datei enthielt nicht mehr den Platzhalter, sondern die echte Konto-ID
    eines echten Kontos. Ausgeführt hätte sie **5 Wortlisten mit 2.275 Karten**
    getroffen, davon **0 mit Fortschritt** — und für jede Karte `gesehen = true`

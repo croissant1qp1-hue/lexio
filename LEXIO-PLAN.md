@@ -1898,6 +1898,40 @@ Die Regel ist wichtig, weil der Build den Fehler **nicht** zeigt: Next führt
 so einen Ordner fröhlich im Routenmanifest, erst die Anfrage liefert 404. Wer
 nicht misst, hält die Seite für erreichbar.
 
+**Ein vierter Fund: der Wortlisten-Import legt doppelte Karten an, und der
+Kommentar im Skript sagt, er verhindere genau das.** Gefunden hat den eine
+Gegenprobe am laufenden System: Probedatei mit sechs Einträgen, einer doppelt,
+Ergebnis „6 Karten". Der `NOT EXISTS`-Block im SQL sieht die Zeilen nicht, die
+sein eigenes Statement einfügt — Postgres wertet gegen den Zustand *vor* dem
+Statement aus. Die Sperre wirkt über Läufe, nicht innerhalb einer Datei. Und
+`public.karten` hat außer `karten_pkey (id)` keine Eindeutigkeitsbedingung
+(geprüft in `pg_constraint` und `pg_indexes`), es fängt also niemand auf.
+
+> **Erledigt, und die versprochene Mengenprüfung gleich mit.** Das Skript
+> kommentierte seit Anbeginn „Die Mengengleichheit pruefen wir abschliessend"
+> und tat es nicht: es las die Zahl aus der Datenbank, druckte sie und meldete
+> „fertig". Ein Import, der 300 von 342 Karten geschafft hätte, wäre als Erfolg
+> durchgegangen — dieselbe Sorte Fehler wie Punkt 10 in `OFFENE-PUNKTE.md`.
+>
+> Jetzt beides: `dateiBefund()` bricht **vor** dem Schreiben ab, wenn ein Paar
+> mehrfach in der Datei steht, und `mengenBefund()` meldet hinterher eine
+> Unterdeckung. Acht Tests in `tests/wortlisten-mengen.test.ts`, live belegt:
+> Gegenprobe exit 1 und Datenbank unverändert bei 5 Sets / 2.275 Karten, grüner
+> Weg mit `ngsl-top100.json` exit 0 bei 100/100.
+>
+> Eine meiner eigenen Erklärungen hat der Live-Test widerlegt, und das ist der
+> Teil, den ich notiere: Ich hatte geschrieben, doppelte englische Seiten
+> würden vom `lower(antwort)`-Abgleich verschluckt. Gegenteil — sie werden
+> **doppelt angelegt**, und die Mengenprüfung blieb deshalb grün, weil 6 = 6.
+> Eine Erklärung, die man nicht am laufenden System geprüft hat, ist hier keine
+> Erklärung, sondern eine Vermutung mit Code drumherum.
+>
+> **Offen gelassen, weil es deine Entscheidung ist:** Der Import fasst auf der
+> englischen Seite zusammen, also würde „Köter" neben „Hund" stillschweigend
+> verschwinden. Ebenso kann `POST /api/karten` dasselbe Paar zweimal anlegen —
+> belegt an deinem Testset `englisch-testlauf` (*dog/Hund* und *cat/Katze*
+> doppelt, kein Fortschritt daran). Beides habe ich nicht angefasst.
+
 **Ein dritter Fund derselben Sorte: 19 Dateipfade, die ins Leere zeigen.** Als
 die Migrationen nach `supabase/migrations/` umgezogen sind (Phase 4), sind die
 Pfade in `SUPABASE-SETPUT.md` mitgewandert — die in ausgeliefertem Code nicht.

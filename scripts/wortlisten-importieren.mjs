@@ -31,7 +31,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const WURZEL = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const API = "https://api.supabase.com/v1";
@@ -105,6 +105,95 @@ async function fuehrenAus(ref, token, sql) {
   return daten;
 }
 
+/**
+ * Welche Paare stehen mehrfach in derselben Datei?
+ *
+ * Das ist die Luecke, die der NOT EXISTS-Block im SQL NICHT schliesst — und
+ * die ein Live-Test am 2026-10-04 gefunden hat. Der Block vergleicht
+ * `lower(k.antwort)` mit dem, was schon in der Datenbank steht, und er sieht
+ * dabei die Zeilen NICHT, die dasselbe Statement gerade einfuegt. Postgres
+ * wertet die Abfrage gegen den Zustand vor dem Statement aus. Zwei gleiche
+ * Paare in einer Datei landen deshalb beide in der Tabelle.
+ *
+ * Nachgewiesen mit einer Probedatei (6 Eintraege, davon eines zweimal):
+ * Das Skript meldete "6 Karten", die Datenbank enthielt 6 Karten — davon
+ * zweimal "probe eins / probe one". Die Mengenpruefung blieb gruen, weil sie
+ * nur zaehlt.
+ *
+ * Und public.karten hat ausser dem Primaerschluessel gar keine Eindeutigkeits-
+ * bedingung (geprueft: pg_constraint und pg_indexes). Niemand faengt es auf.
+ *
+ * Geprueft wird auf das Paar (frage, antwort), nicht auf die englische Seite
+ * allein: "Köter" und "Hund" sind zwei woertlicher verschiedene Karten, auch
+ * wenn beide "dog" bedeuten. Ob der Import auf der englischen Seite
+ * zusammenfasst (das behauptet sein Kommentar), ist eine eigene Frage — siehe
+ * OFFENE-PUNKTE.md.
+ */
+export function dateiBefund(karten) {
+  const gesehen = new Set();
+  const doppelt = [];
+
+  for (const karte of karten) {
+    const frage = String(karte.frage ?? "").trim();
+    const antwort = String(karte.antwort ?? "").trim();
+    const schluessel = JSON.stringify([frage.toLowerCase(), antwort.toLowerCase()]);
+    if (gesehen.has(schluessel)) doppelt.push({ frage, antwort });
+    else gesehen.add(schluessel);
+  }
+
+  return doppelt;
+}
+
+/**
+ * Muss die Datenbank nach dem Import mindestens so viele Karten haben, wie die
+ * Datei vorsieht?
+ *
+ * Der Kommentar am Import versprach diese Pruefung von Anfang an — sie war aber
+ * nirgends: das Skript las die Zahl aus der Datenbank, druckte sie und meldete
+ * "fertig". Ein Import, der 300 von 342 Karten geschafft haette, waere als
+ * Erfolg gemeldet worden. Genau diese Sorte Fehler steht inzwischen dreimal
+ * im Plan (erfundene Null bei /api/sets, "Ergebnis: nichts" beim toten Code,
+ * "ja, die Datei ist geloescht" bei 003b).
+ *
+ * Die Regel ist absichtlich einseitig:
+ *
+ *   inDb < erwartet   FEHLER. Karten fehlen. Der Import hat sie nicht
+ *                     gebracht — etwa weil ein früherer Lauf das Set halb
+ *                     angelegt hat. Was hier NICHT aufgefangen wird, sind
+ *                     doppelte Karten: dieDatei kann zwei gleiche Paare
+ *                     enthalten, und dann stimmt die Zahl trotzdem. Dafuer ist
+ *                     `dateiBefund` da, weiter oben.
+ *   inDb = erwartet   Alles da.
+ *   inDb > erwartet   Erlaubt. Karten werden absichtlich nie geloescht: ein
+ *                     DELETE nimmt per on delete cascade den ganzen
+ *                     Lernfortschritt mit. Wer ein Wort aus der Datei
+ *                     entfernt, laesst die Karte in der Datenbank stehen.
+ *                     Deshalb ist "mehr" kein Fehler, sondern der Normalfall
+ *                     nach dem Weglassen eines Wortes.
+ */
+export function mengenBefund(erwartet, inDb) {
+  if (inDb < erwartet) {
+    return {
+      ok: false,
+      text:
+        `FEHLER: Die Datenbank hat ${inDb} Karten, die Datei ${erwartet}. ` +
+        `Es fehlen ${erwartet - inDb}. Der Import hat sie nicht gebracht. ` +
+        `Nichts ist dabei kaputt, aber die Wortliste ist unvollstaendig, ` +
+        `und das sieht niemand.`,
+    };
+  }
+  if (inDb > erwartet) {
+    return {
+      ok: true,
+      text:
+        `Hinweis: ${inDb - erwartet} Karten mehr als in der Datei. ` +
+        `Das ist erlaubt: Karten werden nie geloescht, weil ein DELETE per ` +
+        `cascade den Lernfortschritt mitnimmt.`,
+    };
+  }
+  return { ok: true, text: `Mengen stimmen: ${inDb} Karten.` };
+}
+
 async function main() {
   const cfg = konfiguration();
   const env = liesEnv();
@@ -131,6 +220,22 @@ async function main() {
   }
   console.log(`\nProjekt ${ref}`);
   console.log(`${cfg.karten.length} Karten im Import, Set "${cfg.name}" (${cfg.slug})\n`);
+
+  /*
+   * Vor dem Schreiben. Dubletten in der Datei wuerde der Import stillschweigend
+   * doppelt anlegen — sie entstehen trotz des NOT EXISTS-Blocks im SQL, weil
+   * ein Statement seine eigenen Zeilen nicht sieht. Abbrechen ist die einzige
+   * Stelle, an der hier noch nichts in der Datenbank passiert ist.
+   */
+  const doppelt = dateiBefund(cfg.karten);
+  if (doppelt.length > 0) {
+    console.error(`ABBRUCH: ${doppelt.length} Paar(e) stehen mehrfach in der Datei.`);
+    console.error("Ohne diese Pruefung wuerde der Import zwei gleiche Karten anlegen;");
+    console.error("die Mengenpruefung am Ende saehe nichts, weil die Zahl dann stimmt.\n");
+    for (const d of doppelt) console.error(`  "${d.frage}" / "${d.antwort}"`);
+    console.error("\nIn der Datei nachsehen, das doppelte Paar entfernen, dann erneut.");
+    process.exit(1);
+  }
 
   /*
    * Ein Befehl, eine Anweisung. Das Set wird mit "on conflict do nothing"
@@ -244,7 +349,19 @@ commit;
     const ergebnis = await fuehrenAus(ref, token, sql);
     const zeile = Array.isArray(ergebnis) ? ergebnis.at(-1) : null;
     if (zeile && typeof zeile === "object" && "karten_gesamt" in zeile) {
-      console.log(`Set "${zeile.slug}" ist fertig – ${zeile.karten_gesamt} Karten darin.\n`);
+      const befund = mengenBefund(cfg.karten.length, zeile.karten_gesamt);
+      if (!befund.ok) {
+        // Die SQL laeuft in begin/commit und ist damit geschrieben — zurueck
+        // gerollt ist hier nichts. exit 1 heisst also nicht "der Import ist
+        // ungeschehen", sondern "die Datenbank enthaelt jetzt weniger Karten,
+        // als die Datei versprochen hat". Der Zustand bleibt, er wird nur
+        // gemeldet statt verschwiegen; wer ihn reparieren will, muss die
+        // doppelten Woerter in der Datei finden, nicht noch einmal laufen.
+        console.error(`\n${befund.text}\n`);
+        process.exit(1);
+      }
+      console.log(`Set "${zeile.slug}" ist fertig – ${zeile.karten_gesamt} Karten darin.`);
+      console.log(`${befund.text}\n`);
     } else {
       console.log(`SQL gelaufen. Ergebnis nicht eindeutig: ${JSON.stringify(ergebnis).slice(0, 200)}\n`);
     }
@@ -257,7 +374,11 @@ commit;
   }
 }
 
-main().catch((fehler) => {
-  console.error(`Fehler: ${fehler.message}`);
-  process.exit(1);
-});
+// Nur starten, wenn diese Datei direkt aufgerufen wird. Sonst kann ein Test
+// `mengenBefund` importieren, ohne dass der Import daneben laeuft.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  main().catch((fehler) => {
+    console.error(`Fehler: ${fehler.message}`);
+    process.exit(1);
+  });
+}
