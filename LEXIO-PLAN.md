@@ -2122,7 +2122,7 @@ sauberere Lösung, ändert aber das Schema an einer Datenbank, in der gerade
 alles läuft, und der Aufwand ist nicht abgeschnitten. Das Skript misst jetzt
 statt zu speichern — das ist ehrlicher als vorher und immer noch kein Verlauf.
 
-**Noch offen:** 6 (zwei stille Typ-Casts) und 11 (toter Code).
+**Noch offen:** nichts aus dieser Liste — 6 und 11 stehen in den beiden nächsten Abschnitten und sind erledigt. Die Zeile stand hier noch offen, während der Plan zwei Seiten weiter das Gegenteil behauptet.
 
 ## Nachtrag vom 2026-10-04 — Punkt 6: der stille Cast ist weg
 
