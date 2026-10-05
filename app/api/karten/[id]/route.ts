@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
 import { migrationsMeldung } from "@/lib/db-fehler";
+import { doppelteIndizes, duplikatMeldung } from "@/lib/karten-duplikat";
 
 const MAX_LAENGE = 200;
 const MAX_SATZ = 300;
@@ -179,6 +180,50 @@ export async function PATCH(
   const geprueft = await karteOderFehler(supabase, user.id, id);
   if ("antwort" in geprueft) return geprueft.antwort;
   const karte = geprueft.karte;
+
+  /*
+   * Dieselbe Dublettenfrage wie beim Anlegen — sonst waere die Sperre dort nur
+   * Dekoration: `bearbeiten` macht dasselbe Paar genauso leicht wie `hinzufuegen`.
+   *
+   * Geprueft wird nur, wenn sich tatsaechlich Begriff oder Uebersetzung
+   * aendern. Wird nur ein Beispielsatz gepflegt, ist das Paar unveraendert, und
+   * eine Meldung wie "steht schon in diesem Set" waere dann einfach falsch.
+   * (`aenderung` enthaelt nur die Felder, die wirklich neu geschrieben werden,
+   * `null` bedeutet hier "loeschen", nicht "unveraendert".)
+   */
+  if (aenderung.frage !== undefined || aenderung.antwort !== undefined) {
+    /*
+     * Ohne `limit`, aus demselben Grund wie beim Anlegen: eine stillschweigende
+     * Grenze waere eine Pruefung, die ab einer gewissen Menge nicht mehr prueft.
+     * Die eigene Karte ist per `neq` ausgenommen — sonst waere jede Karte für
+     * sich selbst ein Duplikat.
+     */
+    const { data: bestand, error: bestandFehler } = await supabase
+      .from("karten")
+      .select("frage, antwort")
+      .eq("set_id", karte.set_id)
+      .neq("id", karte.id);
+
+    if (bestandFehler) {
+      return NextResponse.json({ error: bestandFehler.message }, { status: 500 });
+    }
+
+    const endFrage = aenderung.frage ?? karte.frage;
+    const endAntwort = aenderung.antwort ?? karte.antwort;
+
+    if (
+      doppelteIndizes(
+        [{ frage: endFrage, antwort: endAntwort }],
+        (bestand ?? []) as { frage: string; antwort: string }[],
+      ).length > 0
+    ) {
+      const paar = { frage: endFrage, antwort: endAntwort };
+      return NextResponse.json(
+        { error: "Doppeltes Wortpaar", felder: { frage: duplikatMeldung(paar) } },
+        { status: 400 },
+      );
+    }
+  }
 
   /*
    * `.eq("set_id", karte.set_id)` ist hier Pflicht und nicht Redundanz. Die

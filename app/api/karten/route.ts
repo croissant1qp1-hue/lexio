@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
 import { migrationsMeldung } from "@/lib/db-fehler";
+import { doppelteIndizes, duplikatMeldung } from "@/lib/karten-duplikat";
 
 const MAX_LAENGE = 200;
 
@@ -54,6 +55,17 @@ type Paar = {
 const MAX_BEISPIEL = { beispielsatz: MAX_SATZ, beispiel_uebersetzung: MAX_SATZ } as const;
 
 /**
+ * Der Feldname, an dem die Oberflaeche eine Meldung zu einem Paar anhaengt.
+ *
+ * Beim Stapel traegt jede Zeile ihren Index ("frage.3"), beim einzelnen Paar
+ * nicht. Das ist die ganze Konvention — sie steht an zwei Stellen, deshalb
+ * gehoert sie in eine Funktion und nicht zweimal in eine Schleife.
+ */
+function feldName(name: string, index: number): string {
+  return index === 0 ? name : `${name}.${index}`;
+}
+
+/**
  * Prueft ein Paar und liefert die bereinigten Texte. Fehler landen in
  * `fehler` unter einem Schluessel, den die Oberflaeche dem Feld zuordnen kann.
  */
@@ -69,7 +81,7 @@ function pruefePaar(
   // Nur beide leer heisst "Zeile nicht ausgefuellt".
   if (!frage && !antwort) return null;
 
-  const feld = (name: string) => (index === 0 ? name : `${name}.${index}`);
+  const feld = (name: string) => feldName(name, index);
 
   /*
    * Nur die Fehler DIESES Paares zaehlen. Vorher stand hier
@@ -359,6 +371,49 @@ export async function POST(request: Request) {
       },
       { status: 403 },
     );
+  }
+
+  /*
+   * Steht das Paar schon in diesem Set?
+   *
+   * Gemessen am 2026-10-04 am eigenen Testset `englisch-testlauf`: *dog/Hund*
+   * und *cat/Katze* lagen dort je zweimal, weil hier nichts geprueft wurde und
+   * `public.karten` ausser dem Primaerschluessel keine Eindeutigkeit kennt. In
+   * der Lernrunde steht dasselbe Wort dann zweimal im Stapel, und der Fortschritt
+   * zaehlt es zweimal.
+   *
+   * OHNE `limit`, im Gegensatz zu GET weiter oben. Eine Grenze wuerde die
+   * Pruefung ab einer gewissen Bestandsgroesse stillschweigend ausfallen lassen
+   * — und eine Pruefung, die manchmal nicht mehr prueft, ist schlimmer als gar
+   * keine: Sie meldet Erfolg fuer etwas, das sie nicht weiss. Gelesen werden
+   * zwei Spalten ohne Index, das ist klein; die Wortlisten (zwei Tausend
+   * Karten) sind hier ohnehin nicht erreichbar, weil `:user_id !== user.id`
+   * schon weiter oben abgewiesen wurde.
+   */
+  const { data: bestand, error: bestandFehler } = await supabase
+    .from("karten")
+    .select("frage, antwort")
+    .eq("set_id", set.id);
+
+  if (bestandFehler) {
+    return NextResponse.json({ error: bestandFehler.message }, { status: 500 });
+  }
+
+  /*
+   * Gegen den Bestand UND gegen die eigenen Zeilen. Nur gegen den Bestand zu
+   * pruefen waere die halbe Sache: ein Stapel, in dem dasselbe Paar zweimal
+   * steht, waere dann genau der Weg, an dem die Pruefung vorbeikommt.
+   */
+  const doppelt = doppelteIndizes(
+    sauber,
+    (bestand ?? []) as { frage: string; antwort: string }[],
+  );
+
+  if (doppelt.length > 0) {
+    for (const index of doppelt) {
+      fehler[feldName("frage", index)] = duplikatMeldung(sauber[index]);
+    }
+    return NextResponse.json({ error: "Doppeltes Wortpaar", felder: fehler }, { status: 400 });
   }
 
   /*
