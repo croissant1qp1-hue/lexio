@@ -283,14 +283,17 @@ export const PRUEFUNGEN = [
   {
     datei: "014-sets-gelernt-reparieren.sql",
     merkmal:
-      "die Tabelle xp_tag_sets und dass antwort_verbuchen sie füllt – " +
-      "ohne beides zählt sets_gelernt ein Set zu wenig",
+      "die Tabelle xp_tag_sets und dass antwort_verbuchen sie eintraegt – " +
+      "ohne beides zaehlt sets_gelernt ein Set zu wenig. Der Eindruck muss " +
+      "das INSERT meinen, nicht das Wort: ein Kommentar mit demselben " +
+      "Namen haette sonst als Beleg durchgehen lassen, als 016 den Satz " +
+      "versehentlich wieder entfernte",
     sql: `select (
             exists (select 1 from information_schema.tables
                      where table_schema='public' and table_name='xp_tag_sets')
         and exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
                      where n.nspname='public' and p.proname='antwort_verbuchen'
-                       and pg_get_functiondef(p.oid) like '%xp_tag_sets%')
+                       and pg_get_functiondef(p.oid) like '%insert into public.xp_tag_sets%')
           ) as da`,
   },
   {
@@ -303,6 +306,20 @@ export const PRUEFUNGEN = [
         and not has_function_privilege('anon','public.antwort_rueckgaengig(uuid)'::regprocedure,'execute')
         and has_function_privilege('authenticated','public.antwort_verbuchen(uuid,uuid,text,integer,boolean,date,integer,boolean)'::regprocedure,'execute')
         and has_function_privilege('authenticated','public.antwort_rueckgaengig(uuid)'::regprocedure,'execute')
+          ) as da`,
+  },
+  {
+    datei: "016-erfolg-senkt-fehler.sql",
+    merkmal:
+      "ein Erfolg senkt die Fehlerzahl wieder, und die Rechte aus 015 gelten " +
+      "noch – ohne die Senkung bleibt jede Karte nach 8 Fehlern für immer " +
+      "ausgeblendet",
+    sql: `select (
+            exists (select 1 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+                     where n.nspname='public' and p.proname='antwort_verbuchen'
+                       and pg_get_functiondef(p.oid) like '%v_fehler_delta%')
+        and not has_function_privilege('anon','public.antwort_verbuchen(uuid,uuid,text,integer,boolean,date,integer,boolean)'::regprocedure,'execute')
+        and has_function_privilege('authenticated','public.antwort_verbuchen(uuid,uuid,text,integer,boolean,date,integer,boolean)'::regprocedure,'execute')
           ) as da`,
   },
 ];

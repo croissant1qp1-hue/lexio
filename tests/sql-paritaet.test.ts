@@ -123,21 +123,71 @@ test("SQL zählt jede Bewertung auf den passenden Zähler", () => {
   }
 });
 
-test("SQL behandelt 'nochmal' als Fehler, alles andere als Treffer", () => {
+test("Ein Erfolg senkt die Fehlerzahl, 'nochmal' hebt sie", () => {
   const sql = letzteDefinition("antwort_verbuchen");
 
-  // Der Leech-Zaehler haengt an fehler. Wird 'schwer' hier faelschlich als
-  // Fehler gezaehlt, verliert die Karte nach acht Schwierigkeiten den Status.
-  const fehler = sql.match(
-    /fehler\s*=\s*public\.karten_fortschritt\.fehler\s*\+\s*case when p_bewertung = '(\w+)'\s+then 1 else 0 end/i,
+  /*
+   * Die Zuteilung steckt in v_fehler_delta, nicht mehr im SQL des UPDATE –
+   * dieselbe Variable, die der INSERT braucht. Zwei Schreibweisen fuer
+   * dieselbe Spalte waeren der Grund, warum diese Zelle hier ohne
+   * Quelltext nicht mehr nachvollziehbar waere.
+   */
+  const zuweisung = sql.match(/v_fehler_delta\s+integer\s*:=\s*case\s+p_bewertung\s*([\s\S]*?)\bend/i);
+  assert.ok(
+    zuweisung,
+    "v_fehler_delta fehlt – die Fehlerzahl wird wieder nur nach oben zaehlt.",
   );
+
+  const erwartet: Record<string, number> = {
+    nochmal: 1,
+    schwer: 0,
+    gut: -1,
+    einfach: -1,
+  };
+  const gefunden: Record<string, number> = {};
+  for (const treffer of zuweisung[1].matchAll(/when\s+'(\w+)'\s+then\s+(-?\d+)/gi)) {
+    gefunden[treffer[1]] = Number(treffer[2]);
+  }
+  assert.deepEqual(
+    Object.keys(gefunden).sort(),
+    Object.keys(erwartet).sort(),
+    "Nicht jede Bewertung bekommt eine Fehleraenderung – eine Neue " +
+      "haette sonst einen Stummwert von null.",
+  );
+  for (const [bewertung, delta] of Object.entries(erwartet)) {
+    assert.equal(
+      gefunden[bewertung],
+      delta,
+      `Bewertung '${bewertung}' soll die Fehlerzahl um ${delta} aendern.`,
+    );
+  }
+
+  /*
+   * Die Anwendung in beiden Zwei-Wege-Zweigen. Fehlte dort das
+   * greatest(..., 0), wuerde eine saubere Karte in negative Fehler laufen
+   * und bei -1 haetten wir eine Schwelle von 8, die nie mehr etwas filtert.
+   */
+  assert.match(
+    sql,
+    /fehler\s*=\s*greatest\(\s*public\.karten_fortschritt\.fehler\s*\+\s*v_fehler_delta\s*,\s*0\s*\)/i,
+    "Der UPDATE-Zweig senkt die Fehlerzahl nicht über v_fehler_delta (bzw. ohne Untergrenze 0).",
+  );
+  assert.match(
+    sql,
+    /values[\s\S]*?greatest\(v_fehler_delta,\s*0\)/i,
+    "Der INSERT-Zweig setzt die Fehlerzahl nicht auf v_fehler_delta – eine neue Zeile waere dadurch immer falsch.",
+  );
+
+  /*
+   * Treffer bleibt so, wie es war: 'nochmal' ist der einzige Nicht-Treffer.
+   * Es zaehlt nicht als Erfolg, aber auch nicht (mehr) als Fehler – das
+   * wuerde eine Karte dafuer bestrafen, dass sie ehrlich als schwer markiert
+   * wurde.
+   */
   const treffer = sql.match(
     /treffer\s*=\s*public\.karten_fortschritt\.treffer\s*\+\s*case when p_bewertung = '(\w+)'\s+then 0 else 1 end/i,
   );
-
-  assert.ok(fehler, "fehler wird in antwort_verbuchen nicht nachgefuehrt");
   assert.ok(treffer, "treffer wird in antwort_verbuchen nicht nachgefuehrt");
-  assert.equal(fehler[1], "nochmal", "nur 'nochmal' darf den Fehlerzaehler erhoehen");
   assert.equal(treffer[1], "nochmal", "nur 'nochmal' darf den Trefferzaehler senken");
 });
 

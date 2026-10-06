@@ -652,6 +652,89 @@ doppelten** testen. Damit fiel sofort auf, dass es nicht am Dublettenschutz
 liegen konnte — der Hänger war älter als die Änderung, die ihn ausgelöst zu
 haben schien.
 
+## Nachtrag 2026-10-06 — beim Prüfen des Leech-Modus gefunden
+
+Der Leech-Modus selbst ist in Ordnung: `?modus=leech` liefert genau die
+Problemskarten, „Trotzdem üben" holt sie in die normale Runde, der Knopf
+steht auf Lernseite, Rundenende und „Alles gelernt", die Tasten 1–4
+bewerten, XP und Stufe wandern korrekt. Geprüft an einem Wegwerf-Set mit
+30 Karten, davon 12 mit `fehler = 9`.
+
+Gefunden wurde etwas anderes: **eine Problemskarte kann diesen Status nicht
+mehr loswerden.**
+
+Vier Karten in einer Runde beantwortet, zwei davon mit „Einfach", zwei mit
+„Gut". Danach in der Datenbank:
+
+```
+z_einfach = 2,  z_gut = 2      (die Bewertungszähler steigen)
+fehler    = 9   (unverändert)
+stufe     = 0 → 2              (die Lernstufe steigt)
+```
+
+`leech` in `app/api/lernen/route.ts` ist `fehler >= LEECH_FEHLER` (8). Ein
+Erfolg senkt `fehler` aber nie — die Formel in `antwort_verbuchen` ist
+`fehler + case when p_bewertung = 'nochmal' then 1 else 0 end`. Sobald eine
+Karte die 8 erreicht hat, taucht sie nie wieder von selbst auf, egal wie oft
+sie danach richtig beantwortet wird. Die einzige Chance bleibt `?modus=leech`.
+
+Der Widerspruch sitzt in der Bewertung „nochmal": sie senkt die Stufe um 2
+und vergibt 0 XP, ist also die *schwerste* der vier — keine falsche Antwort,
+sondern die richtige mit dem Hinweis „das war schwer". Die Spalte zählt
+Fehlschläge, verhält sich aber wie ein Zähler, der nur nach oben darf.
+
+Behoben in `supabase/migrations/016-erfolg-senkt-fehler.sql`:
+
+```
+nochmal → +1   schwer → 0   gut → -1   einfach → -1   (mit Untergrenze 0)
+```
+
+„schwer" bewusst mit 0 und nicht −1: es bedeutet in dieser App ausdrücklich
+nicht „falsch", und eine Karte dafür zu bestrafen, dass sie ehrlich als
+schwer markiert wurde, wäre die Umkehrung von Plan 1.7.
+
+Lebend geprüft: `Wort 1` bei 9 → „Einfach" → **8**, Stufe 0 → 2; noch ein
+Erfolg → **7** und damit raus. Danach zeigte die Leech-Runde `1 / 11` statt
+`1 / 12` und der Hinweis „11 Problemskarten sind ausgeblendet" statt 12.
+
+### Zwei Spuren, die ins Leere führten
+
+**1. Der erste Entwurf von 016 setzte auf 010 auf — falsche Vorlage.**
+`antwort_verbuchen` definieren *sechs* Migrationen (003, 007, 009, 010, 013,
+014), und `create or replace` überschreibt alles, was nicht ausdrücklich
+mitgeschrieben wird. 013 stellt das Tagesziel auf 100, 014 schreibt die
+Set-Zeile des Tages in `xp_tag_sets` — beides war in der ersten Fassung
+weg. Am Code war das unsichtbar; `npm run db:pruefen` hat es gemeldet.
+
+Dabei ist die Prüfung selbst aufgefallen: 014s Merkmal suchte nach dem
+String `xp_tag_sets`, und mein Kommentar in der neuen Datei enthielt genau
+dieses Wort. Ein Kommentar hat die Prüfung bestanden. Das Merkmal sucht
+jetzt `insert into public.xp_tag_sets` und begründet, warum.
+
+**2. `db:pruefen` hätte Fehler 2 auch nicht gefunden.** Die erste Fassung
+griff im `RETURN` auf `public.karten_fortschritt.fehler` zu, wo nach dem
+INSERT keine `FROM`-Klausel mehr offen ist. PostgREST meldete `42P01`
+(missing FROM-clause entry) — und die Lernseite übersetzt genau diese
+Fehlercode-Gruppe in „Lernfortschritt ist nicht eingerichtet – Migration 003
+fehlt", also in die *eine* Richtung, in der man nicht sucht. Der echte Text
+kam erst heraus, als die RPC direkt mit curl aufgerufen wurde. Deshalb:
+Merkmal-Prüfung zeigt, *ob* eine Datei läuft, nicht, *ob* sie funktioniert.
+
+Beide Zusatzfelder (`fehler`, `leech`) in der Rückgabe sind wieder raus —
+von niemandem benutzt, und der Wert steht ohnehin in der Tabelle, aus der
+die nächste Runde `leechAnzahl` neu liest.
+
+### Zwei Vermutungen, die falsch waren
+
+Notiert, damit niemand später etwas „repariert", das funktioniert:
+
+- **„Tippen zum Aufdecken" funktioniert.** Die Karte ist ein
+  `<button onClick={umdrehen}>` über beide Seiten
+  (`lernen-seite.tsx:1042`) — live geklickt, deckt auf.
+- **Die Problemskarte ist beim Üben sichtbar.** Das Label steht auf der
+  *Vorderseite* (`lernen-seite.tsx:1182`), also genau im Moment, in dem man
+  entscheidet. Die Vermutung kam vom Lesen nur der aufgedeckten Seite.
+
 ## Geprüft und in Ordnung
 
 Damit man nicht nochmal suchen muss:
@@ -682,12 +765,15 @@ Damit man nicht nochmal suchen muss:
 Alle elf Punkte sind erledigt. Was bleibt, ist Arbeit, die keine Korrektur
 an bestehendem Code ist, sondern Absicherung:
 
-1. **Prüfen, welche Migrationen wirklich in der Datenbank stehen.** Erledigt
-   ist die *eine* Stichprobe aus Punkt 10 — und die hat gezeigt, dass 013 und
-   014 in Produktion nie fertig angekommen sind, obwohl der Plan sie als
-   abgehakt führt. Es gibt keine Tabelle mit angewandten Migrationen, also
-   ist „läuft" nur am Merkmal erkennbar. Ein `npm run db:status`, das alle
-   Migrationen nacheinander prüft, wäre die Abhilfe.
+1. **Prüfen, welche Migrationen wirklich in der Datenbank stehen.**
+   *Erledigt.* Ausgelöst durch die Stichprobe aus Punkt 10, die zeigte, dass
+   013 und 014 in Produktion nie angekommen waren, obwohl der Plan sie als
+   abgehakt führt. Die Abhilfe heißt `npm run db:pruefen` (nicht
+   `db:status`): ein Merkmal je Datei, gemessen gegen die Datenbank, mit
+   Begründung in `scripts/migrationen.mjs`. **Stand 2026-10-06: alle 16
+   Dateien bis einschließlich 016 `da`.** Getestet ist damit, *ob* die Datei
+   lief — nicht, ob sie funktioniert; der Unterschied ist in Punkt „Nachtrag
+   2026-10-06" am eigenen Beispiel festgehalten.
 2. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** *Erledigt (Phase 4):*
    `tests/sql-paritaet.test.ts` vergleicht Bewertungsliste und Zähler der
    jeweils letzten Funktionsdefinition mit den TypeScript-Konstanten. Genau
