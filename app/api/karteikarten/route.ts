@@ -14,7 +14,7 @@ import { migrationsMeldung } from "@/lib/db-fehler";
 const SPALTEN =
   "slug, name, sprache_code, sprache, sprache_flaeche, sprache_akzent, anzahl_karten, " +
   "karten_gesamt, karten_gelernt, karten_faellig, fortschritt_prozent, eigenes_set, " +
-  "zuletzt_gelernt, user_id";
+  "zuletzt_gelernt, user_id, stufe_durchschnitt, set_level, set_level_anteil";
 
 type Zeile = {
   slug: string;
@@ -31,10 +31,17 @@ type Zeile = {
   eigenes_set: boolean | null;
   zuletzt_gelernt: string | null;
   user_id: string | null;
+  stufe_durchschnitt: number | null;
+  set_level: number | null;
+  set_level_anteil: number | null;
 };
 
 /**
  * Was die Oberflaeche bekommt. `eigen` heisst: gehoert dieser Person.
+ *
+ * `setLevel` (1–7) und `setLevelAnteil` (0–1) kommen seit 017 aus der View.
+ * Die Zahl ist kein eigener Stand, sondern der Durchschnitt der Kartenstufen
+ * dieses Sets – dieselbe Skala, die eine einzelne Karte durchlaeuft.
  */
 type SetAntwort = {
   id: string;
@@ -46,6 +53,9 @@ type SetAntwort = {
   kartenGesamt: number;
   kartenGelernt: number;
   kartenFaellig: number;
+  setLevel: number;
+  setLevelAnteil: number;
+  stufeDurchschnitt: number;
   eigenesSet: boolean;
   eigen: boolean;
   zuletztGelernt: string | null;
@@ -135,6 +145,15 @@ export async function GET() {
     kartenGesamt: row.karten_gesamt ?? 0,
     kartenGelernt: row.karten_gelernt ?? 0,
     kartenFaellig: row.karten_faellig ?? 0,
+    /*
+     * Set-Level aus der View (017). 0 heisst "keine Karten", nicht "noch
+     * nichts gelernt" – die Oberfläche unterscheidet das, indem sie bei
+     * kartenGesamt = 0 gar keine Stufen zeichnet. Ohne diesen Rueckfall
+     * auf 0 waere `null` in einem Zahl-React-Style und damit NaN.
+     */
+    setLevel: row.set_level ?? 0,
+    setLevelAnteil: row.set_level_anteil ?? 0,
+    stufeDurchschnitt: row.stufe_durchschnitt ?? 0,
     eigenesSet: row.eigenes_set ?? false,
     // false heisst: Demoset. Nicht loeschbar, nicht ergaenzbar.
     eigen: row.user_id === user.id,

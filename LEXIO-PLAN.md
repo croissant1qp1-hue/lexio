@@ -122,6 +122,21 @@ an der betroffenen Formularzeile**, nicht als allgemeiner Fehler. Ersetzt keine
 Datenbank-Eindeutigkeit; die wäre zusätzlich nötig, um gleichzeitige Anfragen
 abzudecken, und ist eine eigene Entscheidung (siehe `OFFENE-PUNKTE.md`).
 
+**Nachtrag 2026-10-06, vom Nutzer entschieden („als Fortschritt statt Prozentbalken"):**
+Jede Set-Kachel zeigt eine **Stufe 1–7**, auf derselben Leiter, die eine einzelne
+Karte durchläuft (`INTERVALLE` in `lib/lernlogik.ts`). Definition in
+`supabase/migrations/017-set-level.sql`:
+`set_level = least(7, 1 + floor(avg(coalesce(stufe, 0))))` über **alle** Karten
+des Sets, unbeantwortete zählen 0, plus `set_level_anteil` bis zur nächsten Stufe.
+`fortschritt_prozent` bleibt für Wortschatz-Seite und API bestehen.
+
+Bewusst gekauftes Detail: In einem großen Set (342–773 Karten) bleibt die Stufe
+lange bei 1, weil der Durchschnitt über alle Karten träge ist. Der Prozentbalken
+zeigte dort ohnehin „0 %" (er zählt erst ab Stufe 2) — die Stufe kann nur nicht
+einsamer Einzelkarten wegen springen. Die Alternative „Mittelwert nur über
+gesehene Karten" hätte das Gehirn beschönigt, aber ein Set mit zwei alten Karten
+sofort nach oben gestuft.
+
 ---
 
 ## Verifizierter Zustand (2026-09-27)

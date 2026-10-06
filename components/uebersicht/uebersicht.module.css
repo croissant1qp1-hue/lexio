@@ -246,14 +246,19 @@
 
 /* Der Knopf fuellt die Kachel komplett. Er ist ein eigenes Element, weil der
    Loeschen-Knopf daneben liegen muss – zwei Buttons lassen sich nicht
-   ineinander verschachteln. */
+   ineinander verschachteln.
+
+   Abstand und Innenabstand sind klein gehalten, weil die Kachel quadratisch
+   ist und `overflow: hidden` hat: was hier nicht hineinpasst, wird abgeschnitten
+   und man sieht es nicht, man sieht nur, dass etwas fehlt. Gemessen 2026-10-06
+   ueber 11 Breiten von 320 bis 1920 px mit den Werten 0.24rem/0.88rem. */
 .kachelLernen {
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: 0.3rem;
+    gap: 0.24rem;
     width: 100%;
-    padding: 0.95rem;
+    padding: 0.88rem;
     border: none;
     background: transparent;
     color: inherit;
@@ -283,6 +288,15 @@
     color: var(--text-primary);
     overflow-wrap: break-word;
     hyphens: auto;
+    /* Hoechstens zwei Zeilen. Ohne diese Grenze frisst ein langer Set-Name
+       den Platz, den Level-Zeile und Stufenleiter brauchen – und die
+       quadratische Kachel schneidet sie stillschweigend ab. Wer den
+       vollstaendigen Namen braucht, bekommt ihn im aria-label und im
+       Tooltip (title am Knopf), sowie auf der Lernseite. */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .kachelSprache {
@@ -292,11 +306,21 @@
     color: var(--kachelAkzent, var(--text-muted));
 }
 
+/* Zwei Zeilen ueber der Leiter, weil sie verschiedene Fragen beantworten:
+   die Stufe sagt "wie tief", die Deckung sagt "wie viel". Wer nur eine
+   Zeile nimmt, opfert eine der beiden – und zwar die, die er gerade sucht. */
 .kachelFortschritt {
     margin-top: auto;
     font-family: var(--mono);
     font-size: 0.875rem;
     color: var(--text-secondary);
+}
+
+.kachelGelernt {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
 }
 
 .kachelMeta {
@@ -307,17 +331,38 @@
     color: var(--text-muted);
 }
 
-.kachelBalken {
+/* Stufenleiter 1–7: dieselben sieben Stufen, die eine einzelne Karte
+   durchlaeuft (INTERVALLE in lib/lernlogik.ts). Das Segment der naechsten
+   Stufe ist teilweise gefuellt, damit die Leiter zeigt, wie weit es bis
+   dahin noch ist – das, was der alte Prozentbalken verriet, nur an der
+   Skala, die hier zaehlt. */
+.kachelStufen {
+    display: flex;
+    gap: 3px;
+    margin-top: 0.28rem;
+}
+
+.kachelStufe {
+    flex: 1;
     height: 5px;
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.3);
     overflow: hidden;
 }
 
-.kachelFuellung {
+.kachelStufeVoll,
+.kachelStufeTeil {
+    display: block;
     height: 100%;
     border-radius: 999px;
     background: var(--kachelAkzent, var(--gold));
+}
+
+.kachelStufeVoll {
+    width: 100%;
+}
+
+.kachelStufeTeil {
     transition: width 500ms ease;
 }
 

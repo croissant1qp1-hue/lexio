@@ -322,4 +322,20 @@ export const PRUEFUNGEN = [
         and has_function_privilege('authenticated','public.antwort_verbuchen(uuid,uuid,text,integer,boolean,date,integer,boolean)'::regprocedure,'execute')
           ) as da`,
   },
+  {
+    datei: "017-set-level.sql",
+    merkmal:
+      "die View liefert set_level – ohne die Spalte meldet /api/karteikarten " +
+      "42703 und die Übersicht zeigt kein Set-Level",
+    sql: `select (
+            exists (select 1 from information_schema.columns
+                     where table_schema='public'
+                       and table_name='karteikarten_sets_uebersicht'
+                       and column_name='set_level')
+        and exists (select 1 from pg_views
+                     where schemaname='public'
+                       and viewname='karteikarten_sets_uebersicht'
+                       and definition like '%set_level%')
+          ) as da`,
+  },
 ];

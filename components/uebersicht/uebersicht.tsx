@@ -17,7 +17,19 @@ type SetZeile = {
   kartenGesamt: number;
   kartenGelernt: number;
   kartenFaellig: number;
-  fortschrittProzent: number;
+  /**
+   * Stufe des Sets, 1–7. Aus 017: der Durchschnitt der Kartenstufen, mit
+   * `setLevelAnteil` (0–1) bis zur naechsten Stufe. 0 heisst "keine
+   * Karten", nicht "noch nichts gelernt" – die Kachel unterscheidet das.
+   *
+   * Was hier NICHT mehr steht: `fortschrittProzent`. Der alte Prozentbalken
+   * war das Einzige, was es las, und er zaehlt erst ab Stufe 2 – ein Set mit
+   * 1500 einmal gesehenen Karten und keinem gelernten zeigte 0 %. Die
+   * Route schickt den Wert weiter (andere Seiten lesen ihn), die Kachel
+   * braucht ihn nicht mehr.
+   */
+  setLevel: number;
+  setLevelAnteil: number;
   eigenesSet?: boolean;
   /** true, wenn das Set dieser Person gehoert. Aus 003. */
   eigen?: boolean;
@@ -248,6 +260,11 @@ export default function Uebersicht() {
 
             {sets.map((set) => {
               const farbe = farbeVonSprache(set.sprache);
+              /* Ein Set ohne Karten hat Level 0 – das waere eine Zahl, die
+                 nichts bedeutet, deshalb steht dort "keine Karten" und die
+                 Leiter bleibt leer. */
+              const ohneKarten = set.kartenGesamt === 0;
+              const anteil = Math.min(1, Math.max(0, set.setLevelAnteil));
               return (
                 <div
                   key={set.id}
@@ -263,18 +280,43 @@ export default function Uebersicht() {
                     type="button"
                     className={styles.kachelLernen}
                     onClick={() => router.push(`/lernen/${set.id}`)}
-                    aria-label={`${set.name} lernen, ${set.kartenGelernt} von ${set.kartenGesamt} gelernt`}
+                    /* Die Kachel kuerzt lange Namen auf zwei Zeilen – der volle
+                       Name steht hier als Tooltip und im aria-label darunter. */
+                    title={set.name}
+                    aria-label={
+                      ohneKarten
+                        ? `${set.name} lernen, keine Karten`
+                        : `${set.name} lernen, Level ${set.setLevel} von 7, ` +
+                          `${set.kartenGelernt} von ${set.kartenGesamt} gelernt`
+                    }
                   >
                     <span className={styles.kachelSprache}>{nameVonSprache(set.sprache)}</span>
                     <span className={styles.kachelName}>{set.name}</span>
                     <span className={styles.kachelFortschritt}>
-                      {set.kartenGelernt}/{set.kartenGesamt} gelernt
+                      {ohneKarten ? "Noch keine Karten" : `Level ${set.setLevel}`}
                     </span>
-                    <span className={styles.kachelBalken}>
-                      <span
-                        className={styles.kachelFuellung}
-                        style={{ width: `${Math.min(100, Math.max(0, set.fortschrittProzent))}%` }}
-                      />
+                    {!ohneKarten && (
+                      <span className={styles.kachelGelernt}>
+                        {set.kartenGelernt}/{set.kartenGesamt} gelernt
+                      </span>
+                    )}
+
+                    {/* aria-hidden: die Stufen stehen auch im aria-label,
+                        und sieben Einzelmeldungen "1, 2, 3 …" zaehlen dem
+                        Screenreader nur auf. */}
+                    <span className={styles.kachelStufen} aria-hidden="true">
+                      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+                        <span key={i} className={styles.kachelStufe}>
+                          {i < set.setLevel ? (
+                            <span className={styles.kachelStufeVoll} />
+                          ) : i === set.setLevel ? (
+                            <span
+                              className={styles.kachelStufeTeil}
+                              style={{ width: `${Math.round(anteil * 100)}%` }}
+                            />
+                          ) : null}
+                        </span>
+                      ))}
                     </span>
                   </button>
 

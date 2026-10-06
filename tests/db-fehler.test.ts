@@ -42,6 +42,22 @@ test("fehlende Spalte aus 005/006 nennt 005 und 006, nicht 003", () => {
   assert.ok(!meldung.includes("003-auth"), meldung);
 });
 
+test("fehlende Set-Level-Spalte nennt 017, nicht 003", () => {
+  // 017 haengt set_level an die View. Fehlt sie, sagt die Route das ueber
+  // 42703 – und muss dabei die RICHTIGE Datei nennen, sonst liefert der
+  // Hinweis auf 003 denselben Schaden wie die alten Meldungen: man fuehrt
+  // aus, was schon laeuft, und die fehlende Spalte bleibt.
+  for (const spalte of ["set_level", "set_level_anteil", "stufe_durchschnitt"]) {
+    const meldung = migrationsMeldung({
+      code: "42703",
+      message: `column "karteikarten_sets_uebersicht.${spalte}" does not exist`,
+    });
+    assert.ok(meldung, `Meldung fuer ${spalte} fehlt`);
+    assert.ok(meldung.includes("017-set-level.sql"), meldung);
+    assert.ok(!meldung.includes("003-auth"), meldung);
+  }
+});
+
 test("PGRST204 wie 42703 behandeln", () => {
   // PostgREST meldet fehlende Spalten je nach Weg als 42703 oder PGRST204.
   const meldung = migrationsMeldung({ code: "PGRST204", message: "user_id" });

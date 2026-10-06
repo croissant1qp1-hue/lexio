@@ -13,6 +13,10 @@
  * hiesse: die Kachel oben blendet die Karte aus, die Lernroute zeigt sie
  * trotzdem.
  *
+ * Und die Set-Level-Skala steht seit 017 auch an zwei Stellen: INTERVALLE
+ * in TypeScript (sieben Stufen) und `least(7, ...)` in derselben View. Die
+ * Kachel wuerde sonst ueber dem Level 7 weiterfuellen, das es nicht gibt.
+ *
  * Es wird nicht gegen eine laufende Datenbank getestet, sondern gegen den
  * Quelltext der Migrationen: laeuft die DB auseinander, faellt es hier auf,
  * und zwar bei jedem Build. Der Test liest bewusst die LETZTE Definition
@@ -24,7 +28,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 
-import { BEWERTUNGEN, LEECH_FEHLER } from "../lib/lernlogik.ts";
+import { BEWERTUNGEN, INTERVALLE, LEECH_FEHLER } from "../lib/lernlogik.ts";
 
 const MIGRATIONEN = join(import.meta.dirname, "..", "supabase", "migrations");
 
@@ -66,10 +70,11 @@ function letzteDefinition(name: string): string {
  * Inhalt der View `karteikarten_sets_uebersicht` – aus der LETZTEN
  * Definition.
  *
- * Die View wird von 002, 006, 007 und 009 ersetzt. Frühere Fassungen kennen
- * den Leech-Filter noch gar nicht (er kam mit 009 dazu); zuerst den ersten
- * Treffer zu nehmen, würde also eine uralte Definition prüfen und die
- * Änderung in 009 nicht bemerken. Deshalb von hinten suchen.
+ * Die View wird von 002, 006, 007, 009 und 017 ersetzt. Fruehere Fassungen
+ * kennen den Leech-Filter noch gar nicht (er kam mit 009 dazu); zuerst den
+ * ersten Treffer zu nehmen, wuerde also eine uralte Definition pruefen und die
+ * Aenderung in 009 bzw. die Set-Level-Spalten in 017 nicht bemerken. Deshalb
+ * von hinten suchen.
  */
 function viewUebersicht(): string {
   const dateien = migrationen();
@@ -225,4 +230,94 @@ test("die Route rechnet Stufe und XP mit der getesteten Logik", () => {
   assert.match(route, /xpFuerBewertung\(/, "die Route nutzt xpFuerBewertung nicht");
   assert.match(route, /p_neue_stufe:\s*neueStufe/, "p_neue_stufe wird nicht gesetzt");
   assert.match(route, /p_xp:\s*xp/, "p_xp wird nicht gesetzt");
+});
+
+test("Das Set-Level ist dieselbe Leiter wie die Kartenstufen", () => {
+  /*
+   * 017 haengt set_level an die View. Die Zahl ist kein eigener Stand,
+   * sondern `1 + floor(avg(stufe))` – dieselbe Skala, die eine einzelne
+   * Karte durchlaeuft. Zwei Zahlen, die hier auseinanderlaufen koennten:
+   * die Deckelung (7) und die Skala selbst (INTERVALLE). Beide stehen in
+   * SQL und TypeScript, und beide werden hier gegengelesen.
+   */
+  const view = viewUebersicht();
+
+  for (const spalte of ["stufe_durchschnitt", "set_level", "set_level_anteil"]) {
+    assert.match(
+      view,
+      new RegExp(`\\s+as\\s+${spalte}\\s*($|,)`, "im"),
+      `Spalte ${spalte} fehlt in der letzten Fassung der View – ` +
+        "die Kachel meldet dann 42703 und nennt die falsche Datei.",
+    );
+  }
+
+  // Deckelung: nicht eine eingetippte 7, sondern die Laenge von INTERVALLE.
+  assert.match(
+    view,
+    new RegExp(`least\\(\\s*${INTERVALLE.length}\\s*,`),
+    `set_level wird nicht auf INTERVALLE.length = ${INTERVALLE.length} begrenzt.`,
+  );
+
+  // Basis: der Durchschnitt UEBER ALLE Karten, unbeantwortete zaehlen als 0.
+  // `max(f.stufe)` stünde hier auch als Wort "stufe" – deshalb der volle
+  // Ausdruck: eine Karte darf das ganze Set nicht auf Level 7 ziehen.
+  assert.match(
+    view,
+    /avg\(\s*coalesce\(\s*f\.stufe\s*,\s*0\s*\)\s*\)/i,
+    "set_level beruht nicht auf avg(coalesce(f.stufe, 0)).",
+  );
+
+  // floor, nicht round: bei round waere ein Schnitt von 0,6 schon Level 2,
+  // obwohl keine einzige Karte ueber Stufe 0 waere.
+  assert.match(
+    view,
+    /floor\(\s*avg\(\s*coalesce\(\s*f\.stufe\s*,\s*0\s*\)\s*\)/i,
+    "set_level zaehlt mit round statt floor hoch – die Stufe springt zu frueh.",
+  );
+
+  // Set ohne Karten: 0, damit die Kachel "keine Karten" von "noch nichts
+  // gelernt" unterscheiden kann.
+  assert.match(
+    view,
+    /when\s+count\(k\.id\)\s*=\s*0\s+then\s+0/,
+    "set_level hat keinen Nullfall fuer Sets ohne Karten.",
+  );
+
+  // Auf hoechster Stufe gibt es keinen Rest mehr zu fuellen.
+  assert.match(
+    view,
+    new RegExp(`>=\\s*${INTERVALLE.length}\\s+then\\s+0`),
+    "set_level_anteil fuellt auch auf Level " + INTERVALLE.length + " noch weiter.",
+  );
+});
+
+test("Kachel und Route tragen das Set-Level, nicht mehr den Prozentbalken", () => {
+  const route = readFileSync(
+    join(import.meta.dirname, "..", "app", "api", "karteikarten", "route.ts"),
+    "utf8",
+  );
+  assert.match(
+    route,
+    /set_level,\s*set_level_anteil/,
+    "SPALTEN von /api/karteikarten holt die neuen Spalten nicht.",
+  );
+  assert.match(route, /setLevel:\s*row\.set_level/, "setLevel wird nicht zugeordnet");
+  assert.match(route, /setLevelAnteil:\s*row\.set_level_anteil/);
+
+  const kachel = readFileSync(
+    join(import.meta.dirname, "..", "components", "uebersicht", "uebersicht.tsx"),
+    "utf8",
+  );
+  assert.match(kachel, /Level \$\{set\.setLevel\}/, "die Kachel zeigt keine Level an");
+  assert.ok(
+    !kachel.includes("kachelBalken"),
+    "Der alte Prozentbalken ist zurueck – 017 ersetzt ihn, es ersetzt ihn nicht selbst.",
+  );
+  // Geprueft wird die LESESTELLE, nicht das Wort: im Typkommentar der Kachel
+  // steht der alte Name mit Absicht, dort erklaert, warum er entfällt.
+  assert.ok(
+    !kachel.includes("set.fortschrittProzent"),
+    "Die Kachel liest set.fortschrittProzent wieder – der Wert zaehlt erst ab " +
+      "Stufe 2 und zeigt ein Set mit vielen gesehenen Karten als 0 %.",
+  );
 });

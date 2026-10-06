@@ -735,6 +735,48 @@ Notiert, damit niemand später etwas „repariert", das funktioniert:
   *Vorderseite* (`lernen-seite.tsx:1182`), also genau im Moment, in dem man
   entscheidet. Die Vermutung kam vom Lesen nur der aufgedeckten Seite.
 
+## Nachtrag 2026-10-06 — Set-Level statt Prozentbalken (Migration 017)
+
+Die Set-Kachel zeigt seit heute eine **Stufe 1–7** auf derselben Leiter, die
+eine einzelne Karte durchläuft. Entscheidung und Formel stehen in
+`LEXIO-PLAN.md` unter „Produktentscheidungen". Umsetzung:
+
+- `supabase/migrations/017-set-level.sql` hängt drei Spalten an die View
+  `karteikarten_sets_uebersicht`: `stufe_durchschnitt` (avg über alle Karten,
+  unbeantwortete = 0), `set_level` (1–7, gekappt per `least(7, …)`), 
+  `set_level_anteil` (Rest bis zur nächsten Stufe, oben 0). Basis ist die
+  **009er-Fassung** der View, nicht 007/006 — der Leech-Filter aus
+  `karten_faellig` bliebe sonst auf der Strecke.
+- `app/api/karteikarten` liefert die drei Werte; `lib/db-fehler.ts` nennt bei
+  fehlender Spalte jetzt **017** statt fälschlich 003 (neuer Test in
+  `tests/db-fehler.test.ts`).
+- Die Kachel: „Level N" + darunter „x/y gelernt" + sieben Segmente statt
+  Balken. `aria-label` nennt Level und Deckung; die Segmente sind
+  `aria-hidden`. Zwei Paritätstests in `tests/sql-paritaet.test.ts` binden
+  Deckelung (7) und Formel an `INTERVALLE` und die Route/Kachel.
+
+### Dabei gefixt: die Kachel schnitt lange Namen ab
+
+Die neue Zeile ließ die (quadratisch erzwungene) Kachel bei langsamen Namen
+überlaufen — `overflow: hidden` schluckt das still: bei 1920/1440 px waren es
+22 px, bei 320 px 25 px, gemessen per Playwright über 11 Bildschirmbreiten
+(320–1920). Ausprobiert wurden drei Varianten; gewählt wurde: Abstände enger
+(`gap 0.3→0.24rem`, `padding 0.95→0.88rem`, kleine Ränder) **und** der
+Set-Name auf maximal **zwei Zeilen** geklemmt (`-webkit-line-clamp: 2`). Der
+volle Name bleibt in `aria-label` und `title`. Ergebnis danach: 0 px Überlauf
+bei allen 11 Breiten, kein waagerechter Lauf. Die Kachelmaße (21 px
+Segmentbreite bei 192 px Kacheln) stimmen.
+
+### Der Grund, warum der Frühtest eine halbe Stunde kostete
+
+Ein per SQL angelegtes Wegwerf-Konto ließ den Passwort-Login mit
+`500 unexpected_failure / Database error querying schema` scheitern — der
+Grund waren `NULL`-Werte in `confirmation_token`, `recovery_token`,
+`email_change` und `email_change_token_new`. GoTrue scannt sie in
+nicht-nullbare Strings; `''` statt `NULL` macht den Login funktionsfähig.
+Künftige Wegwerf-Konten: Tabellenform nachsehen und die Token-Spalten auf
+`''` setzen.
+
 ## Geprüft und in Ordnung
 
 Damit man nicht nochmal suchen muss:
@@ -770,8 +812,8 @@ an bestehendem Code ist, sondern Absicherung:
    013 und 014 in Produktion nie angekommen waren, obwohl der Plan sie als
    abgehakt führt. Die Abhilfe heißt `npm run db:pruefen` (nicht
    `db:status`): ein Merkmal je Datei, gemessen gegen die Datenbank, mit
-   Begründung in `scripts/migrationen.mjs`. **Stand 2026-10-06: alle 16
-   Dateien bis einschließlich 016 `da`.** Getestet ist damit, *ob* die Datei
+   Begründung in `scripts/migrationen.mjs`. **Stand 2026-10-06: alle 17
+   Dateien bis einschließlich 017 `da`.** Getestet ist damit, *ob* die Datei
    lief — nicht, ob sie funktioniert; der Unterschied ist in Punkt „Nachtrag
    2026-10-06" am eigenen Beispiel festgehalten.
 2. **Tests für `lernlogik.ts` und `antwort_verbuchen`.** *Erledigt (Phase 4):*

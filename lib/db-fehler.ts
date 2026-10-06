@@ -42,6 +42,14 @@ const M_005_006 =
 /** Woran man 005 bzw. 006 im Text erkennt. */
 const SPALTEN_005 = ["sprache_code", "beispielsatz", "beispiel_uebersetzung", "sprachen"];
 
+/** Die View liefert kein Set-Level: 017 ist nicht gelaufen. */
+const M_017 =
+  "Datenbank ist nicht aktuell. Bitte supabase/migrations/017-set-level.sql " +
+  "im Supabase SQL Editor ausführen.";
+
+/** Woran man 017 im Text erkennt – die drei Spalten, die 017 an die View hängt. */
+const SPALTEN_017 = ["set_level", "set_level_anteil", "stufe_durchschnitt"];
+
 /**
  * Die Meldung fuer diesen Fehler, oder `null`, wenn es kein Migrationsproblem
  * ist und die Route ihre eigene Meldung bauen soll.
@@ -69,6 +77,15 @@ export function migrationsMeldung(fehler: PostgrestFehler): string | null {
 
     case "42703":
     case "PGRST204": {
+      /*
+       * Reihenfolge nach Spezifitaet, nicht nach Nummer: die Spalten von 017
+       * sind eigen, die von 005 auch – ein Treffer bei beiden ist unmöglich,
+       * die Reihenfolge entscheidet also nur, welche Meldung beim allgemeinen
+       * Fall vorsteht. Ohne diesen Zweig wuerde ein fehlendes `set_level` als
+       * "003 ausführen" gemeldet, und 003 aendert daran nichts.
+       */
+      const nennt017 = SPALTEN_017.some((spalte) => text.includes(spalte));
+      if (nennt017) return M_017;
       const nennt005 = SPALTEN_005.some((spalte) => text.includes(spalte));
       return nennt005 ? M_005_006 : M_003;
     }
