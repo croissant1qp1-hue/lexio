@@ -407,7 +407,7 @@ export default function LernenSeite({
             setSpricht(false);
             return;
         }
-        const teile = [karte.frage, karte.beispielsatz ?? ""];
+        const teile = [karte.antwort, karte.beispielsatz ?? ""];
         if (
             !spreche(
                 teile,
@@ -1064,12 +1064,33 @@ if (karten.length === 0) {
                                     aufgedeckt ? styles.kartenSeiteHinten : ""
                                 }`}
                             >
+                                {/*
+                                 * Welche Seite was zeigt: `frage` ist die
+                                 * deutsche Übersetzung, `antwort` das
+                                 * fremdsprachige Wort – so legt der Wizard ab
+                                 * (siehe /api/beispielsatz) und so steht es in
+                                 * den Wortlisten. Vorderseite also deutsch,
+                                 * Rückseite der Begriff samt Satz und
+                                 * Lautsprecher (Plan 1.3/1.4). Am 2026-09-28
+                                 * wurden hier nur die Labels getauscht, weil
+                                 * dort angenommen wurde, `frage` sei die
+                                 * Fremdsprache – die Datenbank sagt das
+                                 * Gegenteil, deshalb stand seither die
+                                 * Fremdsprache vorne.
+                                 */}
                                 {aufgedeckt ? (
                                     <>
                                         <span className={styles.karteLabel}>Begriff</span>
-                                        <span className={styles.karteText}>{karte.frage}</span>
+                                        {/* Die Rueckseite ist die Zielsprache.
+                                            `lang` braucht der Screenreader,
+                                            sonst spricht er die englische
+                                            Aussprache mit deutscher Stimme
+                                            vor. */}
+                                        <span className={styles.karteText} lang={set?.sprache.code ?? undefined}>
+                                            {karte.antwort}
+                                        </span>
                                         {karte.beispielsatz && (
-                                            <span className={styles.karteBeispiel}>
+                                            <span className={styles.karteBeispiel} lang={set?.sprache.code ?? undefined}>
                                                 {karte.beispielsatz}
                                             </span>
                                         )}
@@ -1114,7 +1135,7 @@ if (karten.length === 0) {
                                                     e.stopPropagation();
                                                     vorlesen();
                                                 }}
-                                                aria-label={`${karte.frage} vorlesen`}
+                                                aria-label={`${karte.antwort} vorlesen`}
                                                 title="Vorlesen"
                                             >
                                                 <svg
@@ -1163,7 +1184,7 @@ if (karten.length === 0) {
                                 ) : (
                                     <>
                                         <span className={styles.karteLabel}>Übersetzung</span>
-                                        <span className={styles.karteText}>{karte.antwort}</span>
+                                        <span className={styles.karteText}>{karte.frage}</span>
                                         {/*
                                          * Der Satz auf Deutsch steht auf der
                                          * Vorderseite. Er ist kein Spoiler,
