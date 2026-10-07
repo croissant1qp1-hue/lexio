@@ -75,30 +75,55 @@ const caveat = Caveat({
     variable: "--next-font-caveat",
 });
 
+/*
+ * Ein Platz fuer den Text, der dreimal dasselbe sagt: Meta-Description,
+ * Open Graph und die strukturierten Daten unten. Kopien davon laufen
+ * auseinander, sobald sich der Satz aendert – und dann steht in einem
+ * Suchergebnis etwas anderes als im geteilten Link.
+ */
+const BESCHREIBUNG =
+    "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag. " +
+    "Eigene Wortlisten, verteiltes Lernen, Statistiken.";
+
 export const metadata: Metadata = {
     metadataBase: new URL(SITE_URL),
     title: {
         default: "Lexio – Vokabeln lernen",
         template: "%s · Lexio",
     },
-    description:
-        "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag. " +
-        "Eigene Wortlisten, verteiltes Lernen, Statistiken.",
+    description: BESCHREIBUNG,
     openGraph: {
         title: "Lexio – Vokabeln lernen",
-        description:
-            "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag. " +
-            "Eigene Wortlisten, verteiltes Lernen, Statistiken.",
+        description: BESCHREIBUNG,
         url: "/",
         siteName: "Lexio",
         locale: "de_DE",
         type: "website",
+        /*
+         * Ohne Bild zeigt jeder Link in WhatsApp, Slack oder Telegram nur
+         * Text – und wirkt wie eine Weiterleitung, nicht wie eine Seite. Das
+         * Bild ist 1200x630, das Format, das die meisten Netzwerke als
+         * Vorschaubild akzeptieren. Der Pfad ist relativ; metadataBase oben
+         * macht daraus die absolute URL, ohne die das Meta-Tag fuer
+         * ausserhalb der eigenen Domain wertlos waere.
+         */
+        images: [
+            {
+                url: "/images/og-1200x630.png",
+                width: 1200,
+                height: 630,
+                alt: "Lexio – Vokabeln lernen mit Beispielsätzen",
+            },
+        ],
     },
     twitter: {
-        card: "summary",
+        // summary_large_image, nicht summary: eine Karte ohne Bild ist
+        // unsichtbar, und mit Bild will Twitter das grosse Format.
+        card: "summary_large_image",
         title: "Lexio – Vokabeln lernen",
         description:
             "Lexio verteilt deine Vokabeln nach der Karteikarten-Methode über den Tag.",
+        images: ["/images/og-1200x630.png"],
     },
     applicationName: "Lexio",
     appleWebApp: {
@@ -110,8 +135,15 @@ export const metadata: Metadata = {
         telephone: false,
     },
     icons: {
-        icon: "/images/logo.png",
-        apple: "/images/logo.png",
+        /*
+         * Bewusst icon-192 und nicht logo.png: das Logo wiegt 1,9 MB, und
+         * der Browser laedt den Favicon bei jedem Seitenaufruf neu – fuer
+         * ein 32-Pixel-Bild. icon-192 ist dieselbe Marke, 31 KB, und wird
+         * herunter skaliert. logo.png bleibt fuer die Navigationsleiste und
+         * die Anmeldeseite, die es gross zeigen.
+         */
+        icon: "/images/icon-192.png",
+        apple: "/images/icon-192.png",
     },
 };
 
@@ -129,6 +161,38 @@ export const viewport: Viewport = {
     themeColor: [
         { media: "(prefers-color-scheme: dark)", color: "#0D171D" },
         { media: "(prefers-color-scheme: light)", color: "#F7F1E4" },
+    ],
+};
+
+/*
+ * Strukturierte Daten fuer Suchmaschinen, im Root-Layout damit sie auf
+ * jeder Seite stehen – eine Seite, die das vergisst, waere die Regel und
+ * nicht die Ausnahme.
+ *
+ * Bewusst ohne `offers`, `aggregateRating` oder `review`: die App hat kein
+ * Preismodell und keine Bewertungen, und erfundene Werte sind nicht nur
+ * unbrauchbar, sondern Grund fuer eine Abmahnung bei Google. `@graph`
+ * haelt WebSite und SoftwareApplication zusammen, ohne sie zu verschmelzen.
+ */
+const SUCH_DATEN = {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+            "@type": "WebSite",
+            name: "Lexio",
+            url: SITE_URL,
+            inLanguage: "de",
+            description: BESCHREIBUNG,
+        },
+        {
+            "@type": "SoftwareApplication",
+            name: "Lexio",
+            applicationCategory: "EducationalApplication",
+            operatingSystem: "Web",
+            inLanguage: "de",
+            url: SITE_URL,
+            description: BESCHREIBUNG,
+        },
     ],
 };
 
@@ -162,6 +226,18 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   nach dem Paint fertig.
                 */}
                 <script nonce={nonce} dangerouslySetInnerHTML={{ __html: DESIGN_SCRIPT }} />
+                {/*
+                  Strukturierte Daten. Der Nonce steht drauf wie beim
+                  Design-Skript: ohne ihn blockiert die CSP das Inline-Script,
+                  und der Browser meldet den Fehler in der Konsole. Crawlieren
+                  tut Google den Inhalt trotzdem, aber eine Konsolenwarnung
+                  auf eigener Seite ist kein Zustand.
+                */}
+                <script
+                    type="application/ld+json"
+                    nonce={nonce}
+                    dangerouslySetInnerHTML={{ __html: JSON.stringify(SUCH_DATEN) }}
+                />
             </head>
             <body>
                 <DesignAnbieter>{children}</DesignAnbieter>

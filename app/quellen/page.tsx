@@ -32,6 +32,23 @@ export const metadata: Metadata = {
     description:
         "Woher die englischen Wortlisten in Lexio kommen: NGSL, Kaikki/Wiktionary und Tatoeba – mit Lizenzen und Quellenangabe.",
     alternates: { canonical: "/quellen" },
+    /*
+     * Ein eigenes openGraph, obwohl das Layout schon eines hat: ohne dieses
+     * Block hier teilte ein Link auf diese Seite den Titel, die Beschreibung
+     * und die URL der STARTSEITE – Next ersetzt die Gruppe "openGraph" beim
+     * Seitenwechsel komplett, es gibt kein Zusammenfuehren. Wer die
+     * Quellenangabe teilt, soll auf die Quellenangabe zeigen, nicht auf "/".
+     */
+    openGraph: {
+        title: "Quellen der Wortlisten",
+        description:
+            "Woher die englischen Wortlisten in Lexio kommen: NGSL, Kaikki/Wiktionary und Tatoeba – mit Lizenzen und Quellenangabe.",
+        type: "website",
+        url: "/quellen",
+        siteName: "Lexio",
+        locale: "de_DE",
+        images: ["/images/og-1200x630.png"],
+    },
 };
 
 const QUELLEN = [

@@ -1,4 +1,16 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+/*
+ * Eigener Titel und noindex. Ohne dieses export stand hier der Grundtitel
+ * "Lexio – Vokabeln lernen" – eine 404-Seite, die sich wie die Startseite
+ * benennt, und die Suchmaschine indiziert sie obendrein, weil nirgends
+ * etwas Gegenteiliges steht.
+ */
+export const metadata: Metadata = {
+    title: "Seite nicht gefunden",
+    robots: { index: false, follow: false },
+};
 
 export default function NotFound() {
     return (

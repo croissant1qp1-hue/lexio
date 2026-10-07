@@ -18,7 +18,9 @@ import { SITE_URL } from "@/lib/meta";
  * Der pragmatische Mittelweg bleibt: die Pfade, die ohne Sitzung
  * ueberhaupt erreichbar sind, werden ausdruecklich ausgeschlossen; alles
  * andere bleibt standardmaessig erlaubt, damit eine spaetere oeffentliche
- * Seite nicht an einer zu strengen robots.txt scheitert.
+ * Seite nicht an einer zu strengen robots.txt scheitert. Ausgenommen
+ * `/api`: JSON-Endpunkte ohne Textinhalt brauchen keinen Crawler, und ein
+ * Crawler braucht nicht jede Fehlermeldung als Index.
  */
 export default function robots(): MetadataRoute.Robots {
   return {
@@ -26,6 +28,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       disallow: [
+        "/api",
         "/anmelden",
         "/passwort-aendern",
         "/passwort-zuruecksetzen",

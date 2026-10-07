@@ -50,6 +50,13 @@ export const metadata: Metadata = {
     description:
       "Karteikarten mit Beispielsaetzen, gestufte Wiederholung und Statistiken. Starte ohne Abo mit einem Set aus 100 englischen Grundworten.",
     type: "website",
+    // Eigenes openGraph ersetzt das des Layouts vollstaendig (Next mischt
+    // diese Gruppe nicht tief zusammen) – ohne url und images waere der
+    // Share-Link dieser Seite die Startseite und das Vorschaubild fehlte.
+    url: "/",
+    siteName: "Lexio",
+    locale: "de_DE",
+    images: ["/images/og-1200x630.png"],
   },
 };
 
@@ -128,6 +135,10 @@ export default async function Startseite() {
 
   return (
     <div className={styles.seite}>
+      {/* Erster Fokusschritt, wie in (app)/layout.tsx – siehe .skipLink. */}
+      <a href="#inhalt" className="skipLink">
+        Zum Inhalt springen
+      </a>
       <header className={styles.kopf}>
         <div className={styles.marke}>
           <span className={styles.wort}>Lexio</span>
@@ -137,7 +148,7 @@ export default async function Startseite() {
         </nav>
       </header>
 
-      <main className={styles.main}>
+      <main id="inhalt" className={styles.main} tabIndex={-1}>
         <section className={styles.held}>
           <h1>Vokabeln lernen, das hängen bleibt.</h1>
           <p className={styles.vorspann}>
@@ -165,10 +176,17 @@ export default async function Startseite() {
                 <Kartenzeichen karteId={b.id} begriff={b.frage} uebersetzung={b.antwort} />
                 <div>
                   <p className={styles.karteBegriff}>{b.frage}</p>
-                  <p className={styles.karteAntwort}>{b.antwort}</p>
+                  {/* lang=en, sonst liest eine deutsche Stimme die
+                      englische Aussprache nach – und wer eine englische
+                      Hilfe liest, bekommt sie englisch vorgelesen. */}
+                  <p className={styles.karteAntwort} lang="en">
+                    {b.antwort}
+                  </p>
                 </div>
               </div>
-              <p className={styles.karteSatz}>{b.satz}</p>
+              <p className={styles.karteSatz} lang="en">
+                {b.satz}
+              </p>
             </article>
           ))}
         </section>
