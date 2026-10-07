@@ -28,8 +28,17 @@ export const metadata: Metadata = {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
     return (
         <div className="container">
+            {/*
+             * Erster Fokusschritt: ohne ihn muss jemand mit der Tastatur
+             * die ganze Seitenleiste durchtabben, um am Inhalt zu
+             * landen. `tabIndex={-1}` auf dem main, sonst fokussiert der
+             * Sprung nicht sauber.
+             */}
+            <a href="#inhalt" className="skipLink">
+                Zum Inhalt springen
+            </a>
             <Navbar />
-            <main className="main-body">
+            <main id="inhalt" className="main-body" tabIndex={-1}>
                 <PwaRegistrierung />
                 {/*
                  * Nur sichtbar, wenn die Datenbank fehlt. Dann ist die App

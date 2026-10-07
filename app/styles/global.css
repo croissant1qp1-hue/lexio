@@ -281,6 +281,37 @@ p {
     border-radius: 6px;
 }
 
+/*
+ * Skip-Link: der erste Fokusschritt auf jeder Seite. Ausserhalb des
+ * Fokus unsichtbar – nicht display:none, denn dann gaebe es nichts zu
+ * fokussieren, und nicht visibility:hidden, denn beides nimmt den Link
+ * auch aus der Tab-Reihenfolge. position:absolute haelt ihn aus dem
+ * Layout, top schiebt ihn ueber den Rand hinaus.
+ *
+ * `:focus` und nicht `:focus-visible`: mit Tab landet man ohnehin im
+ * `:focus-visible`-Zustand, aber ob der Browser eine programmatisch
+ * fokussierte Taste als "sichtbar fokussiert" ansehen will, entscheidet
+ * er selbst – und ein Skip-Link, der je nach Browser nicht auftaucht,
+ * ist keiner.
+ */
+.skipLink {
+    position: absolute;
+    left: 12px;
+    top: -64px;
+    z-index: 100;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background: var(--gold);
+    color: var(--paper-text);
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 120ms ease;
+}
+
+.skipLink:focus {
+    top: 12px;
+}
+
 /* ==========================================================================
    404
    ========================================================================== */
