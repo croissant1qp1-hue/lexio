@@ -924,3 +924,52 @@ an bestehendem Code ist, sondern Absicherung:
    das erklärt; ausgeführt und gegengeprüft (läuft fehlerfrei, `karten_fortschritt`
    bleibt bei 12 Zeilen, davon 6 aus Wortlisten). Die Konto-ID steht nicht mehr im
    Text.
+
+## Nachtrag 2026-10-07 — SEO/UX-Runde und der Fehler in der Kartenrichtung
+
+Vor Phase 7 (React Native) sollte Lexio noch einmal „krass SEO und UX"
+bekommen. Gemacht, am laufenden System geprüft und dabei ein alter Fehler
+aufgeflogen, der von 2026-09-28 an die ganze App betraf:
+
+- **Die Lernkarte zeigte die falsche Richtung.** Die Datenbank hält unter
+  `frage` das **deutsche** Wort und unter `antwort` die **Fremdsprache**
+  (so baut es der Wizard auf — `app/api/beispielsatz/route.ts:39` nennt das
+  ausdrücklich, und die NGSL-Wortlisten sind genauso gespeichert). Der
+  Commit `4716b59` hat aber nur das *Label* „Antwort" in „Übersetzung"
+  umbenannt und die Inhalte nicht getauscht: Anwender sahen deshalb auf der
+  Vorderseite das englische Wort statt der Aufgabe. Jetzt steht auf der
+  Vorderseite `karte.frage` unter „Übersetzung", auf der Rückseite
+  `karte.antwort` unter „Begriff", der Beispielsatz bleibt englisch, und
+  `lang` ist an Wort und Satz gesetzt. Paarweise gegen die Datenbank
+  verifiziert. Der Irrtum von 2026-09-28 steht als Kommentar hinter dem
+  Ternary, damit niemand ihn wiederholt.
+- **OG-Bild.** `public/images/og-1200x630.png` (1200×630 px) wird in den
+  Meta-Tags ausgeliefert; der Generator `scripts/og-bild.mjs` misst bei jedem
+  Lauf die Bildgröße und die Schrift-Überlappung und bricht mit Fehler ab,
+  statt ein kaputtes Bild zu bauen. Vorher nutzte Lexio vermutlich das
+  gelbe Platzhalter-PNG.
+- **Kein altes Logo mehr.** `public/images/logo.png` taucht im HTML nicht
+  mehr auf (icon-192 greift). Der noch laufende `next start` auf Port 3000
+  dient einen **alten Build** aus — desses HTML zeigt noch `logo.png`. Der
+  Server gehört nicht zu dieser Runde und wurde nicht angefasst.
+- **JSON-LD.** `app/layout.tsx` liefert `WebSite` + `SoftwareApplication`
+  ohne erfundene Ratings/Angebote; URL und `SITE_URL` stimmen mit den
+  Canonical-Meta überein, nichts wird doppelt behauptet.
+- **Skip-Link.** Jede Seite hat vor dem Header „Zum Inhalt springen", der
+  erst im Fokus erscheint, und `<main id="inhalt">` nimmt den vollen Tab-Fokus.
+  Stelle Achtung: im Audit zählte er erst als Klickziel unter 44 px —
+  Padding auf 14 px top/bottom korrigiert, der Audit ist wieder komplett
+  grün (72/72, Befund 0).
+- **404 und robots:** `app/not-found.tsx` trägt Titel, `noindex` und Status;
+  `app/robots.ts` sperrt `/api`. Ebenfalls live geprüft.
+- **Vorgehen beim Privat-Check:** die Prüfung läuft gegen einen eigenen
+  Build auf Port 3210. `lsof -ti:3210` liefert hier nichts → Töten über die
+  pid aus `ss -ltnp`, und nach dem Build zwingend neu starten, sonst antwortet
+  der Vorgänger und die Messung schwafelt von einem veralteten Stand
+  (einem Build, dessen CSS-Dateien es gar nicht mehr gibt — exakt so kam
+  der „Skip-Link ohne Styling"-Befund zustande). Gegenprobe: Tabellen
+  „verlinktes CSS erreichbar" + „skipLink-Regel im CSS" in der Live-Prüfung.
+
+Stand: `npm run build` und `npm run lint` sauber, 213/213 Tests,
+`toten-code` und `db:pruefen` grün, Responsive-Audit 72/72 mit 0 Befund,
+Live-Prüfung (SEO, Skip-Link, Kartenrichtung) vollständig bestanden.
