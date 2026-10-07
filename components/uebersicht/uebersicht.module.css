@@ -318,7 +318,7 @@
 
 .kachelGelernt {
     font-family: var(--mono);
-    font-size: 0.72rem;
+    font-size: 0.875rem;
     color: var(--text-muted);
     margin-top: 0.1rem;
 }
