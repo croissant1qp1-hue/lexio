@@ -777,6 +777,19 @@ nicht-nullbare Strings; `''` statt `NULL` macht den Login funktionsfähig.
 Künftige Wegwerf-Konten: Tabellenform nachsehen und die Token-Spalten auf
 `''` setzen.
 
+## Nachtrag 2026-10-07 — der Audit fand eine Zeile unter 14 px, die Kachelregeln stehen jetzt in Tests
+
+Der Set-Level von gestern verletzte die Phase-5-Abnahme „kein Text kleiner als
+14 px": die neue Deckungs-Zeile `.kachelGelernt` stand mit 0.72rem (11.52 px)
+drunter. Auf Startseite und Übersicht je 5 Fundstellen (einmal je Demo-Set).
+Der Responsive-Audit (72 Durchläufe) hat sie alle gefangen; nach Umstellen auf
+0.875rem = 14 px ist er wieder vollständig grün. Die Tiles wurden zusätzlich
+auf 320/768/1920 px nachgemessen: kein Überlauf, nichts abgeschnitten. Als
+Schutz für beide Kachelregeln (Name maximal zwei Zeilen, Deckung mindestens
+14 px) liegt jetzt `tests/css-kachel.test.ts` im Standard-Testlauf —
+`overflow: hidden` absorbiert solche Fehler still, deshalb war der Audit die
+einzige Stelle, die ihn überhaupt anzeigte.
+
 ## Geprüft und in Ordnung
 
 Damit man nicht nochmal suchen muss:
