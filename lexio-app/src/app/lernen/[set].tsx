@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api";
+import { rotiere } from "@/lib/rundenrotation";
 import { supabase } from "@/lib/supabase";
 import { spreche, stoppe } from "@/lib/vorlesen";
 
@@ -128,18 +129,13 @@ export default function Lernen() {
       setLetzteAntwort({ kartenId: karteId, xp: xpErhalten });
 
       /*
-       * "nochmal" (und "schwer" je nach Würfel) legt die Karte ans Ende der
-       * Runde. Wird eine Karte endgültig entnommen, rutscht die nächste in
-       * dieselbe Position – der Index wandert beim Entnehmen also nicht mit,
-       * sonst würde eine Karte übersprungen. Die Runde ist zu Ende, sobald
-       * der Index hinter der (geschrumpften) Länge liegt: alles entnommen,
-       * nichts neu nachgelegt. Würfel fallen hier im Client, damit die Runde
-       * widerspruchsfrei bleibt – dieselbe Regie wie im Web (schwerChance).
+       * Die Rotation ist eine reine Funktion (src/lib/rundenrotation.ts) und
+       * in Web und App dieselbe Regie. Nur der Würfel für "schwer" fällt
+       * hier im Client, einmal pro Antwort.
        */
-      const bleibtInRunde =
-        bewertung === "nochmal" ||
-        (bewertung === "schwer" &&
-          entscheideSchwer(schwerChance(karte.schwierigkeit, schwerZaehler[karteId] ?? 0)));
+      const schwerBleibt =
+        bewertung === "schwer" &&
+        entscheideSchwer(schwerChance(karte.schwierigkeit, schwerZaehler[karteId] ?? 0));
       if (bewertung === "schwer") {
         setSchwerZaehler((zaehler) => ({
           ...zaehler,
@@ -147,13 +143,16 @@ export default function Lernen() {
         }));
       }
 
-      if (bleibtInRunde) {
-        setStapel((s) => [...s.filter((k) => k.id !== karteId), karte]);
-      } else {
-        setStapel((s) => s.filter((k) => k.id !== karteId));
-        if (index >= stapel.length - 1) {
-          setFertig(true);
-        }
+      const { stapel: neuerStapel, fertig: rundeFertig } = rotiere(
+        stapel,
+        index,
+        karte,
+        bewertung,
+        schwerBleibt,
+      );
+      setStapel(neuerStapel);
+      if (rundeFertig) {
+        setFertig(true);
       }
 
       setAufgedeckt(false);
