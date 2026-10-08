@@ -43,8 +43,11 @@ export type SetUebersicht = {
  * (Phase 7): der Vertrag der Lernrunde liegt hier, nicht im einzelnen
  * Client.
  *
- * `schwierigkeit` kommt nur, wenn die Route ein Modell trainieren konnte
- * (Plan 1.8) – ohne Modell bleibt sie weg. `faelligAm` ist das Datum
+ * `beispielsatz` ist seit Migration 005 optional – die Haelfte der Karten in
+ * einem gemischten Set stammt noch ohne Satz, und der Typ sagt das, statt
+ * die Anzeige auf "" pruefen zu lassen. `schwierigkeit` kommt nur, wenn die
+ * Route ein Modell trainieren konnte (Plan 1.8); ohne sie faellt die
+ * schwer-Chance im Client auf ihre Basis zurueck. `faelligAm` ist das Datum
  * (YYYY-MM-DD), ab dem die Karte faellig war, gesteuert von lernlogik.
  */
 export type LernKarte = {
@@ -71,7 +74,10 @@ export type LernSetInfo = {
 /**
  * Antwort von GET /api/lernen. Uebungs- und Leech-Modus kommen nur gesetzt,
  * wenn die Adresse sie verlangte (`&modus=ueben` / `&modus=leech`); so kann
- * der Client den Stapel ehrlich benennen, ohne zu raten.
+ * der Client den Stapel ehrlich benennen, ohne zu raten. `faelligGesamt` ist
+ * der Stapel (karten.length ist die Runde); `kartenGesamt` ist der Bestand
+ * des Sets, damit „nichts faellig" von „noch nichts angelegt" zu
+ * unterscheiden ist.
  */
 export type LernAntwort = {
   set: LernSetInfo;

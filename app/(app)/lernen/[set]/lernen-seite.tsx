@@ -5,7 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
 import { schwerChance } from "@/lib/reihenfolge";
-import { farbeVonSprache, nameVonSprache, type SpracheInfo } from "@/lib/sprachen";
+import { farbeVonSprache, nameVonSprache } from "@/lib/sprachen";
+import type { LernAntwort, LernKarte, LernSetInfo } from "@/lib/types";
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
 import { xpFormatieren } from "@/lib/profil";
 import { spreche, stimmen, stoppe, tonVerfuegbar } from "@/lib/sprachausgabe";
@@ -15,75 +16,14 @@ import Kartenzeichen from "@/components/kartenzeichen";
 import { IconLeererStapel, IconSterne, IconTasse, IconZielfahne } from "@/components/icone";
 import styles from "./lernen.module.css";
 
-type Karte = {
-    id: string;
-    frage: string;
-    antwort: string;
-    /*
-     * Seit Migration 005 optional. Deshalb nullable: die Haelfte der Karten in
-     * einem gemischten Set stammt noch ohne Satz, und der Typ muss das sagen,
-     * statt die Anzeige auf "" zu pruefen.
-     */
-    beispielsatz: string | null;
-    beispielUebersetzung: string | null;
-    stufe: number;
-    gelernt: boolean;
-    /**
-     * Plan 1.7: erreicht diese Karte die Fehlerschwelle, ist sie eine
-     * Problemskarte. Die Route setzt das Flag; die Seite zeigt damit eine
-     * Markierung und erklärt, warum diese Karte nicht in der normalen
-     * Rotation vorkommt.
-     */
-    leech: boolean;
-    /**
-     * Plan 1.8: wie schwer diese Karte laut dem Modell des Accounts ist
-     * (0 = ganz leicht, 1 = ganz schwer). Kommt nur, wenn die Route ein
-     * Modell trainieren konnte – der Wert ist optional, und ohne ihn faellt
-     * die schwer-Chance auf ihre Basis zurueck.
-     */
-    schwierigkeit?: number;
-};
-
 /**
- * Das Set, wie /api/lernen es meldet.
- *
- * `sprache` ist seit 0.1 ein Objekt mit Code, Namen und Farben. Der Code wird
- * gleich fuer speechSynthesis gebraucht (1.3) – vorher muesste die Seite aus
- * einem deutschen Namen ("Englisch") erst erraten, welche Browserstimme passt.
+ * Die Typen der Lernrunde kommen aus lib/types.ts und sind zwischen Web und
+ * App geteilt (Phase 7) – eine zweite Abschrift hier wuerde irgendwann
+ * auseinanderlaufen, und niemand merkt es, weil beide richtig aussehen. Die
+ * lokalen Namen bleiben, damit der Rest der Seite unveraendert auf sie zeigt.
  */
-type SetInfo = { slug: string; name: string; sprache: SpracheInfo };
-
-/** Antwort von /api/lernen. */
-type LernAntwort = {
-    set: SetInfo;
-    karten: Karte[];
-    faelligGesamt: number;
-    /**
-     * Bestand des Sets, karten.length ist die Runde. Ohne diese Zahl waere
-     * ein leeres Lernfenster nicht zu unterscheiden von einem, in dem heute
-     * nichts faellig ist – und "Nochmal lernen" wuerde bei einem wirklich
-     * leeren Set als Sackgasse enden.
-     */
-    kartenGesamt: number;
-    /** Nur gesetzt, wenn das Set groesser ist als die Lesegrenze der Route. */
-    setZuGross?: boolean;
-    hinweis?: string;
-    /**
-     * Von der Route gesetzt, wenn sie auf `?modus=ueben` ignored hat. Nur zum
-     * Anzeigen: die Karten sind dieselben, es sind nur mehr und andere. Der
-     * Endschirm braucht es, um "7 von 40 geschafft" nicht mit "Alles
-     * geschafft" zu verwechseln.
-     */
-    uebungsmodus?: boolean;
-    /**
-     * Wie viele Karten des Sets die Fehlerschwelle erreicht haben (1.7). Die
-     * Seite zeigt daraus den Hinweis "N Problemskarten sind ausgeblendet" –
-     * mit dem Knopf, der sie trotzdem hereinhält.
-     */
-    leechAnzahl?: number;
-    /** True, wenn die Runde über `?modus=leech` nur Problemskarten zeigt. */
-    leechModus?: boolean;
-};
+type Karte = LernKarte;
+type SetInfo = LernSetInfo;
 
 /**
  * Gelernt und XP kommen aus der Datenbank, nicht aus dem localStorage.
