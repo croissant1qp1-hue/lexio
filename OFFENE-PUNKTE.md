@@ -952,9 +952,44 @@ aufgeflogen, der von 2026-09-28 an die ganze App betraf:
   mehr auf (icon-192 greift). Der noch laufende `next start` auf Port 3000
   dient einen **alten Build** aus — desses HTML zeigt noch `logo.png`. Der
   Server gehört nicht zu dieser Runde und wurde nicht angefasst.
-- **JSON-LD.** `app/layout.tsx` liefert `WebSite` + `SoftwareApplication`
-  ohne erfundene Ratings/Angebote; URL und `SITE_URL` stimmen mit den
-  Canonical-Meta überein, nichts wird doppelt behauptet.
+-   **JSON-LD.** `app/layout.tsx` liefert `WebSite` + `SoftwareApplication`
+    ohne erfundene Ratings/Angebote; URL und `SITE_URL` stimmen mit den
+    Canonical-Meta überein, nichts wird doppelt behauptet.
+
+## Nachtrag 2026-10-08 — Phase 7, Zustand der App
+
+Stand siehe `LEXIO-PLAN.md` (Abschnitt „Phase 7 — Stand 2026-10-08"). Der
+Zustand des Codes, der beim Arbeiten auffiel und nicht in den Plan gehört:
+
+- **Die App spricht die API an, nicht die Datenbank.** Anmelden direkt über
+  supabase-js (Session in AsyncStorage), jeder Datenruf über `src/lib/api.ts`
+  mit `Authorization: Bearer <access_token>` gegen dieselben Routen wie das
+  Web. Der Server prüft das Token seit Etappe 2 (`lib/supabase/token.ts`,
+  `createClientVomToken`) und RLS bleibt die Besitz-Grenze. Für die App gibt
+  es deshalb **keinen** zweiten Supabase-Schlüssel im Client — nur den
+  öffentlichen Anon-Key in `lexio-app/.env` (gitignored; `.env.example`
+  steht im Repo).
+- **`src/app/lernen/[set].tsx` sind die App-Duplikate von lokal Web-Teilen
+  nicht dupliziert:** `LernKarte`/`LernAntwort` kommen aus `lib/types.ts`
+  (die API-Route `app/api/lernen/route.ts` nutzt `LernKarte` ebenso). Die
+  Web-Lernansicht `app/(app)/lernen/[set]/lernen-seite.tsx` definiert ihre
+  Typen noch lokal — eine längst angedachte, kleine Angleichung, die den
+  großen Web-Client nicht anfassen musste; jetzt, wo der Vertrag in
+  `lib/types.ts` liegt, lässt sie sich nachziehen, wenn dort sowieso
+  angefasst wird.
+- **Die App-Rücknahme lädt die Runde neu** statt die Karte an ihren
+  genauen Platz zurückzubauen. Der Server-Stand (Stufe, XP, Streak) wird
+  korrekt rückgängig gemacht — die Rundeneinteilung nicht. Für ein
+  Mobil-MVP bewusst so; wer die genaue Position will, müsste Verlauf mit
+  Index und Nachlege-Objekt spiegeln.
+- **Web-Export der App** braucht `lexio-app/.env` mit den
+  `EXPO_PUBLIC_*`-Werten; beim Server-Rendering fällt `window` weg, deshalb
+  bekommt der Supabase-Client dort einen leeren Speicher
+  (`src/lib/supabase.ts`) statt AsyncStorage. Auf dem Gerät bleibt es bei
+  AsyncStorage.
+- **Offen, hier nicht prüfbar:** echte iPhone-Abnahme und iOS-Push (APNs).
+  Dafür fehlen ein Apple-Entwicklerkonto und ein Gerät; bis dahin ist die
+  App ein lokaler Build unter Expo/Expo Go, kein Versandweg.
 - **Skip-Link.** Jede Seite hat vor dem Header „Zum Inhalt springen", der
   erst im Fokus erscheint, und `<main id="inhalt">` nimmt den vollen Tab-Fokus.
   Stelle Achtung: im Audit zählte er erst als Klickziel unter 44 px —

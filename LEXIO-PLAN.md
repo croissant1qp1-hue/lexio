@@ -1721,6 +1721,48 @@ nichts, aber das Wenige lohnt sich:
 Fortschritt wie im Web, und lernt eine Runde auf einem echten iPhone. Danach
 iOS-Erinnerungen, die auch wirklich ankommen.
 
+### Phase 7 — Stand 2026-10-08
+
+Die App unter `lexio-app/` (Expo, TypeScript, expo-router) ist in Etappen
+gebaut; jede Etappe ist geprüft und auf `origin/main` gepusht:
+
+1. **Gerüst** (Commits `3de3d83`, `fa0fc39`): `metro.config.js` bindet
+   `lib/` per `@lexio/*` an, tsconfig, `.env.example`, `app.json`,
+   eslint (flat), Screens minimal. Export ios/android/web, `expo-doctor`
+   21/21.
+2. **Bearer-API** (`d6dbad6`): `createClient` aus dem `Authorization`
+  -Header; `/api/*` mit Bearer überspringt das Rate-Limit. Live geprüft
+   (401 ohne, 200 mit gültigem, gefälschtes JWT → 401, 0× 429 nach 35
+   schnellen POSTs; Testkonto gelöscht).
+3. **Geteilte Typen + App-Libs** (`bd85cd7`, `c9b81b1`): `SetUebersicht`
+   und jetzt auch `LernKarte`/`LernAntwort` in `lib/types.ts` als
+   gemeinsame Quelle; App: `src/lib/umgebung.ts` (API-Basis),
+   `supabase.ts` (createClient + AsyncStorage), `api.ts`
+   (`holeJson`/`sendeJson` mit Bearer, 401 → Anmelden).
+4. **Anmelden + Übersicht** (`f6a4f6a`): `anmelden.tsx` und `index.tsx`
+   (Sets via `/api/karteikarten`).
+5. **Lernseite** (`bc53aa0`): `src/app/lernen/[set].tsx` – Karten der
+   Runde (`/api/lernen?set=`), Bewertung
+   (`/api/lernen/antwort`), „nochmal"/„schwer"-Würfel wie im Web
+   (`schwerChance` aus `lib/reihenfolge.ts` geteilt), Rücknahme
+   (`/api/lernen/antwort/rueckgaengig`, lädt die Runde frisch),
+   Endschirm mit „Nochmal lernen"/„Weitere Runde" (`modus=ueben`,
+   `modus=leech` via Adresse), Sprachausgabe über `expo-speech`
+   (`src/lib/vorlesen.ts`) — der im Abschnitt oben vorgemerkte
+   Austauschpunkt. Live geprüft gegen 3210 mit Wegwerf-Konto: Lernrunde
+   liefert das erwartete Format, Antwort ergibt XP + Stufe +
+   `naechsteWiederholung`, Rücknahme macht das rückgängig, Übungsmodus
+   liefert 40 Karten, Leech-Modus entsprechend. Konto gelöscht, Server
+   gestoppt.
+
+**Offen** (braucht Hardware und Apple-Konto, hier nicht machbar):
+
+- Abnahme auf echtem iPhone (Anmeldung, gleicher Fortschritt, eine Runde
+  lernen).
+- iOS-Erinnerungen über APNs (`expo-notifications`); dazu ein
+  Apple-Entwicklerkonto, Push-Zertifikat und ein echtes Gerät/Geräte-Farm.
+  Solange das fehlt, bleibt der App ein Wegwerf-Build, kein Versand.
+
 ---
 
 ## Nachtrag vom 2026-10-04 — die Wortlisten sind gemessen statt gelesen
