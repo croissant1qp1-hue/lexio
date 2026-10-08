@@ -10,6 +10,34 @@ export type KarteikartenSet = {
   fortschrittProzent: number;
   updatedAt?: string;
 };
+
+/**
+ * Eine Zeile der Set-Uebersicht, so wie GET /api/karteikarten sie liefert
+ * (fast 1:1 die View karteikarten_sets_uebersicht). Gemeinsam fuer Web und
+ * App (Phase 7): eine zweite Abschrift nur fuer die App wuerde irgendwann
+ * auseinanderlaufen, und niemand merkt es, weil beide richtig aussehen.
+ *
+ * `setLevel` (1–7) und `setLevelAnteil` (0–1) sind seit 017 Teil der View:
+ * der Durchschnitt der Kartenstufen dieses Sets, dieselbe Skala wie bei
+ * einer einzelnen Karte. `eigen` heisst: gehoert dieser Person.
+ */
+export type SetUebersicht = {
+  id: string;
+  name: string;
+  sprache: SpracheInfo;
+  anzahlKarten: number;
+  zielKarten: number;
+  fortschrittProzent: number;
+  kartenGesamt: number;
+  kartenGelernt: number;
+  kartenFaellig: number;
+  setLevel: number;
+  setLevelAnteil: number;
+  stufeDurchschnitt: number;
+  eigenesSet: boolean;
+  eigen: boolean;
+  zuletztGelernt: string | null;
+};
 export type WochenXpTyp = {
   mo: number;
   di: number;

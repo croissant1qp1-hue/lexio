@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { mitUserOder401 } from "@/lib/supabase/user";
 import type { SpracheInfo } from "@/lib/sprachen";
 import { UNBEKANNTE_SPRACHE } from "@/lib/sprachen";
+import type { SetUebersicht } from "@/lib/types";
 import { migrationsMeldung } from "@/lib/db-fehler";
 
 /**
@@ -34,31 +35,6 @@ type Zeile = {
   stufe_durchschnitt: number | null;
   set_level: number | null;
   set_level_anteil: number | null;
-};
-
-/**
- * Was die Oberflaeche bekommt. `eigen` heisst: gehoert dieser Person.
- *
- * `setLevel` (1–7) und `setLevelAnteil` (0–1) kommen seit 017 aus der View.
- * Die Zahl ist kein eigener Stand, sondern der Durchschnitt der Kartenstufen
- * dieses Sets – dieselbe Skala, die eine einzelne Karte durchlaeuft.
- */
-type SetAntwort = {
-  id: string;
-  name: string;
-  sprache: SpracheInfo;
-  anzahlKarten: number;
-  zielKarten: number;
-  fortschrittProzent: number;
-  kartenGesamt: number;
-  kartenGelernt: number;
-  kartenFaellig: number;
-  setLevel: number;
-  setLevelAnteil: number;
-  stufeDurchschnitt: number;
-  eigenesSet: boolean;
-  eigen: boolean;
-  zuletztGelernt: string | null;
 };
 
 /**
@@ -131,7 +107,7 @@ export async function GET() {
    * ein direkter Cast darauf ist nicht erlaubt (TS2352). Deshalb zuerst ueber
    * `unknown` – dieselbe Form wie in app/api/lernen/route.ts:171.
    */
-  const sets: SetAntwort[] = ((data ?? []) as unknown as Zeile[]).map((row) => ({
+  const sets: SetUebersicht[] = ((data ?? []) as unknown as Zeile[]).map((row) => ({
     id: row.slug,
     name: row.name,
     sprache: spracheAusZeile(row),
