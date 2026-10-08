@@ -18,9 +18,12 @@
  *   2. Gesucht wird nach dem Basisnamen ohne Endung, nicht nach dem
  *      vollständigen Pfad. Ein CSS-Modul wird über `./name.module.css`
  *      importiert, nie über seinen Ordner.
- *   3. Was Next.js per Konvention auflöst, wird nicht als "unreferenziert"
- *      gemeldet — `page.tsx`, `layout.tsx`, `route.ts` und Freunde sind
- *      referenziert, ohne dass irgendwo ihr Name steht.
+ *   3. Was Next.js oder Expo Router per Konvention auflöst, wird nicht als
+ *      "unreferenziert" gemeldet — `page.tsx`, `layout.tsx`, `route.ts` und
+ *      Freunde sind referenziert, ohne dass irgendwo ihr Name steht. Gleiches
+ *      gilt seit Phase 7 für Routen im Expo-Projekt: jede Datei unter
+ *      `lexio-app/src/app/` ist eine Route oder ein Layout, auch wenn ihr
+ *      Name sonst nirgends auftaucht.
  *
  * Das Skript meldet Verdächtige und beendet sich mit 1, wenn es welche gibt.
  * Es beweist nicht, dass eine Datei tot ist — es beweist, dass niemand ihren
@@ -40,6 +43,9 @@ const KONVENTION = [
   /^app\/.*\/(page|layout|route)\.module\.css$/,
   /^(middleware|proxy|instrumentation)\.(t|j)sx?$/,
   /^app\/globals\.css$/,
+  // Expo Router (Phase 7): alles unter src/app ist eine Route oder ein Layout,
+  // auch wenn der Name sonst nirgends steht. Routes greifen per Dateisystem.
+  /^lexio-app\/src\/app\//,
 ];
 
 /** Dateien, die niemand zu importieren braucht. */
@@ -48,6 +54,9 @@ const AUSGENOMMEN = [
   /\.md$/,
   /^(package(-lock)?\.json|tsconfig\.json|next\.config\.[cm]?[jt]s|eslint\.config\.[cm]?[jt]s|postcss\.config\.[cm]?[jt]s|\.gitignore|\.env\.example)$/,
   /^tests\//,
+  // lexio-app: Konfigurationen, die Expo, TypeScript oder ESLint per Konvention
+  // laden (das Pendant zu den Wurzel-Konfigurationen gerade oben).
+  /^lexio-app\/(package(-lock)?\.json|app\.json|tsconfig\.json|metro\.config\.js|eslint\.config\.js|\.env\.example|\.gitignore)$/,
 ];
 
 /**
