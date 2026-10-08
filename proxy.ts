@@ -186,6 +186,15 @@ function securityHeader(request: NextRequest): NextResponse {
 export function proxy(request: NextRequest): NextResponse {
   const weg = request.nextUrl.pathname;
   if (weg.startsWith("/api/")) {
+    // Die App (Phase 7) meldet sich ueber `Authorization: Bearer …` an.
+    // Wer einen gueltigen Token hat, ist an der Datenbank ausgewiesen (RLS
+    // schuetzt den Besitz) – das Limit hier ist fuer anonymen Raubverkehr
+    // gedacht und fuesse die App beim eigenen Lernen (Schreib-Limit 30/Min.)
+    // spiegeln: eine Runde wuerde sich selbst stoppen. Deshalb: Token vor
+    // dem Limiter durch.
+    if (request.headers.get("authorization")?.toLowerCase().startsWith("bearer ")) {
+      return NextResponse.next();
+    }
     return rateLimit(request);
   }
   return securityHeader(request);

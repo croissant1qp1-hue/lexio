@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Das Expo-Projekt (Phase 7) hat sein eigenes ESLint (expo lint).
+    "lexio-app/**",
   ]),
 ]);
 

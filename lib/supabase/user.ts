@@ -83,6 +83,11 @@ export function istEchteStoerung(error: unknown): boolean {
  * trauen darf: `getSession()` liest nur, was im Cookie steht, und ist
  * Signed-Attacken ausgesetzt. Guetige Dinge zu tun braucht `getUser()`.
  *
+ * Das Token kann seit Phase 7 auf zwei Wegen ankommen: aus dem
+ * Session-Cookie des Browsers oder – bei der App – aus
+ * `Authorization: Bearer …` (siehe createClient in server.ts). Fuer
+ * `holeUser` ist das egal, beide Wege munden in dasselbe `getUser()`.
+ *
  * Siehe SessionPruefung: der Fehler wird bewusst nicht verschluckt.
  */
 export async function holeUser(supabase: SupabaseServerClient): Promise<SessionPruefung> {
