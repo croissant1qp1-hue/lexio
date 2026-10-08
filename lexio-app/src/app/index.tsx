@@ -84,7 +84,7 @@ export default function Uebersicht() {
 function SetKachel({ set }: { set: SetUebersicht }) {
   const antwort3 = `${Math.round(set.fortschrittProzent)} % gelernt`;
   return (
-    <View style={styles.kachel}>
+    <Pressable style={styles.kachel} onPress={() => router.push(`/lernen/${encodeURIComponent(set.id)}`)}>
       <View style={[styles.balkenMarker, { backgroundColor: set.sprache.flaeche }]} />
       <View style={styles.kachelInhalt}>
         <Text style={styles.setName}>{set.name}</Text>
@@ -92,7 +92,7 @@ function SetKachel({ set }: { set: SetUebersicht }) {
           {set.sprache.name} · {set.anzahlKarten} Karten · {antwort3}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

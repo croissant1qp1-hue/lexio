@@ -6,6 +6,7 @@ import { migrationsMeldung } from "@/lib/db-fehler";
 import { LEECH_FEHLER } from "@/lib/lernlogik";
 import { trainiereModell, schwierigkeit } from "@/lib/reihenfolge";
 import { pruefeRohKarten } from "@/lib/fortschritts-form";
+import type { LernKarte } from "@/lib/types";
 
 const MAX_KARTEN = 20;
 
@@ -437,21 +438,9 @@ export async function GET(request: Request) {
    * Typ der Karten, die die Runde ausgibt: Fortschritt plus Text, der erst
    * nach der Auswahl geladen wird (Plan 3.10). `schwierigkeit` ist optional,
    * weil sie ohne Modell (wenig Daten, Abfragefehler) nicht gesetzt wird.
+   * Geteilt mit der App: der Vertrag steht in lib/types.ts.
    */
-  type ServierteKarte = {
-    id: string;
-    frage: string;
-    antwort: string;
-    beispielsatz: string | null;
-    beispielUebersetzung: string | null;
-    stufe: number;
-    gelernt: boolean;
-    faelligAm: string;
-    leech: boolean;
-    schwierigkeit?: number;
-  };
-
-  const serviert: ServierteKarte[] = [];
+  const serviert: LernKarte[] = [];
   if (genutzt.length > 0) {
     const ids = genutzt.map((k) => k.id);
     const { data: texte, error: textFehler } = await supabase

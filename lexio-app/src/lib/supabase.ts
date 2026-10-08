@@ -1,8 +1,22 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupportedStorage } from "@supabase/supabase-js";
 
 const url = process.env.EXPO_PUBLIC_SUPABASE_URL;
 const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+
+/**
+ * Beim Web-Export rendert der Router die Seiten auch auf dem Server (SSR).
+ * Dort existiert kein `window`, und AsyncStorage wuerde beim ersten Zugriff
+ * scheitern. Ein leerer Speicher reicht dort: die Anmeldung laeuft erst im
+ * Browser (und auf dem Geraet bleibt es bei AsyncStorage).
+ */
+const serverSpeicher: SupportedStorage = {
+  getItem: () => null,
+  setItem: () => {},
+  removeItem: () => {},
+};
+
+const speicher: SupportedStorage = typeof window === "undefined" ? serverSpeicher : AsyncStorage;
 
 /**
  * Supabase direkt in der App (Phase 7, siehe LEXIO-PLAN.md): Die Daten sind
@@ -16,7 +30,7 @@ const anonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
  */
 export const supabase = createClient(url ?? "", anonKey ?? "", {
   auth: {
-    storage: AsyncStorage,
+    storage: speicher,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,

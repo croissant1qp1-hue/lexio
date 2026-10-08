@@ -38,6 +38,53 @@ export type SetUebersicht = {
   eigen: boolean;
   zuletztGelernt: string | null;
 };
+/**
+ * Eine Karte, so wie GET /api/lernen sie ausliefert. Geteilt mit der App
+ * (Phase 7): der Vertrag der Lernrunde liegt hier, nicht im einzelnen
+ * Client.
+ *
+ * `schwierigkeit` kommt nur, wenn die Route ein Modell trainieren konnte
+ * (Plan 1.8) – ohne Modell bleibt sie weg. `faelligAm` ist das Datum
+ * (YYYY-MM-DD), ab dem die Karte faellig war, gesteuert von lernlogik.
+ */
+export type LernKarte = {
+  id: string;
+  frage: string;
+  antwort: string;
+  beispielsatz: string | null;
+  beispielUebersetzung: string | null;
+  stufe: number;
+  gelernt: boolean;
+  faelligAm: string;
+  /** Probleme mit der Fehlerschwelle – in der normalen Runde ausgeblendet. */
+  leech: boolean;
+  schwierigkeit?: number;
+};
+
+/** Der Set-Kopf einer Lernrunde, so wie GET /api/lernen ihn meldet. */
+export type LernSetInfo = {
+  slug: string;
+  name: string;
+  sprache: SpracheInfo;
+};
+
+/**
+ * Antwort von GET /api/lernen. Uebungs- und Leech-Modus kommen nur gesetzt,
+ * wenn die Adresse sie verlangte (`&modus=ueben` / `&modus=leech`); so kann
+ * der Client den Stapel ehrlich benennen, ohne zu raten.
+ */
+export type LernAntwort = {
+  set: LernSetInfo;
+  karten: LernKarte[];
+  faelligGesamt: number;
+  kartenGesamt: number;
+  setZuGross?: boolean;
+  hinweis?: string;
+  uebungsmodus?: boolean;
+  leechAnzahl?: number;
+  leechModus?: boolean;
+};
+
 export type WochenXpTyp = {
   mo: number;
   di: number;
