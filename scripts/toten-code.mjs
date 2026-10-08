@@ -57,6 +57,9 @@ const AUSGENOMMEN = [
   // lexio-app: Konfigurationen, die Expo, TypeScript oder ESLint per Konvention
   // laden (das Pendant zu den Wurzel-Konfigurationen gerade oben).
   /^lexio-app\/(package(-lock)?\.json|app\.json|tsconfig\.json|metro\.config\.js|eslint\.config\.js|\.env\.example|\.gitignore)$/,
+  // lexio-app: das multiplexte App-Icon ist ein Container (icon.json mit
+  // Assets); Expo lädt ihn, wenn app.json auf ./assets/expo.icon zeigt.
+  /^lexio-app\/assets\/expo\.icon\//,
 ];
 
 /**
