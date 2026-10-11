@@ -1763,6 +1763,35 @@ gebaut; jede Etappe ist geprüft und auf `origin/main` gepusht:
   Apple-Entwicklerkonto, Push-Zertifikat und ein echtes Gerät/Geräte-Farm.
   Solange das fehlt, bleibt der App ein Wegwerf-Build, kein Versand.
 
+### Phase 7 — Stand 2026-10-11
+
+Die Etappen 1–5 stehen. Danach kam die Härtung der App, ohne die Oberfläche
+zu ändern — jede Einzellogik, die sich ohne Gerät prüfen lässt, liegt jetzt
+in einem reinen Modul unter Tests (App: `node:test` + `tsx`, wie im Web):
+
+| Modul | Aufgabe | Tests |
+| --- | --- | --- |
+| `src/lib/api-basis.ts` | API-Basis-URL aus `EXPO_PUBLIC_API_URL` / Host-Uri | 4 |
+| `src/lib/api-fehler.ts` | `ApiFehler`, `fehlerAusKoerper`, `wirdImmerGeworfen` (503), `postBody` | 7 |
+| `src/lib/rundenrotation.ts` | Kartenrotation einer Runde (Reihenfolge, „schwer"-Würfel) | 8 |
+| `src/lib/sprechtext.ts` | Satz aus Text + Sprache für die Ausgabe | 6 |
+
+`api.ts`, `umgebung.ts` und `vorlesen.ts` sind dünne Hüllen um diese Module
+(der Grund: `supabase`/`expo-router`/`expo-speech` sind unter Node nicht
+ladbar). Die puren Regeln sind damit an einer Stelle und nicht im Hüllen-Code
+versteckt.
+
+Dazu am laufenden System geprüft, im Web-Target der App gegen die echte API:
+die komplette Lernrunde (Übersicht → Karte → Bewerten → Rücknahme →
+Endschirm), der Fehlerbildschirm mit „Erneut versuchen", und der
+401-Pfad (ungültige Sitzung → abmelden → `/anmelden`). Details stehen in
+`OFFENE-PUNKTE.md` (Nachtrag 2026-10-11). Ein echter Befund war dabei die
+fehlende `accessibilityRole` auf den `Pressable`s (react-native-web rendert
+sie sonst als `div`) — Commit `a388f46`.
+
+Damit ist Phase 7 **software-seitig abgeschlossen**. Es bleiben nur die zwei
+oben genannten Hardware-Punkte.
+
 ---
 
 ## Nachtrag vom 2026-10-04 — die Wortlisten sind gemessen statt gelesen
