@@ -199,10 +199,10 @@ export default function Lernen() {
       <SafeAreaView style={styles.schirm}>
         <View style={styles.mitte}>
           <Text style={styles.fehlerText}>{fehler}</Text>
-          <Pressable style={styles.breiterKnopf} onPress={neuladen}>
+          <Pressable style={styles.breiterKnopf} accessibilityRole="button" onPress={neuladen}>
             <Text style={styles.breiterKnopfText}>Erneut versuchen</Text>
           </Pressable>
-          <Pressable style={styles.breiterKnopfW} onPress={() => router.replace("/")}>
+          <Pressable style={styles.breiterKnopfW} accessibilityRole="button" onPress={() => router.replace("/")}>
             <Text style={styles.breiterKnopfWText}>Zur Übersicht</Text>
           </Pressable>
         </View>
@@ -241,11 +241,15 @@ export default function Lernen() {
             {leer0 ? "Noch keine Vokabeln in diesem Set." : `Nichts fällig in „${antwort?.set.name ?? ""}“.`}
           </Text>
           {!leer0 && (
-            <Pressable style={styles.breiterKnopf} onPress={() => router.replace(`/lernen/${encodeURIComponent(slug)}?modus=ueben`)}>
+            <Pressable
+              accessibilityRole="button"
+              style={styles.breiterKnopf}
+              onPress={() => router.replace(`/lernen/${encodeURIComponent(slug)}?modus=ueben`)}
+            >
               <Text style={styles.breiterKnopfText}>Nochmal lernen</Text>
             </Pressable>
           )}
-          <Pressable style={styles.breiterKnopfW} onPress={() => router.replace("/")}>
+          <Pressable style={styles.breiterKnopfW} accessibilityRole="button" onPress={() => router.replace("/")}>
             <Text style={styles.breiterKnopfWText}>Zur Übersicht</Text>
           </Pressable>
         </View>
@@ -256,7 +260,7 @@ export default function Lernen() {
   return (
     <SafeAreaView style={styles.schirm} edges={["top", "bottom"]}>
       <View style={styles.kopf}>
-        <Pressable onPress={() => router.back()} hitSlop={8}>
+        <Pressable onPress={() => router.back()} accessibilityRole="button" hitSlop={8}>
           <Text style={styles.zurueck}>Zurück</Text>
         </Pressable>
         <Text style={styles.titel} numberOfLines={1}>
@@ -272,6 +276,7 @@ export default function Lernen() {
 
       <View style={styles.kartenfach}>
         <Pressable
+          accessibilityRole="button"
           style={[styles.karte, aufgedeckt && { borderColor: antwort?.set.sprache.akzent }]}
           onPress={() => {
             if (aufgedeckt) return;
@@ -301,6 +306,7 @@ export default function Lernen() {
               {karte.leech ? <Text style={styles.leechTag}>Problemskarte</Text> : null}
               <Pressable
                 style={styles.lesenKnopf}
+                accessibilityRole="button"
                 onPress={() => spreche([karte.antwort, karte.beispielsatz], antwort?.set.sprache.code ?? null)}
                 hitSlop={8}
               >
@@ -326,7 +332,12 @@ export default function Lernen() {
 
       <View style={styles.fuss}>
         {letzteAntwort && (
-          <Pressable style={styles.rueckgaengig} onPress={rueckgaengig} disabled={bewertend}>
+          <Pressable
+              style={styles.rueckgaengig}
+              accessibilityRole="button"
+              onPress={rueckgaengig}
+              disabled={bewertend}
+            >
             <Text style={styles.rueckgaengigText}>Letzte Antwort zurücknehmen</Text>
           </Pressable>
         )}
@@ -336,6 +347,7 @@ export default function Lernen() {
             return (
               <Pressable
                 key={bewertung.id}
+                accessibilityRole="button"
                 style={[styles.bewertungsKnopf, bewertung.id === "nochmal" && styles.bewertungsKnopfNochmal]}
                 disabled={!aktiv}
                 onPress={() => bewerten(karte.id, bewertung.id)}
@@ -392,17 +404,17 @@ function Endschirm({
         {streak !== null ? <Text style={styles.endSerie}>{streak} Tage Serie</Text> : null}
         {zusatz ? <Text style={styles.endHinweis}>{zusatz}</Text> : null}
 
-        <Pressable style={styles.breiterKnopf} onPress={aufNeueRunde}>
+        <Pressable style={styles.breiterKnopf} accessibilityRole="button" onPress={aufNeueRunde}>
           <Text style={styles.breiterKnopfText}>
             {istUeben ? "Weitere Runde" : istLeech ? "Nochmal als Übung" : "Nochmal lernen"}
           </Text>
         </Pressable>
         {kannRueckgaengig && (
-          <Pressable style={styles.breiterKnopfW} onPress={aufZuruecknehmen}>
+          <Pressable style={styles.breiterKnopfW} accessibilityRole="button" onPress={aufZuruecknehmen}>
             <Text style={styles.breiterKnopfWText}>Letzte Antwort zurücknehmen</Text>
           </Pressable>
         )}
-        <Pressable style={styles.breiterKnopfW} onPress={aufZurueck}>
+        <Pressable style={styles.breiterKnopfW} accessibilityRole="button" onPress={aufZurueck}>
           <Text style={styles.breiterKnopfWText}>Zur Übersicht</Text>
         </Pressable>
       </ScrollView>

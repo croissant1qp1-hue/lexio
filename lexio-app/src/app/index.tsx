@@ -51,7 +51,7 @@ export default function Uebersicht() {
     <SafeAreaView style={styles.schirm} edges={["top", "bottom"]}>
       <View style={styles.kopf}>
         <Text style={styles.titel}>Lexio</Text>
-        <Pressable onPress={() => abmelden()} hitSlop={8}>
+        <Pressable onPress={() => abmelden()} accessibilityRole="button" hitSlop={8}>
           <Text style={styles.abmelden}>Abmelden</Text>
         </Pressable>
       </View>
@@ -84,7 +84,11 @@ export default function Uebersicht() {
 function SetKachel({ set }: { set: SetUebersicht }) {
   const antwort3 = `${Math.round(set.fortschrittProzent)} % gelernt`;
   return (
-    <Pressable style={styles.kachel} onPress={() => router.push(`/lernen/${encodeURIComponent(set.id)}`)}>
+    <Pressable
+      accessibilityRole="link"
+      style={styles.kachel}
+      onPress={() => router.push(`/lernen/${encodeURIComponent(set.id)}`)}
+    >
       <View style={[styles.balkenMarker, { backgroundColor: set.sprache.flaeche }]} />
       <View style={styles.kachelInhalt}>
         <Text style={styles.setName}>{set.name}</Text>

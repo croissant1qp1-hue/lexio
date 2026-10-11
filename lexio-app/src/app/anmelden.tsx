@@ -86,6 +86,7 @@ export default function Anmelden() {
 
           <Pressable
             style={({ pressed }) => [styles.knopf, pressed && styles.knopfGedrueckt]}
+            accessibilityRole="button"
             onPress={() => anmelden()}
             disabled={busy}
           >
