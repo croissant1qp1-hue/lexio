@@ -1008,3 +1008,55 @@ Zustand des Codes, der beim Arbeiten auffiel und nicht in den Plan gehört:
 Stand: `npm run build` und `npm run lint` sauber, 213/213 Tests,
 `toten-code` und `db:pruefen` grün, Responsive-Audit 72/72 mit 0 Befund,
 Live-Prüfung (SEO, Skip-Link, Kartenrichtung) vollständig bestanden.
+
+## Nachtrag 2026-10-11 — App-Lernrunde im Browser gegen die echte API durchgespielt
+
+Die App (Phase 7) läuft als Web-Target ohnehin in derselben React-Basis wie
+auf dem Telefon. Deshalb wurde die komplette Lernrunde im Firefox gegen die
+echte API geprüft — der nächste Schritt zur Geräteabnahme, der ohne iPhone
+möglich ist.
+
+**Vorgehen (Wegwerf-Setup, nichts Committbares):**
+
+- Web-Production-Build auf Port 3210 (Frisch, `npm run build`).
+- `expo export --platform web` mit `EXPO_PUBLIC_API_URL=http://localhost:3007`.
+- Ein Wegwerf-Server in `/tmp/opencode/app-ui-server.mjs` liefert `dist/`
+  statisch und proxied `/api/*` nach 3210 — dadurch same-origin, der Browser
+  verlangt kein CORS (auf dem Telefon existiert das Problem nicht). Nicht
+  committet, liegt nur in /tmp.
+- Konto: `scripts/audit-konto.mjs`, danach über die App-UI angemeldet,
+  nach dem Lauf gelöscht.
+
+**Durchlauf (alle Schritte im Browser):**
+
+- Anmeldeseite: E-Mail + Passwort getippt, Enter → Übersicht mit 5 Sets.
+- `Englisch Grundlagen` (100 Karten) geöffnet (deep link `/lernen/<slug>`).
+- Erste Karte `welche, welcher` umgedreht → `which` + Beispielsatz.
+- „Gut" → XP 5, „1 Tage Serie", Fortschritt `0 / 19` (Karte raus).
+- „Letzte Antwort zurücknehmen" → XP 0, „0 Tage Serie", Runde neu (20 Karten,
+  erste Karte wieder `welche, welcher`).
+- Volle Runde: 20 Bewertungen (überwiegend „Gut", einmal „Nochmal") → Endschirm
+  „Runde geschafft · Englisch Grundlagen · 100 Karten · 100" + „1 Tage Serie".
+- „Zur Übersicht": persistiert, ohne Fehler.
+
+**Zwei Befunde, beide ohne Codeänderung:**
+
+1. **Interaktive Pressables waren im Web keine Buttons.** react-native-web
+   rendert `Pressable` ohne `accessibilityRole` als bloße `div` — für Klick
+   und Screenreader unsichtbar. Der Browser-Test blieb erst daran hängen.
+   Behoben im Commit a388f46: alle interaktiven Flächen in
+   `anmelden.tsx`, `index.tsx` und `lernen/[set].tsx` tragen jetzt
+   `accessibilityRole="button"` (Tiles `"link"`). Auf dem Gerät ist das
+   VoiceOver/TalkBack, im Web echtes `role=button`. Keine Verhaltensänderung
+   in der App.
+2. **„0 % gelernt" nach einer Runde ist richtig, kein Bug.** Die View zählt
+   seit 007 `gelernt = stufe >= 2` („ehrlich"), und eine erste Runde bringt
+   neue Karten nur auf Stufe 1. Web und App lesen dieselbe View. Gegenprobe:
+   nach 20 Bewertungen ist `faellig` von 100 auf 80 gesunken — der
+   Schreibpfad persistiert.
+
+**Stand danach:** App `tsc`/Lint/18 Tests grün, Web-Build + Export (ios,
+android, web) ok. Der Wert des Laufs: die Übersicht- bis Endschirm-Regie der
+App ist am laufenden System geprüft, nicht nur im Code gelesen. Die
+Kontrollnummern (XP je Bewertung, Strefk-Semantik) hatte schon der frühere
+API-Test; hier kam die echte Oberfläche dazu.
