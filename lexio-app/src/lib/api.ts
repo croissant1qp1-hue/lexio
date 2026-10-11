@@ -1,4 +1,5 @@
 import { router } from "expo-router";
+import { ApiFehler, fehlerAusKoerper, postBody, wirdImmerGeworfen } from "./api-fehler";
 import { supabase } from "./supabase";
 import { apiBasisUrl } from "./umgebung";
 
@@ -7,19 +8,12 @@ import { apiBasisUrl } from "./umgebung";
  * im Web. Wenn die App auf denselben Server zielt (Phase 7), sollen die
  * Fehler auch derselben Sprache folgen: ein 401 ist kein Nutzerfehler,
  * sondern ein Zustand, aus dem die App herausfuehrt.
+ *
+ * `ApiFehler` und die Fehlerregeln leben der Testbarkeit wegen in
+ * `api-fehler.ts` und werden hier weiter ausgegeben, damit die Aufrufer
+ * sich nicht aendern.
  */
-export class ApiFehler extends Error {
-  readonly status: number;
-  /** Feldname -> Meldung, so wie es die API zurueckgibt. */
-  readonly felder: Record<string, string>;
-
-  constructor(nachricht: string, status: number, felder: Record<string, string> = {}) {
-    super(nachricht);
-    this.name = "ApiFehler";
-    this.status = status;
-    this.felder = felder;
-  }
-}
+export { ApiFehler } from "./api-fehler";
 
 /**
  * Holt JSON von der Web-API, angemeldet ueber `Authorization: Bearer …`.
@@ -78,19 +72,14 @@ export async function holeJson<T>(
   }
 
   if (!antwort.ok) {
-    const koerper = (daten ?? {}) as { error?: string; felder?: Record<string, string> };
-    const fehler = new ApiFehler(
-      koerper.error ?? `Fehler ${antwort.status}`,
-      antwort.status,
-      koerper.felder ?? {},
-    );
+    const fehler = fehlerAusKoerper(antwort.status, daten);
 
     /*
      * 503 wird immer geworfen: "es weiss gerade niemand" ist kein Zustand,
      * den man als leere Liste ausgeben darf – das haette eine Luege fuer
      * einen Lernstand. (Siehe Web-Vorbild lib/api-client.ts.)
      */
-    if (antwort.status === 503) throw fehler;
+    if (wirdImmerGeworfen(antwort.status)) throw fehler;
 
     if (abfall === undefined) throw fehler;
     console.warn(`[api] ${url}: ${fehler.message}`);
@@ -120,7 +109,7 @@ export async function sendeJson<T>(
         "Content-Type": "application/json",
         ...init?.headers,
       },
-      body: daten === undefined ? "{}" : JSON.stringify(daten),
+      body: postBody(daten),
     },
   );
 }
