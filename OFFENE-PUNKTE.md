@@ -1060,3 +1060,46 @@ android, web) ok. Der Wert des Laufs: die Übersicht- bis Endschirm-Regie der
 App ist am laufenden System geprüft, nicht nur im Code gelesen. Die
 Kontrollnummern (XP je Bewertung, Streak-Semantik) hatte schon der frühere
 API-Test; hier kam die echte Oberfläche dazu.
+
+## Nachtrag 2026-10-11 — Fehler- und Randpfade der App im Browser geprüft
+
+Der Durchlauf oben ließ zwei Pfade bewusst aus, weil die API nie ausfiel und
+die Sitzung nie ungültig wurde: den Fehlerbildschirm und die Reaktion auf eine
+abgelaufene Sitzung. Beide sind jetzt im gleichen Wegwerf-Setup nachgeholt.
+
+**Fehlerpfad.** Die Web-API (3210) angehalten, der Proxy (3007) blieb stehen.
+Die Lernseite neu geöffnet → der Proxy antwortet **502**, die App zeigt ihren
+Fehlerbildschirm:
+
+```
+Unerwartete Antwort vom Server.
+Erneut versuchen
+Zur Übersicht
+```
+
+Danach die API neu gestartet und „Erneut versuchen" gedrückt: die Runde lädt
+wieder (`Englisch Alltag I`, `0 / 20`, erste Karte sichtbar). Der Weg zurück
+funktioniert also, nicht nur der Fehler selbst.
+
+> **Präzisierung zur Meldung.** Im Setup steht der Proxy dazwischen, der bei
+> totem Backend mit einem *Textkörper* antwortet — deshalb die Meldung
+> „Unerwartete Antwort vom Server." und nicht „Fehler 502". Auf dem Gerät gibt
+> es keinen Proxy; fällt dort das Netz aus, wirft `fetch` und die App zeigt
+> „Keine Verbindung zum Server." (in `api.ts` am `catch` um den `fetch`). Beide
+> Zweige waren schon vorher da; hier ist der eine live belegt, der andere
+> bleibt die Aussage des Codes.
+
+**Sitzungspfad (401).** Das Wegwerf-Konto wurde gelöscht, während die App noch
+ihre gültige Sitzung hielt. Die Lernseite neu geladen → der Server lehnt das
+Bearer-Token ab (**401**), die App meldet ab und landet auf `/anmelden`
+(„Anmelden – derselbe Lernstand wie im Web."). Das ist die eigentliche
+Erwartung an einen 401: kein Fehlerbildschirm, sondern herausführen.
+
+**Kein Code geändert.** Beide Pfade verhielten sich wie gebaut. Die reinen
+Regeln dahinter (`wirdImmerGeworfen`, `fehlerAusKoerper`) liegen seit
+`tests/api-fehler.test.ts` unter Tests; dieser Lauf zeigt, dass die
+Oberfläche sie auch anwendet.
+
+**Stand danach:** unverändert App `tsc`/Lint/25 Tests grün (7 neue in
+`api-fehler.test.ts`), Web-Export ok, `toten-code` grün. Wegwerf-Konto,
+Server und Firefox wieder gestoppt.
