@@ -1097,9 +1097,41 @@ Erwartung an einen 401: kein Fehlerbildschirm, sondern herausführen.
 
 **Kein Code geändert.** Beide Pfade verhielten sich wie gebaut. Die reinen
 Regeln dahinter (`wirdImmerGeworfen`, `fehlerAusKoerper`) liegen seit
-`tests/api-fehler.test.ts` unter Tests; dieser Lauf zeigt, dass die
+`lexio-app/tests/api-fehler.test.ts` unter Tests; dieser Lauf zeigt, dass die
 Oberfläche sie auch anwendet.
 
 **Stand danach:** unverändert App `tsc`/Lint/25 Tests grün (7 neue in
 `api-fehler.test.ts`), Web-Export ok, `toten-code` grün. Wegwerf-Konto,
 Server und Firefox wieder gestoppt.
+
+## Nachtrag 2026-10-11 — der Web-Rundenwechsel übersprang Karten bei „nochmal"
+
+**Befund (im Browser bestätigt).** In `app/(app)/lernen/[set]/lernen-seite.tsx`
+stand beim Wiedervorlegen einer Karte zweimal `[...liste.slice(index + 1), karte]`
+(unter „nochmal" und unter „schwer", wenn der Würfel die Karte behält). Das warf
+den gesehenen Anfang der Runde (`liste.slice(0, index)`) weg, ließ aber `index`
+stehen. Ab der dritten Karte zeigte `karten[index]` damit an der eigentlichen
+nächsten Karte vorbei.
+
+Nachgestellt mit einem Wegwerf-Konto im Set `englisch-alltag-1` (Reihenfolge
+0 Welt, 1 stehen, 2 manchmal, 3 ändern, 4 Lieber, 5 nichts), Bewertungen
+„Gut, Gut, Nochmal": Die Kopfzeile las `3 / 18` statt `3 / 20` – die Runde war
+um zwei Karten geschrumpft – und als nächste Karte kam `nichts`. `ändern` und
+`Lieber` wurden in dieser Runde nie gezeigt. Die Antworten selbst gingen alle an
+den Server; verloren ging nur die Reihenfolge.
+
+**Fix.** Die Drehung liegt jetzt in `lib/rundenrotation.ts` (`nachHinten`): die
+Karte wandert ans Ende, der gesehene Anfang bleibt, `karten.length` ändert sich
+nicht. Die Seite ruft das an beiden Stellen auf. `tests/rundenrotation.test.ts`
+hält beides fest – gleiche Länge, Cursor auf dem direkten Nachfolger – und nennt
+die alte Form als Gegenprobe.
+
+**Gegengeprüft.** Dieselbe Folge im Browser: Kopfzeile bleibt `3 / 20`, nächste
+Karte ist `ändern`. Die App hatte an derselben Stelle nie den Fehler – ihr
+Stapelmodell (`lexio-app/src/lib/rundenrotation.ts`) entnimmt per `id` und
+überspringt nichts; im selben Durchlauf zeigte sie nach „Lieber" sofort
+`nichts`.
+
+**Nebenbei.** Ein Doku-Verweis in dieser Datei nannte die App-Testdatei ohne das
+`lexio-app/`-Präfix; im Web-Repo löste er damit ins Leere auf und ließ
+`dateiverweise.test.ts` scheitern – richtiggestellt. Web-Gates grün (227 Tests).

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore
 import { useRouter } from "next/navigation";
 import { BEWERTUNGEN, type Bewertung, intervallVorschau } from "@/lib/lernlogik";
 import { schwerChance } from "@/lib/reihenfolge";
+import { nachHinten } from "@/lib/rundenrotation";
 import { farbeVonSprache, nameVonSprache } from "@/lib/sprachen";
 import type { LernAntwort, LernKarte, LernSetInfo } from "@/lib/types";
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api-client";
@@ -495,15 +496,20 @@ export default function LernenSeite({
                  * Der Wuerfel faellt hier im Client, aber die WAHRSCHIN-
                  * LICHKEIT kommt aus lib/reihenfolge.ts – dort ist sie
                  * testbar und dort steht, warum sie so ist.
+                 *
+                 * Das Ans-Ende-Stellen selbst liegt in lib/rundenrotation.ts.
+                 * Dort ist festgehalten, warum der gesehene Anfang der Runde
+                 * stehenbleiben muss: fehlt er, schrumpft die Runde und der
+                 * Cursor springt an Karten vorbei.
                  */
                 if (bewertung === "nochmal") {
-                    setKarten((liste) => [...liste.slice(index + 1), karte]);
+                    setKarten((liste) => nachHinten(liste, index));
                 } else if (bewertung === "schwer") {
                     const vorherSchwer = schwerInRunde.current[karte.id] ?? 0;
                     schwerInRunde.current[karte.id] = vorherSchwer + 1;
                     const bleibt = Math.random() < schwerChance(karte.schwierigkeit, vorherSchwer);
                     if (bleibt) {
-                        setKarten((liste) => [...liste.slice(index + 1), karte]);
+                        setKarten((liste) => nachHinten(liste, index));
                     } else {
                         setIndex((i) => i + 1);
                     }
