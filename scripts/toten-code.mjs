@@ -54,6 +54,7 @@ const AUSGENOMMEN = [
   /\.md$/,
   /^(package(-lock)?\.json|tsconfig\.json|next\.config\.[cm]?[jt]s|eslint\.config\.[cm]?[jt]s|postcss\.config\.[cm]?[jt]s|\.gitignore|\.env\.example)$/,
   /^tests\//,
+  /^lexio-app\/tests\//,
   // lexio-app: Konfigurationen, die Expo, TypeScript oder ESLint per Konvention
   // laden (das Pendant zu den Wurzel-Konfigurationen gerade oben).
   /^lexio-app\/(package(-lock)?\.json|app\.json|tsconfig\.json|metro\.config\.js|eslint\.config\.js|\.env\.example|\.gitignore)$/,

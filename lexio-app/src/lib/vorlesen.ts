@@ -1,5 +1,7 @@
 import * as Speech from "expo-speech";
 
+import { sprechText } from "./sprechtext";
+
 /**
  * Sprachausgabe in der App (Phase 7) – Gegenstueck zu lib/sprachausgabe.ts
  * im Web. Der Plan benennt diesen Austauschpunkt ausdruecklich: das Web
@@ -12,27 +14,18 @@ import * as Speech from "expo-speech";
  * gibt – deshalb bewusst keine.
  */
 
-function sprechbar(text: string | null | undefined): boolean {
-  return typeof text === "string" && text.trim().length > 0;
-}
-
 /**
  * Spricht eine Kartenrueckseite aus: `antwort` und – falls vorhanden –
- * der Beispielsatz, nacheinander in derselben Ausgabe. expo-speech kennt
- * keine Warteschlange, also werden die Teile zu einem Text verbunden –
- * dieselbe Kuerzung wie "nochmal vorlesen" im Web (die Satzzeichen bleiben
- * erhalten, nur ein doppelter Schlusspunkt wird geschluckt).
+ * der Beispielsatz, nacheinander in derselben Ausgabe. Die Verbindung der
+ * Teile ist rein und getestet (`sprechText`).
  */
 export function spreche(
   teile: (string | null | undefined)[],
   spracheCode: string | null,
   fertig?: () => void,
 ): void {
-  const texte = teile.filter((teil): teil is string => sprechbar(teil));
-  if (texte.length === 0) return;
-
-  let text = texte.map((t) => t.trim()).join(". ") + ".";
-  text = text.replace(/\.{2,}$/, ".");
+  const text = sprechText(teile);
+  if (!text) return;
 
   const weiter = () => fertig?.();
 
