@@ -1058,5 +1058,5 @@ möglich ist.
 **Stand danach:** App `tsc`/Lint/18 Tests grün, Web-Build + Export (ios,
 android, web) ok. Der Wert des Laufs: die Übersicht- bis Endschirm-Regie der
 App ist am laufenden System geprüft, nicht nur im Code gelesen. Die
-Kontrollnummern (XP je Bewertung, Strefk-Semantik) hatte schon der frühere
+Kontrollnummern (XP je Bewertung, Streak-Semantik) hatte schon der frühere
 API-Test; hier kam die echte Oberfläche dazu.
