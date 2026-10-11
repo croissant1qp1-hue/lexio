@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { ApiFehler, holeJson, sendeJson } from "@/lib/api";
+import { rundenFortschritt } from "@/lib/rundenfortschritt";
 import { rotiere } from "@/lib/rundenrotation";
 import { supabase } from "@/lib/supabase";
 import { spreche, stoppe } from "@/lib/vorlesen";
@@ -106,6 +107,12 @@ export default function Lernen() {
   useEffect(() => () => stoppe(), []);
 
   const karte = stapel[index];
+  /*
+   * Die Rundengroesse bleibt `antwort.karten.length` (rotiere liefert neue
+   * Arrays, mutiert nichts). Der Fortschritt kommt aus ihr und dem Rest, nicht
+   * aus `index` – der steht in dieser Regie fest auf 0.
+   */
+  const fortschritt = rundenFortschritt(antwort?.karten.length ?? 0, stapel.length);
 
   const neuladen = () => {
     setLaden(true);
@@ -270,7 +277,7 @@ export default function Lernen() {
       </View>
 
       <Text style={styles.fortschritt}>
-        {Math.min(index, stapel.length)} / {stapel.length}
+        {fortschritt.position} / {fortschritt.gesamt}
         {streak !== null ? ` · ${streak} Tage Serie` : ""}
       </Text>
 
