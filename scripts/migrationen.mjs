@@ -338,4 +338,15 @@ export const PRUEFUNGEN = [
                        and definition like '%set_level%')
           ) as da`,
   },
+  {
+    datei: "018-eindeutige-paare.sql",
+    merkmal:
+      "der eindeutige Index auf dem normalisierten Paar je Set – ohne ihn " +
+      "kann die Datenbank dasselbe Wortpaar zweimal annehmen, wenn zwei " +
+      "Anfragen gleichzeitig dieselbe Vorprüfung bestehen",
+    sql: `select exists (
+            select 1 from pg_indexes
+             where schemaname='public' and indexname='karten_set_paar_idx'
+          ) as da`,
+  },
 ];

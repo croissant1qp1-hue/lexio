@@ -470,6 +470,16 @@ export async function POST(request: Request) {
         { status: 503 },
       );
     }
+    /*
+     * 23505 = "unique_violation". Die Vorprüfung weiter oben deckt den
+     * Normalfall ab; hier landet nur, was zwei gleichzeitige Anfragen
+     * durchgelassen haben. Der Index `karten_set_paar_idx` (018) fängt es auf
+     * Datenbank-Ebene ab. Ohne diesen Zweig käme eine 500 mit einem
+     * Postgres-Satz zurück statt der Meldung, die die Vorprüfung ausgibt.
+     */
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "Doppeltes Wortpaar", felder: {} }, { status: 400 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

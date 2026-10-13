@@ -273,6 +273,15 @@ export async function PATCH(
         { status: 503 },
       );
     }
+    /*
+     * 23505 = "unique_violation". Siehe POST /api/karten: die Vorprüfung deckt
+     * den Normalfall ab, der Index `karten_set_paar_idx` (018) den Rest. Ohne
+     * diesen Zweig käme eine 500 mit einem Postgres-Satz statt der Meldung,
+     * die die Vorprüfung ausgibt.
+     */
+    if (error.code === "23505") {
+      return NextResponse.json({ error: "Doppeltes Wortpaar", felder: {} }, { status: 400 });
+    }
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 

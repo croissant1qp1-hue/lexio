@@ -901,15 +901,17 @@ an bestehendem Code ist, sondern Absicherung:
    davon hing Fortschritt. Der Nutzer hat die Bereinigung ausdrücklich
    freigegeben.
 
-   **Nicht gelöst, weil es eine Entscheidung ist:** die Prüfung läuft in der
-   Route, nicht in der Datenbank. Zwei gleichzeitig eingehende Anfragen können
-   sich zwischen Prüfung und Schreiben noch ins Gehege kommen. Eine
-   Eindeutigkeit je Set wäre die saubere Gegenmassnahme und braucht eine
-   Migration plus die Entscheidung, was mit den bestehenden Sets passiert.
-   Eine SET-Variante auf Basis normalisierter Paare wäre über einen Ausdruck
-   möglich und würde ohne Datenbereinigung auskommen, weil global keine
-   Dublette innerhalb eines Sets existiert — sie müsste nur wieder entfernt
-   werden, sobald die App Zugriff bekommt.
+   **Erledigt (2026-10-11).** Die Prüfung läuft jetzt auch in der Datenbank:
+   Migration `018-eindeutige-paare.sql` legt einen eindeutigen Index
+   `karten_set_paar_idx` auf dem normalisierten Paar je Set an
+   (`lower(btrim(frage))` / `lower(btrim(antwort))` — derselbe Vergleich wie in
+   der Route), und `POST`/`PATCH /api/karten` fangen ein `23505` ab und geben
+   die Meldung der Vorprüfung aus statt einer rohen 500. Vor dem Anlegen
+   gemessen: 2286 Karten in 9 Sets, keine Dublette je Set unter diesem
+   Schlüssel, keine NULL-Werte, keine Randleerzeichen — die Migration brauchte
+   also keine Datenbereinigung. Am laufenden System belegt: ein Dubletten-Insert
+   wird mit `23505` abgelehnt, der Kartenbestand bleibt bei 2286. Der Import
+   bleibt verträglich, weil er nur englischseitig fehlende Wörter einfügt.
 
    Nebenbefund derselben Messung, unkritisch: vier Sets haben
    `anzahl_karten = 0`, obwohl sie Karten enthalten. Kein Fehler — die Anzeige
