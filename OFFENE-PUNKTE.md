@@ -979,6 +979,10 @@ Zustand des Codes, der beim Arbeiten auffiel und nicht in den Plan gehört:
   großen Web-Client nicht anfassen musste; jetzt, wo der Vertrag in
   `lib/types.ts` liegt, lässt sie sich nachziehen, wenn dort sowieso
   angefasst wird.
+
+  > **Erledigt.** `lernen-seite.tsx` holt die Typen inzwischen ebenfalls aus
+  > `lib/types.ts` (`Karte` und `SetInfo` sind nur noch Aliasse), die lokale
+  > Definition ist weg.
 - **Die App-Rücknahme lädt die Runde neu** statt die Karte an ihren
   genauen Platz zurückzubauen. Der Server-Stand (Stufe, XP, Streak) wird
   korrekt rückgängig gemacht — die Rundeneinteilung nicht. Für ein
@@ -1137,3 +1141,31 @@ Stapelmodell (`lexio-app/src/lib/rundenrotation.ts`) entnimmt per `id` und
 **Nebenbei.** Ein Doku-Verweis in dieser Datei nannte die App-Testdatei ohne das
 `lexio-app/`-Präfix; im Web-Repo löste er damit ins Leere auf und ließ
 `dateiverweise.test.ts` scheitern – richtiggestellt. Web-Gates grün (227 Tests).
+
+## Nachtrag 2026-10-11 — Set-Eindeutigkeit auf Datenbank-Ebene
+
+Punkt 5 (Dublettenschutz) hatte eine zweite, offen gelassene Hälfte: die
+Prüfung lief nur in der Route, nicht in der Datenbank. Zwei gleichzeitige
+Anfragen konnten sich zwischen Prüfung und Schreiben noch ins Gehege kommen.
+
+**Vorher gemessen, damit die Migration gefahrlos ist** (keine Bereinigung
+nötig): 2286 Karten in 9 Sets, **0** Dubletten je Set unter dem Schlüssel
+`lower(btrim(frage))`/`lower(btrim(antwort))`, keine NULL-Werte, keine
+Randleerzeichen. Der Import bleibt verträglich, weil er nur englischseitig
+fehlende Wörter einfügt — ein solches Paar ist damit ebenfalls neu.
+
+**Migration `supabase/migrations/018-eindeutige-paare.sql`** legt den
+eindeutigen Index `karten_set_paar_idx` auf dem normalisierten Paar je Set an
+— derselbe Vergleich wie in `lib/karten-duplikat.ts`. `db:migrieren` gelaufen,
+`db:pruefen` meldet 018 als `da`.
+
+**Am laufenden System belegt:** ein Dubletten-Insert wird mit `23505`
+abgelehnt und der Kartenbestand bleibt bei 2286. Route-Smoke-Test mit
+Wegwerf-Konto: Set 201, Karte 201, dieselbe Karte in anderer Schreibweise →
+**400 „Doppeltes Wortpaar"**. `app/api/karten/route.ts` und
+`app/api/karten/[id]/route.ts` fangen ein `23505` jetzt ab und geben die
+Meldung der Vorprüfung aus statt einer rohen 500.
+
+**Stand danach:** Web 227 Tests, Lint 0 Errors, `next build` ok.
+Wegwerf-Konto, Server und Sessiondatei wieder entfernt; die Datenbank ist auf
+2286/9 zurück.
