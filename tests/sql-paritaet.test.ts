@@ -217,10 +217,13 @@ test("Leech-Schwelle stimmt zwischen Code und View ueberein", () => {
   );
 });
 
-test("die Route rechnet Stufe und XP mit der getesteten Logik", () => {
+test("die Route rechnet Stufe, XP und Faelligkeit mit der getesteten Logik", () => {
   // Schluessen der Kette: app/api/lernen/antwort/route.ts ruft die Funktion
-  // auf. Rechnet sie dort mit eigenen Zahlen statt mit stufeNachAntwort und
-  // xpFuerBewertung, waeren die Tests hier gruen und die Daten trotzdem falsch.
+  // auf. Rechnet sie dort mit eigenen Zahlen statt mit stufeNachAntwort,
+  // xpFuerBewertung und faelligAb, waeren die Tests hier gruen und die Daten
+  // trotzdem falsch. Der rpc-Aufruf ist ungetypt (createClient ohne Database-
+  // Typ), deshalb faellt eine vertauschte Zuweisung nicht beim Build auf –
+  // nur hier.
   const route = readFileSync(
     join(import.meta.dirname, "..", "app", "api", "lernen", "antwort", "route.ts"),
     "utf8",
@@ -228,8 +231,14 @@ test("die Route rechnet Stufe und XP mit der getesteten Logik", () => {
 
   assert.match(route, /stufeNachAntwort\(/, "die Route nutzt stufeNachAntwort nicht");
   assert.match(route, /xpFuerBewertung\(/, "die Route nutzt xpFuerBewertung nicht");
+  assert.match(route, /faelligAb\(/, "die Route nutzt faelligAb nicht");
   assert.match(route, /p_neue_stufe:\s*neueStufe/, "p_neue_stufe wird nicht gesetzt");
   assert.match(route, /p_xp:\s*xp/, "p_xp wird nicht gesetzt");
+  assert.match(
+    route,
+    /p_faellig_am:\s*faelligAb\(/,
+    "p_faellig_am wird nicht aus faelligAb gesetzt",
+  );
 });
 
 test("Das Set-Level ist dieselbe Leiter wie die Kartenstufen", () => {
