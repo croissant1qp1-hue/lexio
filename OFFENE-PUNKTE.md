@@ -881,11 +881,20 @@ an bestehendem Code ist, sondern Absicherung:
    > vorhandene Mengenprüfung eingebaut (`Die Mengengleichheit pruefen wir
    > abschliessend` — Tat: Zahl aus der Datenbank gedruckt).
 
-   **Offen, weil es eine Produktentscheidung ist, nicht ein Fehler:**
-   Der Import fasst auf der **englischen Seite** zusammen. „Köter" und „Hund"
-   bedeuten beide „dog" — zwei woertlich verschiedene Karten, von denen der
-   Import stillschweigend eine wegwirft. Ob das gewollt ist, entscheidet der
-   Nutzer.
+   **Nachgemessen am 2026-10-14 — die frühere Fassung war falsch:**
+   Hier stand, der Import fasse auf der englischen Seite zusammen und werfe von
+   „Köter"/„Hund" (beide „dog") stillschweigend eine weg. Der Live-Test sagt
+   das Gegenteil. Der Import schlüsselt zwar auf der englischen Seite
+   (`lower(k.antwort)`), aber er wirft nichts weg: eine Probedatei mit
+   *Hund/dog, Koeter/dog, Katze/cat* ergab nach dem ersten **und** nach einem
+   zweiten Lauf je „3 Karten darin". Über die Management-API nachgesehen standen
+   anschließend `Katze/cat, Hund/dog, Koeter/dog` im Set — beide deutschen
+   Wörter nebeneinander. Der `NOT EXISTS`-Block sieht die eigene Zeile nicht,
+   deshalb legt schon der erste Lauf beide an. Es gibt hier also nichts zu
+   entscheiden: es geht nichts verloren. Praktisch ohnehin gegenstandslos, denn
+   über alle sechs echten Wortlisten geprüft trägt jede englische Seite genau
+   eine Karte. (Wegwerf-Set `probe-kollision-tmp` danach gelöscht, Bestand
+   zurück auf 2286 Karten / 9 Sets.)
 
    Die zweite Hälfte ist erledigt. `POST /api/karten` und `PATCH
    /api/karten/{id}` lehnen ein Wortpaar jetzt ab, das im Set schon steht —

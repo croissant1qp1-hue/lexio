@@ -2025,6 +2025,17 @@ Statement aus. Die Sperre wirkt über Läufe, nicht innerhalb einer Datei. Und
 > verschwinden. Ebenso kann `POST /api/karten` dasselbe Paar zweimal anlegen —
 > belegt an deinem Testset `englisch-testlauf` (*dog/Hund* und *cat/Katze*
 > doppelt, kein Fortschritt daran). Beides habe ich nicht angefasst.
+>
+> **Nachtrag 2026-10-14 — die „Köter"-Vermutung war falsch.** Den Satz darüber
+> habe ich am laufenden Import nachgeprüft, und er hält nicht: der Import fasst
+> nicht zusammen und wirft nichts weg. Eine Probedatei *Hund/dog, Koeter/dog,
+> Katze/cat* ergab nach dem ersten und nach einem zweiten Lauf je „3 Karten
+> darin"; über die Management-API nachgesehen standen beide deutschen Wörter
+> (`Hund/dog` und `Koeter/dog`) nebeneinander im Set. Der `NOT EXISTS`-Block
+> sieht die eigene Zeile nicht, also legt schon der erste Lauf beide an. Die
+> „Entscheidung" ist damit vom Tisch — es geht nichts verloren. Der echte
+> Dublettenfund (dasselbe Paar zweimal) bleibt davon unberührt und ist mit
+> `dateiBefund` erledigt.
 
 **Ein dritter Fund derselben Sorte: 19 Dateipfade, die ins Leere zeigen.** Als
 die Migrationen nach `supabase/migrations/` umgezogen sind (Phase 4), sind die
